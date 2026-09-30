@@ -71,6 +71,8 @@ def lint():
         rel = p.relative_to(ROOT)
         for t in LINK.findall(p.read_text(errors="ignore")):
             tgt = resolve(t, known, bases)
+            if tgt is None and (ROOT / t.strip()).is_file():
+                continue  # non-markdown attachment (image, pdf)
             if tgt is None:
                 if str(rel).startswith("wiki/"):
                     errs.append(f"broken link [[{t}]] in {rel}")
