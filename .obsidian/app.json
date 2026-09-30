@@ -1,0 +1,14 @@
+{
+  "userIgnoreFilters": [
+    ".venv",
+    ".venv-docling",
+    "tools",
+    "node_modules"
+  ],
+  "useMarkdownLinks": false,
+  "newLinkFormat": "absolute",
+  "alwaysUpdateLinks": true,
+  "showFrontmatter": true,
+  "defaultViewMode": "preview",
+  "attachmentFolderPath": "./"
+}

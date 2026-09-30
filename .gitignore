@@ -1,0 +1,8 @@
+.venv/
+.venv-docling/
+debug/
+.DS_Store
+.papers/watch.pid
+.papers/watch.log
+.obsidian/workspace.json
+.obsidian/plugins/*/data.json
