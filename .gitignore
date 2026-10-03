@@ -6,3 +6,8 @@ debug/
 .papers/watch.log
 .obsidian/workspace.json
 .obsidian/plugins/*/data.json
+
+# local infra config (not part of the vault)
+.mcp.json
+.claude/settings.json
+.claude/settings.local.json
