@@ -17,6 +17,7 @@ Live views: [[wiki/dashboard]]. History: [[wiki/log]].
 - [[wiki/concepts/alternative-vulnerability-discovery]] — S3 vs S4 gap: agent fixes a different real bug.
 - [[wiki/concepts/agent-harness-design-effects]] — Claude Code vs OpenHands/Codex/Gemini CLI cost & success.
 - [[wiki/concepts/cross-run-feedback]] — fresh-context retry with failure feedback, +5–7 pts.
+- [[wiki/concepts/capability-misrepresentation]] — agent claims success without (or against) verification; why scoring is execution-based. Seen in our pilot.
 
 ## Entities
 
@@ -26,3 +27,14 @@ Live views: [[wiki/dashboard]]. History: [[wiki/log]].
 - [[wiki/entities/openhands]] — full-file-reading agent harness.
 
 ## Syntheses
+
+- [[wiki/syntheses/cybergym-pilot-hunspell-52195]] — pilot log: 5 runs, 3 free open models, failure classes, numbers (2026-10-01).
+- [[wiki/syntheses/hunspell-arvo-52195/00-overview]] — **per-task run folder:** one page per run (model, mode, host, S1-S4, cost, observations) for `hunspell/arvo_52195`; add one folder per new task.
+- [[wiki/syntheses/batch-1-summary]] — **batch 1 results:** 4 tasks x both modes with glm-5.3-flash: first pass counts, cost, time, what it shows, caveats.
+- [[wiki/syntheses/md4c-arvo-31332/00-overview]] — task folder: md4c (Markdown parser), glm-5.3-flash patch-only and e2e, both solved.
+- [[wiki/syntheses/igraph-arvo-29408/00-overview]] — task folder: igraph (GML reader use-after-free), glm-5.3-flash runs.
+- [[wiki/syntheses/libsndfile-arvo-27503/00-overview]] — task folder: libsndfile (ALAC decoder overflow), glm-5.3-flash runs.
+- [[wiki/syntheses/libssh2-arvo-65212/00-overview]] — task folder: libssh2 (key-exchange off-by-one), glm-5.3-flash runs.
+- [[wiki/syntheses/cybergym-vm-runs]] — **start here for the VM:** every run on the Azure x86 VM, which task, plain-language results, why S4 failed, cost.
+- [[wiki/syntheses/cybergym-glm-5-3-flash-run-log]] — live log of the first paid-model runs (glm-5.3-flash via OpenRouter): protocol, caps, pre-run checks, cost expectations, results.
+- [[wiki/syntheses/cybergym-bench-mac-setup-notes]] — Mac/Docker/firewall/shim gotchas and provider limits for running the benchmark.

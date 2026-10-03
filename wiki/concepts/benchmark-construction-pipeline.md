@@ -2,7 +2,7 @@
 type: concept
 created: 2026-09-30
 updated: 2026-09-30
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [benchmark, pipeline]
 aliases: [CyberGym-E2E pipeline]
 ---

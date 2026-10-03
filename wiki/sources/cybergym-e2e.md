@@ -48,7 +48,7 @@ C/C++ memory-safety only (sanitizer oracle); structured-input projects dominate;
 [[wiki/entities/oss-fuzz]] · [[wiki/entities/arvo]] · [[wiki/entities/cybergym]] · [[wiki/entities/openhands]]
 
 ## Concepts
-[[wiki/concepts/end-to-end-vulnerability-lifecycle-evaluation]] · [[wiki/concepts/benchmark-construction-pipeline]] · [[wiki/concepts/alternative-vulnerability-discovery]] · [[wiki/concepts/agent-harness-design-effects]] · [[wiki/concepts/cross-run-feedback]]
+[[wiki/concepts/end-to-end-vulnerability-lifecycle-evaluation]] · [[wiki/concepts/benchmark-construction-pipeline]] · [[wiki/concepts/alternative-vulnerability-discovery]] · [[wiki/concepts/agent-harness-design-effects]] · [[wiki/concepts/cross-run-feedback]] · [[wiki/concepts/capability-misrepresentation]]
 
 ## Open questions / relevance to my work
-Explicit tie to my research not recorded yet — add when known.
+Internship goal: benchmark recent open-source models on this benchmark. Pilot log: [[wiki/syntheses/cybergym-pilot-hunspell-52195]]; setup notes: [[wiki/syntheses/cybergym-bench-mac-setup-notes]].

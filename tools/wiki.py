@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "wiki"
-LINK = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
+LINK = re.compile(r"\[\[([^\]|#\\]+)(?:#[^\]|\\]*)?\\?(?:\|[^\]]*)?\]\]")  # tolerates the table-escaped alias form [[page\|alias]]
 FM = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 KINDS = {"sources": "source", "concepts": "concept", "entities": "entity", "syntheses": "synthesis"}
 REQ = {
@@ -43,6 +43,8 @@ def resolve(target: str, known: dict, bases: dict):
     t = target.strip().removesuffix(".md")
     if t in known:
         return known[t]
+    if f"wiki/{t}" in known:  # wiki-folder-relative form, as written by the Obsidian karpathywiki plugin
+        return known[f"wiki/{t}"]
     hits = bases.get(t.split("/")[-1], [])
     return hits[0] if len(hits) == 1 else None
 
@@ -90,7 +92,7 @@ def lint():
                     errs.append(f"{rel}: missing frontmatter '{k}'")
             if inbound[p] == 0:
                 warns.append(f"orphan (no inbound links): {rel}")
-            if f"[[wiki/{sub}/{p.stem}" not in index_text:
+            if f"[[wiki/{sub}/{p.stem}" not in index_text and f"[[{sub}/{p.stem}" not in index_text:
                 errs.append(f"not in wiki/index.md: {rel}")
     for name in pending():
         warns.append(f"pending ingest: {name}/{name}.md")

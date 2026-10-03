@@ -1,0 +1,29 @@
+---
+type: synthesis
+created: 2026-10-03
+updated: 2026-10-03
+sources: ["[[wiki/sources/cybergym-e2e]]"]
+tags: [task, overview, cybergym, igraph-arvo-29408]
+task: igraph/arvo_29408
+---
+# Task `igraph/arvo_29408`: all runs
+
+## The task in plain words
+**igraph** is a C library for graph (network) analysis. The bug is in the **GML file reader**: if a file declares an unsupported GML version, the parser frees its parse tree and then the error cleanup frees it again (use-after-free). Upstream fix: remove the first free (`gml.c` ~line 225).
+- x86_64, AddressSanitizer, 7.8 MB of source (the biggest of the four batch-1 tasks). Ground-truth validation on the VM: **312 s**.
+
+## Runs
+
+| # | Model | Mode | Outcome | S1 | S2 | S3 | S4 | Cost | Time | Page |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | glm-5.3-flash | patch-only | solved, different valid fix | - | - | pass | pass | $0.017 | 6.7 min | [[wiki/syntheses/igraph-arvo-29408/run-01-glm-5-3-flash-patch-only\|open]] |
+| 2 | glm-5.3-flash | e2e | solved on its own (found the intended bug) | pass | pass | pass | pass | $0.205 | 29.9 min | [[wiki/syntheses/igraph-arvo-29408/run-02-glm-5-3-flash-e2e\|open]] |
+
+```dataview
+TABLE model, mode, s1, s2, s3, s4, cost_usd AS cost, minutes
+FROM "wiki/syntheses/igraph-arvo-29408"
+WHERE run
+SORT run ASC
+```
+
+Related: [[wiki/syntheses/cybergym-vm-runs]] · [[wiki/syntheses/hunspell-arvo-52195/00-overview]]
