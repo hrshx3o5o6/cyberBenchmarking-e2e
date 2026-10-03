@@ -1,0 +1,13 @@
+*
+!.gitignore
+!shim/
+!shim/llm_shim.py
+!pyhook/
+!pyhook/sitecustomize.py
+!run_pilot.sh
+!NOTES.md
+!shim/mock_oracle_llm.py
+!preflight.sh
+!collect_results.py
+!run_linux.sh
+!run_batch.sh
