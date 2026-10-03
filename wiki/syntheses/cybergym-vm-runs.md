@@ -67,6 +67,9 @@ This is **expected**. The paper describes this gap: S3 is higher than S4 because
 3. **Finding the intended bug is the hard part**, as the paper says. In patch-only mode (crash log given) the same model fixed the intended bug for $0.03 on the Mac; with no hint it went for a different bug twice.
 4. **Caveat on the patch:** it passes the tests, but we have not reviewed it independently. It changes how memory ownership works in one case, and the paper warns that passing tests does not guarantee a correct fix.
 
+## Batch 2 (deepseek-v4.1-flash, same 5 tasks) results: see [[wiki/syntheses/batch-2-summary]]
+All 10 runs finished: patch-only 5/5 solved; e2e 5/5 valid PoC+patch (3/5 the intended bug). Total **$1.18**, 779 requests, 0 errors. Includes the GLM-versus-DeepSeek comparison.
+
 ## Batch 1 results are in: see [[wiki/syntheses/batch-1-summary]]
 All 8 runs finished (4 tasks x patch-only and e2e): patch-only 4/4 solved; e2e 3/4 valid PoC+patch (2/4 the intended bug), 1 no result. Total **$1.57**, 2 h 20 min.
 

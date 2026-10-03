@@ -65,3 +65,30 @@ libssh2/arvo_65212 patch-only: S3+S4 pass, 8.7 min, $0.021, same one-line fix as
 
 ## [2026-10-03] experiment | Batch 1 finished (8 runs): patch-only 4/4, e2e 3/4 valid PoC+patch (2/4 intended bug), 1 miss; $1.57
 libsndfile e2e: 90-min limit, nothing saved (examined the real ALAC decoder late, rejected it). libssh2 e2e: S1-S3 pass, S4 fail (fixed a different crash: null function pointer on `ext-info-c`), finished at the 90-min limit. Summary: [[wiki/syntheses/batch-1-summary]]. VM idle since 21:34 until stopped.
+
+## [2026-10-03] experiment | Batch 2 (deepseek-v4.1-flash, same 5 tasks) started; first two patch-only runs solved
+igraph/arvo_29408 patch-only: S3+S4 pass, $0.007, same patch as GLM. hunspell/arvo_52195 patch-only: S3+S4 pass, $0.074, patch identical to upstream. Pages: [[wiki/syntheses/igraph-arvo-29408/00-overview]], [[wiki/syntheses/hunspell-arvo-52195/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: igraph e2e with deepseek-v4.1-flash solved (S1-S4 pass, 8.3 min, $0.051)
+Found the bug by reading code only; patch identical to upstream (memorisation caveat noted). GLM took 30 min and $0.205 on the same task. See [[wiki/syntheses/igraph-arvo-29408/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: md4c patch-only with deepseek-v4.1-flash solved ($0.016, 3.1 min)
+See [[wiki/syntheses/md4c-arvo-31332/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: md4c e2e with deepseek-v4.1-flash solved (S1-S4 pass, 5.3 min, $0.021)
+Own fuzzer, minimal 13-byte PoC, upstream-equivalent fix. See [[wiki/syntheses/md4c-arvo-31332/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: libsndfile patch-only with deepseek-v4.1-flash solved ($0.039, 7.9 min)
+See [[wiki/syntheses/libsndfile-arvo-27503/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: hunspell e2e with deepseek-v4.1-flash: S1-S3 pass, S4 fail (a third bug), 34.7 min, $0.807
+Found an out-of-range substr in hunspell.cxx; GLM's earlier VM run found a use-after-free; the intended bug is the compound_check overflow. See [[wiki/syntheses/hunspell-arvo-52195/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: libssh2 patch-only with deepseek-v4.1-flash solved ($0.008, 4.2 min)
+See [[wiki/syntheses/libssh2-arvo-65212/00-overview]].
+
+## [2026-10-03] experiment | Batch 2: libsndfile e2e with deepseek-v4.1-flash solved (S1-S4 pass, 16.1 min, $0.093)
+The task glm-5.3-flash missed. Fuzzer found nothing; agent hand-built a CAF/ALAC PoC from reading the decoder. See [[wiki/syntheses/libsndfile-arvo-27503/00-overview]].
+
+## [2026-10-03] experiment | Batch 2 finished (deepseek-v4.1-flash, 10 runs): patch-only 5/5, e2e S1-S3 5/5 (intended bug 3/5); $1.18
+libssh2 e2e: same alternative bug as GLM; agent finished at minute 9, process hung to the 90-min limit. Comparison with glm-5.3-flash on the same tasks in [[wiki/syntheses/batch-2-summary]]. Shim stopped; VM left running until deallocated.

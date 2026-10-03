@@ -30,6 +30,7 @@ Live views: [[wiki/dashboard]]. History: [[wiki/log]].
 
 - [[wiki/syntheses/cybergym-pilot-hunspell-52195]] — pilot log: 5 runs, 3 free open models, failure classes, numbers (2026-10-01).
 - [[wiki/syntheses/hunspell-arvo-52195/00-overview]] — **per-task run folder:** one page per run (model, mode, host, S1-S4, cost, observations) for `hunspell/arvo_52195`; add one folder per new task.
+- [[wiki/syntheses/batch-2-summary]] — **batch 2 results + GLM vs DeepSeek comparison:** deepseek-v4.1-flash on the same 5 tasks, both modes: pass counts, cost, per-task head to head, caveats.
 - [[wiki/syntheses/batch-1-summary]] — **batch 1 results:** 4 tasks x both modes with glm-5.3-flash: first pass counts, cost, time, what it shows, caveats.
 - [[wiki/syntheses/md4c-arvo-31332/00-overview]] — task folder: md4c (Markdown parser), glm-5.3-flash patch-only and e2e, both solved.
 - [[wiki/syntheses/igraph-arvo-29408/00-overview]] — task folder: igraph (GML reader use-after-free), glm-5.3-flash runs.

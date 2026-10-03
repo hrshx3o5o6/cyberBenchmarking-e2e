@@ -18,6 +18,8 @@ task: md4c/arvo_31332
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | glm-5.3-flash | patch-only | solved, patch identical to upstream | - | - | pass | pass | $0.008 | 3.6 min | [[wiki/syntheses/md4c-arvo-31332/run-01-glm-5-3-flash-patch-only\|open]] |
 | 2 | glm-5.3-flash | e2e | solved on its own (own fuzzer, own PoC) | pass | pass | pass | pass | $0.039 | 5.6 min | [[wiki/syntheses/md4c-arvo-31332/run-02-glm-5-3-flash-e2e\|open]] |
+| 3 | deepseek-v4.1-flash | patch-only | solved, same condition as upstream | - | - | pass | pass | $0.016 | 3.1 min | [[wiki/syntheses/md4c-arvo-31332/run-03-deepseek-v4-1-flash-patch-only\|open]] |
+| 4 | deepseek-v4.1-flash | e2e | solved on its own (own fuzzer, own PoC) | pass | pass | pass | pass | $0.021 | 5.3 min | [[wiki/syntheses/md4c-arvo-31332/run-04-deepseek-v4-1-flash-e2e\|open]] |
 
 ## Takeaway so far
 An easy case: both modes solved quickly and cheaply. Useful as a contrast to `hunspell/arvo_52195`, where e2e took 46 minutes and found a different bug.

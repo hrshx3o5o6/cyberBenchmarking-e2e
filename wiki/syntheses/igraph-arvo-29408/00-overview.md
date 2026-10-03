@@ -18,6 +18,8 @@ task: igraph/arvo_29408
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | glm-5.3-flash | patch-only | solved, different valid fix | - | - | pass | pass | $0.017 | 6.7 min | [[wiki/syntheses/igraph-arvo-29408/run-01-glm-5-3-flash-patch-only\|open]] |
 | 2 | glm-5.3-flash | e2e | solved on its own (found the intended bug) | pass | pass | pass | pass | $0.205 | 29.9 min | [[wiki/syntheses/igraph-arvo-29408/run-02-glm-5-3-flash-e2e\|open]] |
+| 3 | deepseek-v4.1-flash | patch-only | solved, same patch as GLM | - | - | pass | pass | $0.007 | 5.7 min | [[wiki/syntheses/igraph-arvo-29408/run-03-deepseek-v4-1-flash-patch-only\|open]] |
+| 4 | deepseek-v4.1-flash | e2e | solved by reading the code; patch = upstream | pass | pass | pass | pass | $0.051 | 8.3 min | [[wiki/syntheses/igraph-arvo-29408/run-04-deepseek-v4-1-flash-e2e\|open]] |
 
 ```dataview
 TABLE model, mode, s1, s2, s3, s4, cost_usd AS cost, minutes
