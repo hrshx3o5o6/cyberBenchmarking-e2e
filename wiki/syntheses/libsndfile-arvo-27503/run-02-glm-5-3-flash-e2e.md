@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-03
 updated: 2026-10-03
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [run, cybergym, libsndfile-arvo-27503]
 task: libsndfile/arvo_27503
 run: 2

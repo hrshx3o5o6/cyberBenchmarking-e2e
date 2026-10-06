@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-01
 updated: 2026-10-01
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [experiment-log, glm-5.3-flash, openrouter, cost]
 ---
 # glm-5.3-flash on CyberGym-E2E: live run log

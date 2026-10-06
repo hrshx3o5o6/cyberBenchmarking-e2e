@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-01
 updated: 2026-10-01
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [pilot, cybergym, experiment-log, open-models]
 ---
 # CyberGym-E2E pilot: `hunspell/arvo_52195` (2026-10-01)

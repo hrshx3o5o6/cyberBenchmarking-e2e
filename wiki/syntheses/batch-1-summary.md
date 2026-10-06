@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-03
 updated: 2026-10-03
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [batch, summary, results, cybergym, glm-5.3-flash]
 ---
 # Batch 1 summary: glm-5.3-flash on 4 tasks, both modes (Azure VM)

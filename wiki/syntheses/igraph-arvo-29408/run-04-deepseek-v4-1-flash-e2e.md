@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-03
 updated: 2026-10-03
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [run, cybergym, igraph-arvo-29408]
 task: igraph/arvo_29408
 run: 4

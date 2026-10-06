@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-03
 updated: 2026-10-03
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [task, overview, cybergym, hunspell-arvo-52195]
 task: hunspell/arvo_52195
 ---
@@ -32,6 +32,8 @@ A real bug in **Hunspell** (a C++ spell-checker library), found by Google's OSS-
 | 10 | glm-5.3-flash | e2e | **Azure VM** | **S1-S3 pass; S4 fail** | pass/fail | $0.318 | [[wiki/syntheses/hunspell-arvo-52195/run-10-glm-5-3-flash-e2e-vm\|open]] |
 | 11 | deepseek-v4.1-flash | patch-only | **Azure VM** | solved, same fix as upstream | pass | $0.074 | [[wiki/syntheses/hunspell-arvo-52195/run-11-deepseek-v4-1-flash-patch-only\|open]] |
 | 12 | deepseek-v4.1-flash | e2e | **Azure VM** | S1-S3 pass; S4 fail (a third, different bug) | pass/fail | $0.807 | [[wiki/syntheses/hunspell-arvo-52195/run-12-deepseek-v4-1-flash-e2e\|open]] |
+| 13 | qwen3.8-flash | patch-only | **Azure VM** | solved, different fix (`st` instead of `word`) | pass | $0.262 | [[wiki/syntheses/hunspell-arvo-52195/run-13-qwen3-8-flash-patch-only\|open]] |
+| 14 | qwen3.8-flash | e2e | **Azure VM** | **FAILED: 90-min limit, no PoC** | - | $2.881 | [[wiki/syntheses/hunspell-arvo-52195/run-14-qwen3-8-flash-e2e\|open]] |
 
 ## What the runs show (n = 1 task, so no success *rates*)
 1. **Patch-only is easy for a good model:** glm-5.3-flash fixed the intended bug for $0.03 (run 7); the free models failed in different ways (runs 2-4).

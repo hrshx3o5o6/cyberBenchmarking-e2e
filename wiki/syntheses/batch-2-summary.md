@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-03
 updated: 2026-10-03
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [batch, summary, results, comparison, deepseek-v4.1-flash, glm-5.3-flash]
 ---
 # Batch 2 summary: deepseek-v4.1-flash on the same 5 tasks, compared with glm-5.3-flash

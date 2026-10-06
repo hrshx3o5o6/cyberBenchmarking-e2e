@@ -1,8 +1,8 @@
 ---
 type: synthesis
 created: 2026-10-03
-updated: 2026-10-03
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+updated: 2026-10-06
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [azure-vm, runs, plain-language, cybergym]
 ---
 # Everything we ran on the Azure VM (plain-language log)
@@ -66,6 +66,9 @@ This is **expected**. The paper describes this gap: S3 is higher than S4 because
 2. **Native x86 made the difference** for e2e: a valid PoC and patch in 46 minutes versus nothing on the Mac. This is one run each with a non-deterministic model, so it is strong evidence of direction, not a precise measurement.
 3. **Finding the intended bug is the hard part**, as the paper says. In patch-only mode (crash log given) the same model fixed the intended bug for $0.03 on the Mac; with no hint it went for a different bug twice.
 4. **Caveat on the patch:** it passes the tests, but we have not reviewed it independently. It changes how memory ownership works in one case, and the paper warns that passing tests does not guarantee a correct fix.
+
+## Batch 3 (qwen3.8-flash, same 5 tasks) results: see [[wiki/syntheses/batch-3-summary]]
+All 10 runs finished: patch-only 5/5 solved; e2e 3/5 valid PoC+patch (1/5 the intended bug), 2 with no result (hunspell hit the 90-min limit, libsndfile stopped early). Total **$5.52**, 623 requests, 0 errors, 2 h 07 min. Qwen's low prompt-cache reuse made it the most expensive of the three models.
 
 ## Batch 2 (deepseek-v4.1-flash, same 5 tasks) results: see [[wiki/syntheses/batch-2-summary]]
 All 10 runs finished: patch-only 5/5 solved; e2e 5/5 valid PoC+patch (3/5 the intended bug). Total **$1.18**, 779 requests, 0 errors. Includes the GLM-versus-DeepSeek comparison.

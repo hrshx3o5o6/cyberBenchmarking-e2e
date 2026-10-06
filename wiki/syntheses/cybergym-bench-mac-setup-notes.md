@@ -2,7 +2,7 @@
 type: synthesis
 created: 2026-10-01
 updated: 2026-10-01
-sources: ["[[wiki/sources/cybergym-e2e]]"]
+sources: ["[[sources/cybergym-e2e]]"]
 tags: [setup, docker, networking, reproducibility]
 ---
 # Running CyberGym-E2E on an Apple-silicon Mac with a non-Anthropic model
