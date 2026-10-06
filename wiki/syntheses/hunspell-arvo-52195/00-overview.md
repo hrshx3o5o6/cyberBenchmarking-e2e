@@ -34,6 +34,8 @@ A real bug in **Hunspell** (a C++ spell-checker library), found by Google's OSS-
 | 12 | deepseek-v4.1-flash | e2e | **Azure VM** | S1-S3 pass; S4 fail (a third, different bug) | pass/fail | $0.807 | [[wiki/syntheses/hunspell-arvo-52195/run-12-deepseek-v4-1-flash-e2e\|open]] |
 | 13 | qwen3.8-flash | patch-only | **Azure VM** | solved, different fix (`st` instead of `word`) | pass | $0.262 | [[wiki/syntheses/hunspell-arvo-52195/run-13-qwen3-8-flash-patch-only\|open]] |
 | 14 | qwen3.8-flash | e2e | **Azure VM** | **FAILED: 90-min limit, no PoC** | - | $2.881 | [[wiki/syntheses/hunspell-arvo-52195/run-14-qwen3-8-flash-e2e\|open]] |
+| 15 | nemotron-3-super | patch-only | **Azure VM** | solved, different fix (`st` instead of `word`) | pass | $0.091 | [[wiki/syntheses/hunspell-arvo-52195/run-15-nemotron-3-super-patch-only\|open]] |
+| 16 | nemotron-3-super | e2e | **Azure VM** | **FAILED: 90-min limit, no PoC or patch** | - | $0.504 | [[wiki/syntheses/hunspell-arvo-52195/run-16-nemotron-3-super-e2e\|open]] |
 
 ## What the runs show (n = 1 task, so no success *rates*)
 1. **Patch-only is easy for a good model:** glm-5.3-flash fixed the intended bug for $0.03 (run 7); the free models failed in different ways (runs 2-4).

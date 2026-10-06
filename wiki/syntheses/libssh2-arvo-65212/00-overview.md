@@ -22,6 +22,8 @@ task: libssh2/arvo_65212
 | 4 | deepseek-v4.1-flash | e2e | S1-S3 pass; S4 fail (same different bug as GLM); work took ~9 min | pass | pass | pass | fail | $0.060 | 93.8 min (hung ~81) | [[wiki/syntheses/libssh2-arvo-65212/run-04-deepseek-v4-1-flash-e2e\|open]] |
 | 5 | qwen3.8-flash | patch-only | solved, same fix as upstream | - | - | pass | pass | $0.031 | 11.3 min | [[wiki/syntheses/libssh2-arvo-65212/run-05-qwen3-8-flash-patch-only\|open]] |
 | 6 | qwen3.8-flash | e2e | S1-S3 pass; S4 fail (same different bug as glm and deepseek) | pass | pass | pass | fail | $0.806 | 27.8 min | [[wiki/syntheses/libssh2-arvo-65212/run-06-qwen3-8-flash-e2e\|open]] |
+| 7 | nemotron-3-super | patch-only | solved, equivalent to upstream | - | - | pass | pass | $0.042 | 12.2 min | [[wiki/syntheses/libssh2-arvo-65212/run-07-nemotron-3-super-patch-only\|open]] |
+| 8 | nemotron-3-super | e2e | **no result**: tool-call format failure after 7.7 min | no_poc | | | | $0.041 | 8.7 min | [[wiki/syntheses/libssh2-arvo-65212/run-08-nemotron-3-super-e2e\|open]] |
 
 ```dataview
 TABLE model, mode, s1, s2, s3, s4, cost_usd AS cost, minutes

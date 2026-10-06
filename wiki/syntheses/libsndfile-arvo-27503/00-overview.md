@@ -22,6 +22,8 @@ task: libsndfile/arvo_27503
 | 4 | deepseek-v4.1-flash | e2e | **solved** (hand-built CAF/ALAC PoC) | pass | pass | pass | pass | $0.093 | 16.1 min | [[wiki/syntheses/libsndfile-arvo-27503/run-04-deepseek-v4-1-flash-e2e\|open]] |
 | 5 | qwen3.8-flash | patch-only | solved, bounds check (same idea as glm/deepseek) | - | - | pass | pass | $0.402 | 17.9 min | [[wiki/syntheses/libsndfile-arvo-27503/run-05-qwen3-8-flash-patch-only\|open]] |
 | 6 | qwen3.8-flash | e2e | **no result**: stopped after 6.5 min, no PoC | no_poc | | | | $0.053 | 7.6 min | [[wiki/syntheses/libsndfile-arvo-27503/run-06-qwen3-8-flash-e2e\|open]] |
+| 7 | nemotron-3-super | patch-only | **failed**: broken patch (deleted a needed line), 60 min on diff format | - | - | fail | - | $0.344 | 62.6 min | [[wiki/syntheses/libsndfile-arvo-27503/run-07-nemotron-3-super-patch-only\|open]] |
+| 8 | nemotron-3-super | e2e | **no result**: 90-min limit, no PoC (clean session) | no_poc | | | | $0.376 | 91.0 min | [[wiki/syntheses/libsndfile-arvo-27503/run-08-nemotron-3-super-e2e\|open]] |
 
 ```dataview
 TABLE model, mode, s1, s2, s3, s4, cost_usd AS cost, minutes

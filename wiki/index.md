@@ -32,6 +32,8 @@ Live views: [[wiki/dashboard]]. History: [[wiki/log]].
 - [[wiki/syntheses/hunspell-arvo-52195/00-overview]] — **per-task run folder:** one page per run (model, mode, host, S1-S4, cost, observations) for `hunspell/arvo_52195`; add one folder per new task.
 - [[wiki/syntheses/batch-2-summary]] — **batch 2 results + GLM vs DeepSeek comparison:** deepseek-v4.1-flash on the same 5 tasks, both modes: pass counts, cost, per-task head to head, caveats.
 - [[wiki/syntheses/batch-3-summary]] — **batch 3 results + three-model comparison:** qwen3.8-flash on the same 5 tasks, both modes: pass counts (patch-only 5/5, e2e 3/5), cost ($5.52, low cache reuse), two empty e2e runs, caveats.
+- [[wiki/syntheses/batch-4-summary]] — **batch 4 results + four-model comparison:** nemotron-3-super on the same 5 tasks, both modes: patch-only 2/5, e2e 0/5, six format-failure endings, $1.78, caveats.
+- [[wiki/syntheses/nemotron-tool-call-format-failures]] — **Nemotron caveat:** runs that end with the next tool call written as raw text in a thinking block (format failure, not capability); how to report them.
 - [[wiki/syntheses/batch-1-summary]] — **batch 1 results:** 4 tasks x both modes with glm-5.3-flash: first pass counts, cost, time, what it shows, caveats.
 - [[wiki/syntheses/md4c-arvo-31332/00-overview]] — task folder: md4c (Markdown parser), glm-5.3-flash patch-only and e2e, both solved.
 - [[wiki/syntheses/igraph-arvo-29408/00-overview]] — task folder: igraph (GML reader use-after-free), glm-5.3-flash runs.

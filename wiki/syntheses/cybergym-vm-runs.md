@@ -67,6 +67,9 @@ This is **expected**. The paper describes this gap: S3 is higher than S4 because
 3. **Finding the intended bug is the hard part**, as the paper says. In patch-only mode (crash log given) the same model fixed the intended bug for $0.03 on the Mac; with no hint it went for a different bug twice.
 4. **Caveat on the patch:** it passes the tests, but we have not reviewed it independently. It changes how memory ownership works in one case, and the paper warns that passing tests does not guarantee a correct fix.
 
+## Batch 4 (nemotron-3-super, same 5 tasks) results: see [[wiki/syntheses/batch-4-summary]]
+All 10 runs finished: patch-only 2/5 solved; e2e 0/5 with a PoC; six runs ended on a tool-call format failure, two on the 90-minute limit. Total **$1.78**, 472 requests (63 rate-limited), 3 h 45 min. Details in [[wiki/syntheses/nemotron-tool-call-format-failures]].
+
 ## Batch 3 (qwen3.8-flash, same 5 tasks) results: see [[wiki/syntheses/batch-3-summary]]
 All 10 runs finished: patch-only 5/5 solved; e2e 3/5 valid PoC+patch (1/5 the intended bug), 2 with no result (hunspell hit the 90-min limit, libsndfile stopped early). Total **$5.52**, 623 requests, 0 errors, 2 h 07 min. Qwen's low prompt-cache reuse made it the most expensive of the three models.
 

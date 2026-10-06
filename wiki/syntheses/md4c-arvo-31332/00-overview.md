@@ -22,6 +22,8 @@ task: md4c/arvo_31332
 | 4 | deepseek-v4.1-flash | e2e | solved on its own (own fuzzer, own PoC) | pass | pass | pass | pass | $0.021 | 5.3 min | [[wiki/syntheses/md4c-arvo-31332/run-04-deepseek-v4-1-flash-e2e\|open]] |
 | 5 | qwen3.8-flash | patch-only | solved, same condition as upstream | - | - | pass | pass | $0.027 | 9.4 min | [[wiki/syntheses/md4c-arvo-31332/run-05-qwen3-8-flash-patch-only\|open]] |
 | 6 | qwen3.8-flash | e2e | valid PoC + patch, but a different real bug (S4 fail) | pass | pass | pass | fail | $0.482 | 17.8 min | [[wiki/syntheses/md4c-arvo-31332/run-06-qwen3-8-flash-e2e\|open]] |
+| 7 | nemotron-3-super | patch-only | **failed**: malformed hand-written patch; fix never re-saved | - | - | error | - | $0.017 | 7.3 min | [[wiki/syntheses/md4c-arvo-31332/run-07-nemotron-3-super-patch-only\|open]] |
+| 8 | nemotron-3-super | e2e | **no result**: tool-call format failure after 7.7 min | no_poc | | | | $0.056 | 8.6 min | [[wiki/syntheses/md4c-arvo-31332/run-08-nemotron-3-super-e2e\|open]] |
 
 ## Takeaway so far
 An easy case: both modes solved quickly and cheaply. Useful as a contrast to `hunspell/arvo_52195`, where e2e took 46 minutes and found a different bug.
