@@ -164,3 +164,10 @@ Key limit had reset; shim caps $10 per run, $20 total; two runs in parallel from
 
 ## [2026-10-12] experiment | Batch 5 finished: kimi-k3, patch-only 5/5, e2e 4/5 valid PoC+patch (3/5 intended bug), $32.39 for all Kimi runs
 Five-model comparison, billing reconciliation (OpenRouter key counter +$16.01 equals the shim's $16.011853 for the reruns; the earlier unlogged spend on the shared key is consistent with other users) and the timestamp-artifact note are in [[wiki/syntheses/batch-5-summary]]; ledger section added to [[wiki/syntheses/cybergym-vm-runs]]; index updated.
+
+## [2026-10-12] experiment | Batch 6: minimax-m3 on 5 tasks (patch-only 5/5; e2e igraph and md4c S1-S4; hunspell, libsndfile, libssh2 no result at 90 min)
+Model `minimax/minimax-m3` via OpenRouter, shim caps $10 per run and $30 total, 05:33 to 08:52 (VM clock). Total $10.84, 1,786 requests, 0 errors. Run pages: hunspell 19-20, igraph 11-12, md4c 11-12, libsndfile 12-13, libssh2 13-14; five overviews updated. Six-model comparison in [[wiki/syntheses/batch-6-summary]].
+
+## [2026-10-12] experiment | File-timestamp marker checked in all five task tarballs: the bug file has a later mtime in every task
+Read-only listing of `src.tgz` for each task: hunspell (5 files incl. `affixmgr.cxx`), igraph (`gml.c`), md4c (`md4c.c`), libsndfile (`alac_decoder.c`), libssh2 (`kex.c`) are dated later than the rest of the tree. In this batch only the libssh2 e2e run used it (and dismissed it). Cause not verified. Recorded in [[wiki/syntheses/batch-6-summary]]; batches 1-4 trajectories not yet searched.
+
