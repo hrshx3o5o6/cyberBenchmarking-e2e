@@ -174,3 +174,6 @@ Read-only listing of `src.tgz` for each task: hunspell (5 files incl. `affixmgr.
 
 ## [2026-10-12] synthesis | Cross-model observations page (six models, five tasks)
 Compiled from the six batch summaries and the task overviews into [[wiki/syntheses/cross-model-observations]]; also fixed the hunspell overview rows for runs 19-20 to the table's column layout.
+
+## [2026-10-12] synthesis | All-runs comparison page (71 runs, 8 models)
+Generated from the frontmatter of every run page into [[wiki/syntheses/all-runs-comparison]]: totals by model, best-result grids, per-task run lists, cost extremes, spend per S4 pass. Interpretation stays in [[wiki/syntheses/cross-model-observations]].
