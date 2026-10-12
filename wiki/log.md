@@ -171,3 +171,6 @@ Model `minimax/minimax-m3` via OpenRouter, shim caps $10 per run and $30 total, 
 ## [2026-10-12] experiment | File-timestamp marker checked in all five task tarballs: the bug file has a later mtime in every task
 Read-only listing of `src.tgz` for each task: hunspell (5 files incl. `affixmgr.cxx`), igraph (`gml.c`), md4c (`md4c.c`), libsndfile (`alac_decoder.c`), libssh2 (`kex.c`) are dated later than the rest of the tree. In this batch only the libssh2 e2e run used it (and dismissed it). Cause not verified. Recorded in [[wiki/syntheses/batch-6-summary]]; batches 1-4 trajectories not yet searched.
 
+
+## [2026-10-12] synthesis | Cross-model observations page (six models, five tasks)
+Compiled from the six batch summaries and the task overviews into [[wiki/syntheses/cross-model-observations]]; also fixed the hunspell overview rows for runs 19-20 to the table's column layout.

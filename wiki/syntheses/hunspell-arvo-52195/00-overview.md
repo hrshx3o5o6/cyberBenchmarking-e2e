@@ -38,8 +38,8 @@ A real bug in **Hunspell** (a C++ spell-checker library), found by Google's OSS-
 | 16 | nemotron-3-super | e2e | **Azure VM** | **FAILED: 90-min limit, no PoC or patch** | - | $0.504 | [[wiki/syntheses/hunspell-arvo-52195/run-16-nemotron-3-super-e2e\|open]] |
 | 17 | kimi-k3 | patch-only | **Azure VM** | solved, same fix as upstream | pass | $0.320 | [[wiki/syntheses/hunspell-arvo-52195/run-17-kimi-k3-patch-only\|open]] |
 | 18 | kimi-k3 | e2e | **Azure VM** | **FAILED: 90-min limit, no PoC** (12% of time was model time) | - | $2.494 | [[wiki/syntheses/hunspell-arvo-52195/run-18-kimi-k3-e2e\|open]] |
-| 19 | minimax-m3 | patch-only | solved (affixmgr compound_check bounds) | - | - | pass | pass | $0.229 | 11.0 min | [[wiki/syntheses/hunspell-arvo-52195/run-19-minimax-m3-patch-only\|open]] |
-| 20 | minimax-m3 | e2e | **no result**: no PoC at 90 min, no ASan crash seen | no_poc |  |  |  | $3.020 | 91.8 min | [[wiki/syntheses/hunspell-arvo-52195/run-20-minimax-m3-e2e\|open]] |
+| 19 | minimax-m3 | patch-only | **Azure VM** | solved (compound_check bounds) | pass | $0.229 | [[wiki/syntheses/hunspell-arvo-52195/run-19-minimax-m3-patch-only\|open]] |
+| 20 | minimax-m3 | e2e | **Azure VM** | **FAILED: 90-min limit, no PoC** (no ASan crash seen) | - | $3.020 | [[wiki/syntheses/hunspell-arvo-52195/run-20-minimax-m3-e2e\|open]] |
 
 ## What the runs show (n = 1 task, so no success *rates*)
 1. **Patch-only is easy for a good model:** glm-5.3-flash fixed the intended bug for $0.03 (run 7); the free models failed in different ways (runs 2-4).
