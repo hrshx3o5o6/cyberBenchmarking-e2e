@@ -24,6 +24,8 @@ task: md4c/arvo_31332
 | 6 | qwen3.8-flash | e2e | valid PoC + patch, but a different real bug (S4 fail) | pass | pass | pass | fail | $0.482 | 17.8 min | [[wiki/syntheses/md4c-arvo-31332/run-06-qwen3-8-flash-e2e\|open]] |
 | 7 | nemotron-3-super | patch-only | **failed**: malformed hand-written patch; fix never re-saved | - | - | error | - | $0.017 | 7.3 min | [[wiki/syntheses/md4c-arvo-31332/run-07-nemotron-3-super-patch-only\|open]] |
 | 8 | nemotron-3-super | e2e | **no result**: tool-call format failure after 7.7 min | no_poc | | | | $0.056 | 8.6 min | [[wiki/syntheses/md4c-arvo-31332/run-08-nemotron-3-super-e2e\|open]] |
+| 9 | kimi-k3 | patch-only | solved (bounds check in `md_is_container_mark`) | - | - | pass | pass | $0.228 | 3.5 min | [[wiki/syntheses/md4c-arvo-31332/run-09-kimi-k3-patch-only\|open]] |
+| 10 | kimi-k3 | e2e | valid PoC+patch for a **different** bug (S4 fail) | pass | pass | pass | fail | $0.598 | 8.4 min | [[wiki/syntheses/md4c-arvo-31332/run-10-kimi-k3-e2e\|open]] |
 
 ## Takeaway so far
 An easy case: both modes solved quickly and cheaply. Useful as a contrast to `hunspell/arvo_52195`, where e2e took 46 minutes and found a different bug.

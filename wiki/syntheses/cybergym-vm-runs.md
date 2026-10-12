@@ -1,7 +1,7 @@
 ---
 type: synthesis
 created: 2026-10-03
-updated: 2026-10-06
+updated: 2026-10-12
 sources: ["[[sources/cybergym-e2e]]"]
 tags: [azure-vm, runs, plain-language, cybergym]
 ---
@@ -67,6 +67,9 @@ This is **expected**. The paper describes this gap: S3 is higher than S4 because
 3. **Finding the intended bug is the hard part**, as the paper says. In patch-only mode (crash log given) the same model fixed the intended bug for $0.03 on the Mac; with no hint it went for a different bug twice.
 4. **Caveat on the patch:** it passes the tests, but we have not reviewed it independently. It changes how memory ownership works in one case, and the paper warns that passing tests does not guarantee a correct fix.
 
+## Batch 5 (kimi-k3, same 5 tasks) results: see [[wiki/syntheses/batch-5-summary]]
+First paid model above the flash tier. Main batch 2026-10-10: all 10 runs started, patch-only **5/5 solved**, e2e: igraph all four stages, md4c S1-S3 (S4 fail), hunspell no PoC at the 90-minute limit; libsndfile and libssh2 e2e were **ended by my own limits** (a $15 shim total cap, then the OpenRouter key's $50 weekly limit), so they did not count. Reruns 2026-10-12 with the key reset and caps of $10 per run, $20 total: **libssh2 e2e S1-S4 pass (50.5 min, $5.99)** and **libsndfile e2e S1-S4 pass (70.3 min, $10.02)**, the latter found through a file-timestamp artifact. Kimi e2e therefore stands at 4/5 valid PoC+patch, 3/5 the intended bug. Total for all Kimi runs **$32.39**, 1,067 requests, the most expensive model by 6x. The key's usage counter matched the shim to the cent for the reruns; the earlier gap on the shared key is consistent with other users. Runs: igraph 9-10, hunspell 17-18, md4c 9-10, libsndfile 9-11, libssh2 9-12 in the task folders.
+
 ## Batch 4 (nemotron-3-super, same 5 tasks) results: see [[wiki/syntheses/batch-4-summary]]
 All 10 runs finished: patch-only 2/5 solved; e2e 0/5 with a PoC; six runs ended on a tool-call format failure, two on the 90-minute limit. Total **$1.78**, 472 requests (63 rate-limited), 3 h 45 min. Details in [[wiki/syntheses/nemotron-tool-call-format-failures]].
 
@@ -96,7 +99,7 @@ Chosen from the 75 tasks that are x86_64, AddressSanitizer, use the base image w
 Caveats: two runs share 8 CPUs and 15 GB RAM, so times may be noisier than solo runs; memory use per run is not yet measured.
 
 ## What we have NOT done on the VM
-- No other models, and no more than one e2e attempt per task, so we have **no success rates yet**, only single results.
+- No more than one valid e2e attempt per task and model, so we have **no success rates yet**, only single results. (Reruns of runs ended by my own limits are listed in batch 5.)
 
 ## Cost so far on the VM runs
 Model calls about **$0.32** (run 4) plus pennies for the tests; VM compute about **$0.295 per hour it was running** (it had been up 4.4 hours at last check, so roughly $1.30). **Stop (deallocate) the VM when idle.**
