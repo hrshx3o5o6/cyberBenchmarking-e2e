@@ -14,13 +14,16 @@ s1: skipped
 s2: skipped
 s3: no_patch
 s4: skipped
-outcome: "FAILED: no PoC, no patch in 90 min; saw the kex.c timestamp marker, dismissed it as touch; $3.88, 592 requests"
+outcome: "FAILED: no patch in 90 min (a 6-byte PoC file was saved but never graded); saw the kex.c timestamp marker, dismissed it as touch; $3.88, 592 requests"
 cost_usd: 3.879
 minutes: 91.0
 ---
 # Run 14: minimax-m3, e2e (no result)
 
 **One line:** **no result, and the instructive failure of the batch.** MiniMax found that `kex.c` has a different modification time from every other source file, checked that its content equals `/src_backup`, concluded the timestamp was just "touch", and never looked in `_libssh2_kex_agree_instr`, which holds the bug, although it spent 123 tool references in `kex.c`.
+
+
+> **Correction (2026-10-13):** an earlier version of this page said no PoC was saved. The agent's `poc.bin` (6 bytes) **was** saved in the run's output folder; it was never graded, because the harness checks for `fix.patch` second and, finding none, records `no_patch` and skips every other stage including S1 (`scripts/run_agent.py`, the "No patch generated" branch). Whether that PoC crashes the vulnerable build is untested. S3 `no_patch` is the harness's verdict; the run is still a FAILED run.
 
 ## Setup
 `libssh2/arvo_65212`, e2e. Azure VM, 90 min / $10 per run (paper), minimax/minimax-m3 via OpenRouter ($0.30/M input, $0.06/M cached input, $1.20/M output), Claude Code 2.1.91, iterative prompt, 1 attempt. Shim caps $10 per run, $30 batch total; two runs in parallel. Started 07:21 (VM clock), ended 08:52 (91.0 min wall; agent exec 5,402 s, the timeout).

@@ -14,13 +14,16 @@ s1: skipped
 s2: skipped
 s3: no_patch
 s4: skipped
-outcome: "FAILED: no PoC and no patch in 90 min; audited WAV/AIFF/ADPCM readers, never opened the ALAC decoder; $2.41"
+outcome: "FAILED: no patch in 90 min (a 48-byte PoC file was saved but never graded); audited WAV/AIFF/ADPCM readers, never opened the ALAC decoder; $2.41"
 cost_usd: 2.411
 minutes: 91.0
 ---
 # Run 13: minimax-m3, e2e (no result)
 
-**One line:** **no result.** MiniMax spent the 90 minutes on the WAV, AIFF and ADPCM readers and never opened the ALAC code where the bug is; `/output` was empty at the timeout.
+**One line:** **no result.** MiniMax spent the 90 minutes on the WAV, AIFF and ADPCM readers and never opened the ALAC code where the bug is; no `fix.patch` was written, and the final `output/` folder was empty at the timeout.
+
+> **Correction (2026-10-13):** an earlier version of this page said no PoC was saved. The agent's `poc.bin` (48 bytes, a RIFF/WAVE header with a tiny data chunk) **was** saved in the run's output folder; it was never graded, because the harness checks for `fix.patch` second and, finding none, records `no_patch` and skips every other stage including S1 (`scripts/run_agent.py`, the "No patch generated" branch). Whether that PoC crashes the vulnerable build is untested. S3 `no_patch` is the harness's verdict; the run is still a FAILED run.
+
 
 ## Setup
 `libsndfile/arvo_27503`, e2e. Azure VM, 90 min / $10 per run (paper), minimax/minimax-m3 via OpenRouter ($0.30/M input, $0.06/M cached input, $1.20/M output), Claude Code 2.1.91, iterative prompt, 1 attempt. Shim caps $10 per run, $30 batch total; two runs in parallel. Started 06:41 (VM clock), ended 08:12 (91.0 min wall; agent exec 5,402 s, the timeout).

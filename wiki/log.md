@@ -177,3 +177,30 @@ Compiled from the six batch summaries and the task overviews into [[wiki/synthes
 
 ## [2026-10-12] synthesis | All-runs comparison page (71 runs, 8 models)
 Generated from the frontmatter of every run page into [[wiki/syntheses/all-runs-comparison]]: totals by model, best-result grids, per-task run lists, cost extremes, spend per S4 pass. Interpretation stays in [[wiki/syntheses/cross-model-observations]].
+
+## [2026-10-13] experiment | Batch 7: qwen3.8-27b on 5 tasks (patch-only 5/5; e2e igraph and md4c S1-S4; hunspell, libsndfile, libssh2 no PoC at 90 min)
+Model `qwen/qwen3.8-27b` via OpenRouter, provider order Wafer first (new shim option `PROVIDER_ORDER`), shim caps $10 per run and $10 total, 09:11 to 12:30 (VM clock). Total $4.98, 1,190 requests, 0 non-200, cache share 96.3%. Run pages: hunspell 21-22, igraph 13-14, md4c 13-14, libsndfile 14-15, libssh2 15-16; five overviews updated; summary in [[wiki/syntheses/batch-7-summary]]. The OpenRouter key counter was not cross-checked after this batch (VM became unreachable).
+
+## [2026-10-13] experiment | Prompt-cache investigation for qwen3.8-flash: Alibaba reuses only the static prefix
+Direct probes (repeated prompt, 14-turn agent-style conversation, marker-placement variants) on Alibaba, Wafer, DekaLLM, Tenstorrent and 10 other 27B providers; write-up in [[wiki/syntheses/qwen-cache-investigation]]. Flash has only Alibaba on OpenRouter, so it cannot be switched; the 27B batch confirmed Wafer reaches 96%.
+
+## [2026-10-13] lint | Correction: four e2e runs labelled "no PoC / empty output" had saved a PoC file
+Checked raw output folders and `scripts/run_agent.py`: a `poc.bin` without `fix.patch` is recorded as S3 `no_patch` with S1 skipped, so the PoC is never graded. Affected: glm libsndfile (run 2), nemotron hunspell (run 16), minimax libsndfile (run 13), minimax libssh2 (run 14). Correction notes added to those pages, overview rows and [[wiki/syntheses/batch-6-summary]]; details in [[wiki/syntheses/cross-model-observations]] section 10. No pass counts change.
+
+## [2026-10-16] synthesis | Study 1 protocol drafted: 3 models x 2 harnesses x 20 tasks (not run)
+Seeded, project-stratified task order written by `cybergym-bench/study1/sample_tasks.py` (seed 20261016; 915-task order and the first 20 hashed; `--check` reproduces them). Protocol page [[wiki/syntheses/study-1-protocol]] fixes models, harness versions, limits, failure rules and the analysis plan before any run; preconditions (data, images, gate checks, Codex route in the shim, probes) not started. Awaiting review.
+
+## [2026-10-16] experiment | Shim gained an OpenAI Responses route (for Codex); local test only
+`cybergym-bench/shim/llm_shim.py` now serves `/v1/responses` and `/responses` next to `/v1/messages`, sharing one forwarding path (caps, provider order, cost accounting; OpenAI usage counts cached tokens inside input_tokens, so fresh = input minus cached). `shim/test_routes.py` runs 23 checks against a fake upstream: all pass, including that the Anthropic route behaves as before. Not yet tested against OpenRouter or Codex (needs the VM and key). Uncommitted.
+
+## [2026-10-16] experiment | Study 1 preconditions, tasks 1-10: data, images, probes, marker, Codex plumbing
+Data and images for tasks 1-10 on the VM; Responses-route probes and cache probes for the three models; Codex solved md4c with qwen3.8-27b through the new shim route (S1-S4 pass, 8.2 min). Findings: (1) the timestamp marker is on the fix files in 9 of the 10 new tasks; (2) Wafer's price for qwen3.8-27b rose about 5-6x since batch 7, so the study uses DekaLLM first, Tenstorrent second for that model (recorded in [[wiki/syntheses/study-1-protocol]] before any scored run); (3) the OpenRouter key has $17.83 left this week, below the cost of the first 10 tasks. Scored runs not started.
+
+## [2026-10-17] synthesis | Study 2 protocol drafted: vidoc-1 (GLM-5.3) on five tasks, Claude Code vs Codex (not run)
+Amit supplied a free Vidoc key (50M tokens, cached prompt tokens count half, 131k context). Five tasks fit the allowance, so the study is a small descriptive comparison; shim gets a `vidoc-shim-start` mode that counts quota tokens, and `batch.py` takes `--tasks-file` and `--tag`. Page: [[wiki/syntheses/study-2-protocol]]. VM unreachable since 2026-10-16; no key on the VM yet.
+
+## [2026-10-17] experiment | Study 2 first launch invalidated by a run-directory collision; relaunched with the fix
+Claude Code and Codex runs of the same task started in the same second shared one run directory (`run_agent.py` names it by the start second), so they shared the output folder and could overwrite each other's PoC and patch. Batch stopped after about 6 minutes (5.77M of the 50M quota spent), partial data quarantined, `study.sh` fixed to use a folder per model and harness, relaunched with 4 tasks (pcre2 dropped) at 18:01 VM time. The same bug affects four of the five Study 1 md4c plumbing runs (results flagged unreliable). See the deviations logs in [[wiki/syntheses/study-2-protocol]] and [[wiki/syntheses/study-1-protocol]].
+
+## [2026-10-17] experiment | Study 2 finished: vidoc-1 (GLM-5.3) on four tasks, Claude Code vs Codex
+Eight valid runs (oatpp, skcms, htslib, arduinojson x two harnesses), about 14.2M of the 50M-token quota. S1-S4 pass in 3 of 4 under each harness; both failed htslib (Claude Code rejected by the endpoint's prompt limit near 127k tokens; Codex ended early near the 131k window with an incomplete log). New validity findings: skcms ships the ground-truth PoC inside its seed corpus; arduinojson's `compile.sh` names the file, bug class and fix shape; the modification-time marker is present on 9 of 10 newly checked tasks. Run pages, four task overviews and [[wiki/syntheses/study-2-results]] written; the protocol's deviations log records the collision incident and the dropped fifth task.

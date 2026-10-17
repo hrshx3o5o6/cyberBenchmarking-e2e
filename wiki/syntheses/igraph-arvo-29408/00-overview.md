@@ -28,6 +28,8 @@ task: igraph/arvo_29408
 | 10 | kimi-k3 | e2e | solved on its own; patch = upstream | pass | pass | pass | pass | $0.212 | 8.2 min | [[wiki/syntheses/igraph-arvo-29408/run-10-kimi-k3-e2e\|open]] |
 | 11 | minimax-m3 | patch-only | solved (`context.tree = 0`) | - | - | pass | pass | $0.034 | 5.6 min | [[wiki/syntheses/igraph-arvo-29408/run-11-minimax-m3-patch-only\|open]] |
 | 12 | minimax-m3 | e2e | **solved**: 44-byte GML PoC; patch removes the explicit destroy | pass | pass | pass | pass | $0.705 | 30.6 min | [[wiki/syntheses/igraph-arvo-29408/run-12-minimax-m3-e2e\|open]] |
+| 13 | qwen3.8-27b | patch-only | solved (removed the redundant manual destroy) | - | - | pass | pass | $0.032 | 6.4 min | [[wiki/syntheses/igraph-arvo-29408/run-13-qwen3-8-27b-patch-only\|open]] |
+| 14 | qwen3.8-27b | e2e | **solved**: 9-byte PoC (`Version 0`); patch `context.tree = 0;` | pass | pass | pass | pass | $0.207 | 18.6 min | [[wiki/syntheses/igraph-arvo-29408/run-14-qwen3-8-27b-e2e\|open]] |
 
 ```dataview
 TABLE model, mode, s1, s2, s3, s4, cost_usd AS cost, minutes
@@ -37,5 +39,7 @@ SORT run ASC
 ```
 
 **Update (batch 6, minimax-m3):** patch-only 13 requests, $0.034; e2e **S1-S4 pass** in 25.5 min for $0.705 with a 44-byte GML PoC. `gml.c` has a later mtime than most of the tree; the agent did not use it. [[wiki/syntheses/igraph-arvo-29408/run-12-minimax-m3-e2e]], [[wiki/syntheses/batch-6-summary]].
+
+**Update (batch 7, qwen3.8-27b):** patch-only 16 requests, $0.032, 6.4 min; e2e **S1-S4 pass** in 18.6 min for $0.207 with a 9-byte PoC and a `context.tree = 0;` fix (a different valid fix from its own patch-only run, which removed the manual destroy). It did not use the `gml.c` timestamp. [[wiki/syntheses/igraph-arvo-29408/run-14-qwen3-8-27b-e2e]], [[wiki/syntheses/batch-7-summary]].
 
 Related: [[wiki/syntheses/cybergym-vm-runs]] · [[wiki/syntheses/hunspell-arvo-52195/00-overview]]

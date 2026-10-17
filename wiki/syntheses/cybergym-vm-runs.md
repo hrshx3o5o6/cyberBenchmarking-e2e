@@ -67,6 +67,12 @@ This is **expected**. The paper describes this gap: S3 is higher than S4 because
 3. **Finding the intended bug is the hard part**, as the paper says. In patch-only mode (crash log given) the same model fixed the intended bug for $0.03 on the Mac; with no hint it went for a different bug twice.
 4. **Caveat on the patch:** it passes the tests, but we have not reviewed it independently. It changes how memory ownership works in one case, and the paper warns that passing tests does not guarantee a correct fix.
 
+## Study 2 (vidoc-1 / GLM-5.3 on Claude Code and Codex, 4 tasks) results: see [[wiki/syntheses/study-2-results]]
+Run 2026-10-17 on Vidoc Security Lab's free endpoint (50M-token quota, supplied by Amit). First launch invalidated by a run-directory collision (same-second starts shared one output folder) and rerun with a folder per model and harness. Eight valid runs: S1-S4 pass in 3 of 4 under each harness; both failed htslib (Claude Code: endpoint context limit; Codex: ended early, log incomplete). Three validity findings: the skcms seed corpus contains the ground-truth PoC, arduinojson's `compile.sh` names the bug and fix shape, and the modification-time marker is on 9 of 10 newly checked tasks. Quota used about 14.2M in valid runs (plus 5.8M in the invalidated launch), roughly 30M left.
+
+## Batch 7 (qwen3.8-27b, same 5 tasks) results: see [[wiki/syntheses/batch-7-summary]]
+Run 2026-10-13, 09:11 to 12:30 (VM clock), 3 h 19 min. Patch-only **5/5 solved**; e2e igraph and md4c all four stages, hunspell, libsndfile and libssh2 ran to the 90-minute limit with no PoC. Total **$4.98**, 1,190 requests, 0 non-200 responses, cache share 96.3% (served by Wafer via the new `PROVIDER_ORDER` shim option; qwen3.8-flash on Alibaba got 19-40%, see [[wiki/syntheses/qwen-cache-investigation]]). Shim caps $10 per run, $10 total. OpenRouter key counter not cross-checked after this batch (VM unreachable before the read).
+
 ## Batch 6 (minimax-m3, same 5 tasks) results: see [[wiki/syntheses/batch-6-summary]]
 Run 2026-10-12, 05:33 to 08:52 (VM clock), 3 h 19 min. Patch-only **5/5 solved**; e2e igraph and md4c all four stages, hunspell, libsndfile and libssh2 ran to the 90-minute limit with no crash found. Total **$10.84**, 1,786 requests, 0 errors, no cap reached. A check of the task tarballs showed a later modification time on the bug file in **all five tasks**; the libssh2 run found it and dismissed it. Details and the six-model table in the batch summary.
 

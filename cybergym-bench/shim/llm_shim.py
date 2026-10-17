@@ -14,6 +14,10 @@ Env:
   UPSTREAM_AUTH  x-api-key | bearer | both   (default x-api-key; OpenRouter needs bearer)
   STRIP_FIELDS   comma list of request fields to drop before forwarding (e.g. "context_management,thinking")
   PRICE_IN_PER_M / PRICE_CACHE_PER_M / PRICE_OUT_PER_M   USD per 1M tokens (fresh in / cache read / out)
+  (routes: /v1/messages = Anthropic format for Claude Code; /v1/responses and /responses = OpenAI Responses format for Codex)
+  COUNT_CACHE_CREATION  1 = count cache_creation_input_tokens as fresh input (Anthropic route; needed for Vidoc quota accounting)
+  PROVIDER_ORDER comma list of OpenRouter provider tags tried first (e.g. "wafer"); sent as provider.order with
+                 fallbacks still allowed, so a provider outage does not stall the run. Unset = OpenRouter default routing.
   UPSTREAM_SERIAL  1 = send upstream calls one at a time (needed for Ollama's free tier, 1 concurrent request);
                  0 = allow parallel calls (default 0 for https upstreams like OpenRouter, 1 otherwise)
   UPSTREAM_TIMEOUT_STREAM  seconds of SILENCE tolerated on a streaming call before failing fast (default 150).
@@ -39,6 +43,8 @@ _kf = os.environ.get("UPSTREAM_KEY_FILE")
 UPSTREAM_KEY = open(_kf).read().strip() if _kf else os.environ.get("UPSTREAM_KEY", "ollama")
 UPSTREAM_AUTH = os.environ.get("UPSTREAM_AUTH", "x-api-key")
 STRIP_FIELDS = [f for f in os.environ.get("STRIP_FIELDS", "").split(",") if f]
+COUNT_CACHE_CREATION = os.environ.get("COUNT_CACHE_CREATION") == "1"   # Anthropic-route upstreams that report cache writes separately (Vidoc): count them as fresh input
+PROVIDER_ORDER = [f for f in os.environ.get("PROVIDER_ORDER", "").split(",") if f]
 def _f(name):
     v = os.environ.get(name)
     return float(v) if v not in (None, "") else None
@@ -80,6 +86,18 @@ def _n(x):
 def _cost(u):
     c = u.get("cost") if isinstance(u, dict) else None
     return float(c) if isinstance(c, (int, float)) and not isinstance(c, bool) else None
+
+
+def in_tokens(u):
+    """Anthropic-format fresh input tokens; optionally includes cache-creation tokens (billed as ordinary input)."""
+    return _n(u.get("input_tokens")) + (_n(u.get("cache_creation_input_tokens")) if COUNT_CACHE_CREATION else 0)
+
+
+def usage_responses(u):
+    """OpenAI Responses usage: input_tokens INCLUDES cached tokens (unlike Anthropic), so fresh = input - cached."""
+    det = u.get("input_tokens_details") if isinstance(u, dict) else None
+    cached = _n((det or {}).get("cached_tokens"))
+    return {"in": max(0, _n(u.get("input_tokens")) - cached), "cache": cached, "out": _n(u.get("output_tokens")), "cost": _cost(u)}
 
 
 def eff_cap(c):
@@ -189,20 +207,39 @@ class H(BaseHTTPRequestHandler):
             return self._json(200, {"input_tokens": est_tokens(req.get("messages", [])) + est_tokens(req.get("system", "")) + est_tokens(req.get("tools", []))})
         if p == "/v1/messages":
             return self._messages(body)
+        if p in ("/v1/responses", "/responses"):
+            return self._responses(body)
         return self._json(404, {"error": "not found"})
 
     def _messages(self, body):
+        return self._forward(body, "messages")
+
+    def _responses(self, body):
+        return self._forward(body, "responses")
+
+    def _forward(self, body, kind):
+        """Forward one model call. kind 'messages' = Anthropic /v1/messages (Claude Code),
+        'responses' = OpenAI Responses /v1/responses (Codex). Accounting is the same for both."""
+        upstream_path = "/v1/messages" if kind == "messages" else "/v1/responses"
+
+        def err(code, etype, msg):
+            if kind == "messages":
+                return self._json(code, {"type": "error", "error": {"type": etype, "message": msg}})
+            return self._json(code, {"error": {"type": etype, "message": msg, "code": etype}})
+
         key, c = self._key()
         if c is None:
-            return self._json(401, {"type": "error", "error": {"type": "authentication_error", "message": "invalid key"}})
+            return err(401, "authentication_error", "invalid key")
         try:
             req = json.loads(body)
         except Exception:
-            return self._json(400, {"type": "error", "error": {"type": "invalid_request_error", "message": "bad json"}})
+            return err(400, "invalid_request_error", "bad json")
         orig_model = req.get("model")
         req["model"] = TARGET_MODEL
         for fld in STRIP_FIELDS:
             req.pop(fld, None)
+        if PROVIDER_ORDER:
+            req["provider"] = {"order": PROVIDER_ORDER, "allow_fallbacks": True}
         with STATE_LOCK:
             over = (c["requests"] >= MAX_REQUESTS or c["input_tokens"] >= MAX_INPUT_TOKENS or c["cache_read_tokens"] >= MAX_CACHE_TOKENS
                     or (eff_cap(c) is not None and c["spend"] >= eff_cap(c))
@@ -210,24 +247,25 @@ class H(BaseHTTPRequestHandler):
         if over:
             log({"event": "cap_hit", "requests": c["requests"], "input": c["input_tokens"], "cache": c["cache_read_tokens"],
                  "spend": round(c["spend"], 6), "total_spend": round(TOTAL["spend"], 6)})
-            return self._json(400, {"type": "error", "error": {"type": "invalid_request_error", "message": "shim budget exhausted"}})
+            return err(400, "invalid_request_error", "shim budget exhausted")
         stream = bool(req.get("stream"))
         payload = json.dumps(req).encode()
         t0 = time.time()
-        rec = {"event": "messages", "alias": c.get("alias"), "orig_model": orig_model, "stream": stream, "tools": len(req.get("tools") or [])}
+        rec = {"event": "messages", "route": kind, "alias": c.get("alias"), "orig_model": orig_model, "stream": stream, "tools": len(req.get("tools") or [])}
         usage = {"in": 0, "cache": 0, "out": 0, "cost": None}
         status = 0
         try:
             with LOCK:
                 for attempt in range(4):  # retry 429 on the free tier
                     conn = (http.client.HTTPSConnection if UP_HTTPS else http.client.HTTPConnection)(up.hostname, UP_PORT, timeout=(T_STREAM if stream else T_PLAIN))
-                    hdrs = {"content-type": "application/json",
-                            "anthropic-version": self.headers.get("anthropic-version", "2023-06-01")}
+                    hdrs = {"content-type": "application/json"}
+                    if kind == "messages":
+                        hdrs["anthropic-version"] = self.headers.get("anthropic-version", "2023-06-01")
                     if UPSTREAM_AUTH in ("x-api-key", "both"):
                         hdrs["x-api-key"] = UPSTREAM_KEY
                     if UPSTREAM_AUTH in ("bearer", "both"):
                         hdrs["authorization"] = "Bearer " + UPSTREAM_KEY
-                    conn.request("POST", UP_PREFIX + "/v1/messages", payload, hdrs)
+                    conn.request("POST", UP_PREFIX + upstream_path, payload, hdrs)
                     resp = conn.getresponse()
                     status = resp.status
                     if status == 429 and attempt < 3:
@@ -248,13 +286,17 @@ class H(BaseHTTPRequestHandler):
                                 d = json.loads(line[5:])
                             except Exception:
                                 continue
-                            if d.get("type") == "message_start":
+                            if kind == "responses":
+                                if d.get("type") in ("response.completed", "response.incomplete", "response.failed"):
+                                    u = (d.get("response") or {}).get("usage") or {}
+                                    usage = usage_responses(u) if u else usage
+                            elif d.get("type") == "message_start":
                                 u = d.get("message", {}).get("usage", {})
-                                usage["in"] = _n(u.get("input_tokens")); usage["cache"] = _n(u.get("cache_read_input_tokens"))
+                                usage["in"] = in_tokens(u); usage["cache"] = _n(u.get("cache_read_input_tokens"))
                                 usage["out"] = max(usage["out"], _n(u.get("output_tokens")))
                             elif d.get("type") == "message_delta":
                                 u = d.get("usage", {})
-                                usage["in"] = _n(u.get("input_tokens")) or usage["in"]
+                                usage["in"] = in_tokens(u) or usage["in"]
                                 usage["cache"] = _n(u.get("cache_read_input_tokens")) or usage["cache"]
                                 usage["out"] = _n(u.get("output_tokens")) or usage["out"]
                                 if _cost(u) is not None:
@@ -264,8 +306,11 @@ class H(BaseHTTPRequestHandler):
                     if status == 200:
                         try:
                             u = json.loads(data).get("usage", {})
-                            usage = {"in": _n(u.get("input_tokens")), "cache": _n(u.get("cache_read_input_tokens")),
-                                     "out": _n(u.get("output_tokens")), "cost": _cost(u)}
+                            if kind == "responses":
+                                usage = usage_responses(u)
+                            else:
+                                usage = {"in": in_tokens(u), "cache": _n(u.get("cache_read_input_tokens")),
+                                         "out": _n(u.get("output_tokens")), "cost": _cost(u)}
                         except Exception:
                             pass
                     self.send_response(status)
@@ -281,7 +326,7 @@ class H(BaseHTTPRequestHandler):
             rec["timeout_s"] = T_STREAM if stream else T_PLAIN
             status = status or 502
             try:
-                self._json(502, {"type": "error", "error": {"type": "api_error", "message": "shim upstream failure"}})
+                err(502, "api_error", "shim upstream failure")
             except Exception:
                 pass
         calc = cost_of(usage["in"], usage["cache"], usage["out"])
@@ -299,7 +344,6 @@ class H(BaseHTTPRequestHandler):
         except Exception as e:                                  # never let accounting fail silently
             rec.update(status=status, accounting_error=repr(e)[:200])
         log(rec)
-
 
 if __name__ == "__main__":
     os.makedirs(os.path.dirname(os.path.abspath(LOG_FILE)), exist_ok=True)

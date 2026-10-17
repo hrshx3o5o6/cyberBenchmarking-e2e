@@ -11,3 +11,7 @@
 !collect_results.py
 !run_linux.sh
 !run_batch.sh
+!shim/test_routes.py
+!study1/
+!study1/*
+study1/__pycache__/

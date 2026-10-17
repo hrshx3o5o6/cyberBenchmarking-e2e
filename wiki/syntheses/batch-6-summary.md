@@ -28,9 +28,9 @@ tags: [batch, summary, results, comparison, minimax-m3, kimi-k3, nemotron-3-supe
 | md4c | patch-only | solved | - | - | pass | pass | $0.018 | 3.4 min | [[wiki/syntheses/md4c-arvo-31332/run-11-minimax-m3-patch-only\|open]] |
 | md4c | e2e | **solved, all four stages** | pass | pass | pass | pass | $0.351 | 15.8 min | [[wiki/syntheses/md4c-arvo-31332/run-12-minimax-m3-e2e\|open]] |
 | libsndfile | patch-only | solved | - | - | pass | pass | $0.138 | 12.8 min | [[wiki/syntheses/libsndfile-arvo-27503/run-12-minimax-m3-patch-only\|open]] |
-| libsndfile | e2e | **no PoC, no patch** (never opened the ALAC code) | skipped | skipped | no_patch | skipped | $2.411 | 91.0 min | [[wiki/syntheses/libsndfile-arvo-27503/run-13-minimax-m3-e2e\|open]] |
+| libsndfile | e2e | **no patch** (48-byte PoC file saved but never graded; never opened the ALAC code) | skipped | skipped | no_patch | skipped | $2.411 | 91.0 min | [[wiki/syntheses/libsndfile-arvo-27503/run-13-minimax-m3-e2e\|open]] |
 | libssh2 | patch-only | solved | - | - | pass | pass | $0.060 | 5.9 min | [[wiki/syntheses/libssh2-arvo-65212/run-13-minimax-m3-patch-only\|open]] |
-| libssh2 | e2e | **no PoC, no patch** (saw the `kex.c` mtime marker and dismissed it) | skipped | skipped | no_patch | skipped | $3.879 | 91.0 min | [[wiki/syntheses/libssh2-arvo-65212/run-14-minimax-m3-e2e\|open]] |
+| libssh2 | e2e | **no patch** (6-byte PoC file saved but never graded; saw the `kex.c` mtime marker and dismissed it) | skipped | skipped | no_patch | skipped | $3.879 | 91.0 min | [[wiki/syntheses/libssh2-arvo-65212/run-14-minimax-m3-e2e\|open]] |
 
 In the three failed e2e runs the harness records S1 `no_poc` (hunspell) or S3 `no_patch` (the others, S1 skipped) because nothing was in `/output` when the 90-minute limit cut the agent. Sum of the per-run costs $10.845; the shim's batch total $10.8436.
 
