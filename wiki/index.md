@@ -52,3 +52,4 @@ Live views: [[wiki/dashboard]]. History: [[wiki/log]].
 - [[wiki/syntheses/cybergym-vm-runs]] — **start here for the VM:** every run on the Azure x86 VM, which task, plain-language results, why S4 failed, cost.
 - [[wiki/syntheses/cybergym-glm-5-3-flash-run-log]] — live log of the first paid-model runs (glm-5.3-flash via OpenRouter): protocol, caps, pre-run checks, cost expectations, results.
 - [[wiki/syntheses/cybergym-bench-mac-setup-notes]] — Mac/Docker/firewall/shim gotchas and provider limits for running the benchmark.
+- [[wiki/syntheses/benchmark-evals-aws-vm-parallelism]] — AWS VM: benchmark-evals replica, Kimi K3 patch-only on 20 seeded tasks (20/20 passed, $21), 2 vs 8 parallel runs on 16 vCPU (no breaking point found), spend-guard design, mistakes.
