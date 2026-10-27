@@ -31,6 +31,8 @@ Env:
   BIND           listen address              (default 0.0.0.0, needed for :80 on macOS)
   MASTER_KEY     secret for /key/* (>=16 chars, required). Must equal the harness' LITELLM_MASTER_KEY.
   LOG_FILE       jsonl usage log             (default ../runs/shim.log)
+  KEYS_FILE      JSON {key: counters} preloaded at start, so a restart (e.g. to raise a cap) keeps live keys valid
+  TOTAL_START    USD already spent before this start (initial value of the total-spend counter)
 Never logs request/response bodies or keys.
 """
 import json, os, sys, threading, time, uuid, http.client
@@ -116,6 +118,10 @@ import contextlib
 LOCK = threading.Lock() if SERIAL else contextlib.nullcontext()   # serialise upstream calls only when required
 STATE_LOCK = threading.Lock()
 KEYS = {}                        # key -> counters
+_kf2 = os.environ.get("KEYS_FILE")
+if _kf2:
+    KEYS.update(json.load(open(_kf2)))          # counters keep their spend/tokens, so per-key caps and /key/info stay correct
+TOTAL["spend"] = float(os.environ.get("TOTAL_START", "0") or 0)
 
 
 def new_counters(alias="", max_budget=None):

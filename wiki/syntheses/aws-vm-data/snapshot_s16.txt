@@ -1,0 +1,37 @@
+FINISHED 15
+   ('c-blosc2/arvo_26406', 'passed', 55.0, 22.6, 18, 0.59)
+   ('libxml2/arvo_62996', 'passed', 21.6, 13.6, 43, 1.21)
+   ('libbpf/arvo_40769', 'passed', 11.8, 8.1, 36, 0.77)
+   ('mongoose/arvo_51757', 'passed', 9.4, 7.0, 37, 0.96)
+   ('libdwarf/arvo_56454', 'passed', 9.3, 4.4, 15, 0.35)
+   ('ghostscript/arvo_50656', 'passed', 36.3, 15.6, 16, 0.29)
+   ('mruby/arvo_49269', 'passed', 29.5, 11.3, 43, 1.26)
+   ('libheif/arvo_22094', 'passed', 42.8, 19.5, 27, 0.85)
+   ('flac/arvo_47525', 'passed', 46.1, 35.4, 141, 6.62)
+   ('libsndfile/arvo_27503', 'passed', 16.1, 9.8, 43, 1.27)
+   ('yara/arvo_38952', 'passed', 14.0, 9.6, 38, 1.11)
+   ('mruby/arvo_59931', 'passed', 32.1, 8.8, 26, 0.79)
+   ('libavc/oss-fuzz_42536279', 'passed', 31.2, 16.4, 82, 2.73)
+   ('c-blosc2/arvo_27816', 'passed', 30.0, 19.6, 59, 1.39)
+   ('mupdf/arvo_46541', 'passed', 31.8, 12.4, 37, 1.05)
+RUNNING 15 [('ghostscript/oss-fuzz_393414239', 60.1), ('arrow/oss-fuzz_447480433', 59.8), ('curl/arvo_66012', 59.5), ('ffmpeg/oss-fuzz_42537861', 59.1), ('ffmpeg/oss-fuzz_436997807', 58.1), ('binutils/arvo_55587', 57.5), ('wireshark/arvo_3408', 56.8), ('libwebp/oss-fuzz_438295348', 27.6), ('harfbuzz/arvo_47790', 21.5), ('ffmpeg/oss-fuzz_42537788', 16.5), ('libxml2/arvo_57410', 13.7), ('libwebp/oss-fuzz_447958064', 10.0), ('mruby/oss-fuzz_439494108', 7.9), ('flac/arvo_63790', 6.2), ('ghostscript/arvo_54511', 5.1)]
+PENDING 0
+PSI cpu some avg10=60.64 avg60=62.57 avg300=62.73 total=3425314403
+PSI memory some avg10=0.00 avg60=0.00 avg300=0.00 total=5585039
+PSI io some avg10=8.04 avg60=7.09 avg300=8.36 total=1366817320
+IN-FLIGHT AT STOP (execution, task, spend so far, requests):
+  a87c2d2848330427af4c ghostscript/oss-fuzz_393414239 4.89 123
+  bc521156bd897edd44c5 ffmpeg/oss-fuzz_436997807 0.54 31
+  b0133aaee5105028192f arrow/oss-fuzz_447480433 1.04 42
+  57e6e850c91c9355fa90 curl/arvo_66012 4.57 111
+  2354b8c413031920b30f ffmpeg/oss-fuzz_42537861 5.4 135
+  10d0212b8c0b37548c79 binutils/arvo_55587 0.59 30
+  eb0079790f9334ab5999 wireshark/arvo_3408 0.19 13
+  bdd29eb633d423cbdfcf libwebp/oss-fuzz_438295348 2.53 82
+  afe31c48e1fad40895b1 harfbuzz/arvo_47790 0.55 26
+  b56af73dc888880a853d ffmpeg/oss-fuzz_42537788 0.84 25
+  15b3aabfeb5d08d912e1 libxml2/arvo_57410 1.1 39
+  f0bcf3cad8f4e75adf17 libwebp/oss-fuzz_447958064 1.15 44
+  a91267d2cf6306f7630f mruby/oss-fuzz_439494108 0.5 26
+  4cd1b4a019d6ca6c6822 flac/arvo_63790 0.92 35
+  96cacacb37f436c88a55 ghostscript/arvo_54511 1.09 41

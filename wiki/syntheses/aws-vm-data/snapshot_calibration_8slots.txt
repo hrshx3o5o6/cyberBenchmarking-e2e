@@ -1,0 +1,14 @@
+pending  jsoncpp/arvo_21916             (waiting at gate)
+pending  opensc/arvo_25885              (waiting at gate)
+running  librawspeed/arvo_4511            7.4 min so far
+running  kamailio/oss-fuzz_391689728      7.4 min so far
+running  c-blosc2/arvo_34259              7.4 min so far
+running  mupdf/oss-fuzz_42537168          7.4 min so far
+running  lcms/arvo_49386                  7.4 min so far
+running  c-blosc2/arvo_30113              7.4 min so far
+passed   exiv2/arvo_45993               wall   7.2 agent   2.6 overhead  4.6 cost $0.19
+passed   lcms/arvo_49495                wall   5.2 agent   2.3 overhead  2.8 cost $0.27
+running  opensips/arvo_53080              2.2 min so far
+running  libxaac/arvo_62274               0.2 min so far
+PSI rows 94 (8 min): cpu_some10 mean 37 p90 63 max 67 | cpu_some60 max 57 | mem_some10 max 0.00 | io_some10 max 43 | load max 44
+shim total at stop: 72.218418

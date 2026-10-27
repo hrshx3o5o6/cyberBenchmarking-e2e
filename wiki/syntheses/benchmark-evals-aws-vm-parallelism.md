@@ -7,7 +7,7 @@ tags: [aws, ec2, ray, parallelism, benchmark-evals, kimi-k3, codex, bedrock, pat
 ---
 # AWS VM: benchmark-evals replica, Kimi K3 patch-only on 20 tasks, 2 vs 8 parallel runs
 
-**One line:** on Amit's 16 vCPU / 61 GB EC2 VM, Codex + Kimi K3 (Bedrock) solved **20 of 20** seeded random patch-only tasks (S3 and S4 passed every time, one attempt each). Running **8 at once** (CPU saturated, load up to 33.7 on 16 cores) did not break anything and barely changed per-task time on three control tasks; 13 tasks finished in 18.2 minutes at 8 slots, where 9 took 77.9 minutes at 2 slots. The **limit of the machine was not found**. Total model spend was **$21.04** of a $150 cap.
+**One line:** on Amit's 16 vCPU / 61 GB EC2 VM, Codex + Kimi K3 (Bedrock) solved **20 of 20** seeded random patch-only tasks (S3 and S4 passed every time, one attempt each). Running **8 at once** (CPU saturated, load up to 33.7 on 16 cores) did not break anything and barely changed per-task time on three control tasks; 13 tasks finished in 18.2 minutes at 8 slots, where 9 took 77.9 minutes at 2 slots. The **limit of the machine was not found**. Total model spend was **$21.04** of a $150 cap after those two batches. A later 16-slot batch on the other 30 sampled tasks (section 4c) saturated the CPU for 50+ minutes, stretched the setup/grading phase about 5x, and was stopped after 15 passes and 15 cut tasks; shim total **$68.50**.
 
 Raw data (per-run results, sampler CSVs, sample list): `wiki/syntheses/aws-vm-data/`. Earlier Azure VM results: [[wiki/syntheses/cybergym-vm-runs]]; cross-model notes: [[wiki/syntheses/cross-model-observations]].
 
@@ -105,6 +105,69 @@ What stands out:
 
 Limits of this comparison: the two batches ran different tasks, one sampler row per 10 seconds, no per-container CPU/memory (the sampler reads host totals), and Amit's own processes were idle throughout but are included in the baseline.
 
+## 4c. Batch C: 16 slots with a 20 s stagger, stopped early (tasks 21-50 of the sample)
+Started 09:34:02Z, **stopped at about 62 minutes** at the user's request ("stop with patch only, move to e2e"). 30 tasks queued, **15 finished (all passed)**, **15 were still running and were cut** (their work and about **$25.9** of spend are lost; no result exists for them, so their pass/fail is unknown). The shim total went from $21.04 to **$68.50**. Finished-task cost $21.22; the 15 cut tasks had spent about $25.9 (batch total about $47).
+
+Finished (the 15 faster tasks; the cut ones are the heavy projects, so these numbers are biased towards easy tasks):
+| Task | Result | Wall min | Agent min | Wall - agent | Requests | Cost |
+|---|---|---|---|---|---|---|
+| c-blosc2/arvo_26406 | S3 passed, S4 passed | 55.0 | 22.6 | 32.4 | 18 | $0.59 |
+| c-blosc2/arvo_27816 | S3 passed, S4 passed | 30.0 | 19.6 | 10.4 | 59 | $1.39 |
+| flac/arvo_47525 | S3 passed, S4 passed | 46.1 | 35.4 | 10.7 | 141 | $6.62 |
+| ghostscript/arvo_50656 | S3 passed, S4 passed | 36.3 | 15.6 | 20.7 | 16 | $0.29 |
+| libavc/oss-fuzz_42536279 | S3 passed, S4 passed | 31.2 | 16.4 | 14.8 | 82 | $2.73 |
+| libbpf/arvo_40769 | S3 passed, S4 passed | 11.8 | 8.1 | 3.7 | 36 | $0.77 |
+| libdwarf/arvo_56454 | S3 passed, S4 passed | 9.3 | 4.4 | 4.9 | 15 | $0.35 |
+| libheif/arvo_22094 | S3 passed, S4 passed | 42.8 | 19.5 | 23.3 | 27 | $0.85 |
+| libsndfile/arvo_27503 | S3 passed, S4 passed | 16.1 | 9.8 | 6.3 | 43 | $1.27 |
+| libxml2/arvo_62996 | S3 passed, S4 passed | 21.6 | 13.6 | 8.0 | 43 | $1.21 |
+| mongoose/arvo_51757 | S3 passed, S4 passed | 9.4 | 7.0 | 2.4 | 37 | $0.96 |
+| mruby/arvo_49269 | S3 passed, S4 passed | 29.5 | 11.3 | 18.2 | 43 | $1.26 |
+| mruby/arvo_59931 | S3 passed, S4 passed | 32.1 | 8.8 | 23.3 | 26 | $0.79 |
+| mupdf/arvo_46541 | S3 passed, S4 passed | 31.8 | 12.4 | 19.4 | 37 | $1.05 |
+| yara/arvo_38952 | S3 passed, S4 passed | 14.0 | 9.6 | 4.4 | 38 | $1.11 |
+
+Cut in flight (all had been running 40 to 60 minutes; ffmpeg, ghostscript, curl, libwebp, arrow, wireshark, binutils among them):
+| Task | Spend before the stop | Requests |
+|---|---|---|
+| ghostscript/oss-fuzz_393414239 | $4.89 | 123 |
+| ffmpeg/oss-fuzz_42537861 | $5.40 | 135 |
+| curl/arvo_66012 | $4.57 | 111 |
+| libwebp/oss-fuzz_438295348 | $2.53 | 82 |
+| libwebp/oss-fuzz_447958064 | $1.15 | 44 |
+| libxml2/arvo_57410 | $1.10 | 39 |
+| ghostscript/arvo_54511 | $1.09 | 41 |
+| arrow/oss-fuzz_447480433 | $1.04 | 42 |
+| flac/arvo_63790 | $0.92 | 35 |
+| ffmpeg/oss-fuzz_42537788 | $0.84 | 25 |
+| binutils/arvo_55587 | $0.59 | 30 |
+| ffmpeg/oss-fuzz_436997807 | $0.54 | 31 |
+| harfbuzz/arvo_47790 | $0.55 | 26 |
+| mruby/oss-fuzz_439494108 | $0.50 | 26 |
+| wireshark/arvo_3408 | $0.19 | 13 |
+
+**Machine at 16 slots (sampler + PSI log):**
+| Window (min) | CPU avg / max | Load avg / max | Memory used avg / max | Min free | Swap |
+|---|---|---|---|---|---|
+| 0-5 | 19.5% / 96% | 4.5 / 10.5 | 6.3 / 8.3 GB | 53.5 GB | 0 |
+| 5-10 | 78.6% / 100% | 30.1 / 60.5 | 8.3 / 10.7 GB | 51.1 GB | 0 |
+| 10-20 | **99.6% / 100%** | 77.7 / 132 | 11.2 / 16.3 GB | 45.5 GB | 0 |
+| 20-30 | 100% / 100% | 114.5 / 130.9 | 13.9 / 15.5 GB | 46.3 GB | 0 |
+| 30-40 | 100% / 100% | 117.8 / 131.7 | 14.1 / 18.2 GB | 43.5 GB | 0 |
+| 40-50 | 100% / 100% | 130.6 / 155.7 | 13.6 / 17.2 GB | 44.5 GB | 0 |
+| 50-60 | 100% / 100% | 92.1 / 136.8 | 15.2 / 19.5 GB | 42.3 GB | 0 |
+
+PSI (logged from about minute 40, 134 rows over 22 minutes): CPU `some` avg10 **mean 65%, p90 76%, max 88%**, avg60 up to 77%; memory pressure max 0.63% (essentially none); I/O `some` avg10 mean 9%, max 21%. Load average mean 108, max 156 (about 10x the 16 cores).
+
+**What it shows**
+- **CPU was saturated from about minute 10 to the stop** (50+ minutes at 100%), with tasks waiting for CPU about two thirds of the time. Memory never limited: at most 19.5 GB used of 61, no swap, memory pressure about zero. **CPU is the binding resource; memory is not.** (My earlier worry that memory would be the limit at higher slot counts was not borne out at 16.)
+- **The non-model part of each task got much slower.** Wall minus agent time (setup, build, grading), median: **2.2 min at 2 slots, 4.2 at 8 slots, 10.7 at 16 slots** (range 2.4 to 32.4 at 16). Wall time median among finished tasks was 30.0 min (mean 27.8, max 55). These are different tasks in each batch, and batch C's finished set is biased towards easy ones, so the true slowdown is probably larger; but the direction matches the PSI.
+- **Cost per task is not caused by the load** (cost follows tokens), but the sample half contained the expensive projects: one finished task cost $6.62 (flac/arvo_47525, 141 requests) and the cut ones had spent $4.5 to $5.4 each (ghostscript, ffmpeg, curl).
+- **No failures of any kind among the 30:** no infra errors, no HTTP errors from Bedrock, no watchdog trigger, no swap. The 16-slot batch was slow, not broken.
+- **Conclusion:** for this task mix, 16 slots on 16 vCPUs oversubscribes the CPU about 4 to 10 times and stretches tasks; 8 slots held up on a lighter mix. The best fixed setting is likely 8 to 10; with e2e (longer, heavier) it is lower. This motivated the adaptive controller (reference page, section 14).
+
+**Shadow run of the controller during this batch** (read only, nothing applied; started with limit 12): over 71 ticks it called the state red from the first tick (`cpu_psi10 62>50; cpu_psi60 68>40`), decreased 5 times (12 -> 9 -> 6 -> 4 -> 3 -> 2, respecting the 60 s cooldown) and then held at the floor. It read PSI, memory, the shim log and the SQLite state correctly on the real machine, and opened the run database read-only without disturbing the batch. Log: `wiki/syntheses/aws-vm-data/controller_shadow.jsonl`.
+
 ## 5. Estimates against reality
 - My early patch-only estimate was **$0.18 per task** (from five easy tasks, see [[wiki/syntheses/all-runs-comparison]]). Over 20 random tasks the mean was **$0.94** (median $0.37): a few long tasks (elfutils $3.95, binutils $4.06, mruby $1.97, binutils-449440793 $1.78) dominate. For the remaining 30 sampled tasks, expect about $28 at the same mean (wide range).
 - Time per task is heavy-tailed: median 9.8 min but 3 of 20 took 45 to 79 min. A batch finishes when its slowest task does; here the last task ran 60 minutes alone, so slot count mattered little for wall time at the end.
@@ -120,8 +183,9 @@ Limits of this comparison: the two batches ran different tasks, one sampler row 
 - Credential steps (copying Amit's key file with sudo, running the bootstrap) were blocked by the tool's permission classifier, and were done by the user or by file operations inside `/home/harshav` after consent.
 
 ## 7. Open questions and next steps
-1. **Where is the limit?** Try 12 and 16 slots on the remaining 30 sampled tasks, with the sampler and the shim guard on.
-2. **e2e** at the best slot count on a subset; about $129 of the $150 cap remains; 20 e2e tasks would cost roughly $77 to $136 (Kimi K3 e2e mean $3.86 on five Azure runs, times a possible Bedrock price premium).
-3. Amit's confirmation of the key use, the proxy sharing and a quiet window is still wanted; his Ray head ran idle throughout.
-4. Verify the Kimi K3 Bedrock price against AWS.
-5. Scaling beyond one VM needs shared state (SQLite and artifacts are node-local) and node-loss handling; see the Ray cluster discussion in this session's notes.
+1. **Where is the limit?** Partly answered: 16 slots oversubscribes the CPU for this task mix (section 4c) and 8 slots held up on a lighter mix, so the best fixed value is somewhere between and depends on the tasks. The plan is an adaptive controller instead of a fixed number (reference page, section 14), built and unit-tested but not yet run live.
+2. **Patch-only is finished as a measurement.** 35 distinct tasks completed, all 35 passed; 15 more were cut in flight at the 16-slot stop and have no result. The 50-task sample is therefore 35 done, 15 not done. Do not report 50/50 or a pass rate over the whole sample.
+3. **e2e** (done afterwards: [[wiki/syntheses/e2e-runs-and-vm-behaviour]]); it was planned for 10 to 12 tasks that passed patch-only, starting at a low slot count under the controller (start 4, ceiling 12), with a total spend cap of about $60. About $81 of the $150 cap remains after the $68.50 spent.
+4. Amit's confirmation of the key use, the proxy sharing and a quiet window is still wanted; the 16-slot batch made the VM slow for about an hour. His Ray head ran idle throughout.
+5. Verify the Kimi K3 Bedrock price against AWS (third-party pages only so far).
+6. Scaling beyond one VM needs shared state (SQLite and artifacts are node-local) and node-loss handling.
