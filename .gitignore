@@ -11,3 +11,7 @@ debug/
 .mcp.json
 .claude/settings.json
 .claude/settings.local.json
+
+# autoscaler infra: real IDs/paths live in the untracked local file
+wiki/syntheses/aws-vm-data/autoscaler/*.local.env
+wiki/syntheses/aws-vm-data/autoscaler/rendered/

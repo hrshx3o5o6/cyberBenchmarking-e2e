@@ -1,0 +1,81 @@
+# Ray cluster-launcher config for the benchmark autoscaler (TEMPLATE).
+# Double-brace placeholders are filled by render_cluster.py from autoscaler.local.env (untracked).
+# Every AWS resource is named explicitly: left blank, Ray would try to create a key pair,
+# a security group and an IAM role (with full EC2 + S3 access) and our user cannot.
+cluster_name: benchmark-ray
+max_workers: {{MAX_WORKERS}}
+upscaling_speed: 1.0
+idle_timeout_minutes: {{IDLE_MINUTES}}
+
+provider:
+  type: aws
+  region: us-east-1
+  availability_zone: us-east-1c
+  use_internal_ips: true          # reach nodes by private IP (the laptop's public IP rotates)
+  cache_stopped_nodes: true       # scale-down STOPS on-demand nodes; scale-up restarts a matching one
+
+auth:
+  ssh_user: harshav
+  ssh_private_key: {{SSH_KEY_PATH}}
+  # jump through the existing VM, which is reachable and in the same VPC
+  ssh_proxy_command: "ssh -i {{JUMP_KEY_PATH}} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -W %h:%p harshav@{{JUMP_HOST}}"
+
+available_node_types:
+  head:
+    resources: {CPU: 0, benchmark_slot: 0}      # coordinates only: autoscaler + driver
+    node_config:
+      InstanceType: {{HEAD_TYPE}}
+      ImageId: {{AMI_ID}}
+      KeyName: {{KEY_NAME}}
+      SubnetIds: [{{SUBNET_ID}}]
+      SecurityGroupIds: [{{SECURITY_GROUP_ID}}]
+      IamInstanceProfile: {Arn: {{HEAD_INSTANCE_PROFILE_ARN}}}
+      MetadataOptions: {HttpTokens: required, HttpPutResponseHopLimit: 2}
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs: {VolumeSize: {{HEAD_DISK_GIB}}, VolumeType: gp3, DeleteOnTermination: true}
+      TagSpecifications:
+        - ResourceType: instance
+          Tags: [{Key: project, Value: benchmark-ray}]
+  worker:
+    min_workers: 0
+    max_workers: {{MAX_WORKERS}}
+    resources: {CPU: 16, benchmark_slot: {{SLOTS}}}
+    node_config:
+      InstanceType: m7i.4xlarge
+      ImageId: {{AMI_ID}}
+      KeyName: {{KEY_NAME}}
+      SubnetIds: [{{SUBNET_ID}}]
+      SecurityGroupIds: [{{SECURITY_GROUP_ID}}]
+      MetadataOptions: {HttpTokens: required, HttpPutResponseHopLimit: 2}
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs: {VolumeSize: {{WORKER_DISK_GIB}}, VolumeType: gp3, DeleteOnTermination: true}
+      TagSpecifications:
+        - ResourceType: instance
+          Tags: [{Key: project, Value: benchmark-ray}]
+
+head_node_type: head
+
+# Secrets are never in the AMI: they are synced from the machine running `ray up`
+# to the head, and from the head to every worker.
+file_mounts:
+  /home/harshav/benchmark-evals/config/.env: {{LOCAL_ENV_FILE}}
+  /home/harshav/benchmark-evals/config/.bedrock_key: {{LOCAL_BEDROCK_KEY_FILE}}
+  /home/harshav/.ray/auth_token: {{LOCAL_RAY_TOKEN_FILE}}
+
+initialization_commands: []
+setup_commands: []                 # everything is baked into the AMI
+head_setup_commands: []
+worker_setup_commands: []
+
+# NOTE: no space after the colon inside --resources JSON, or YAML reads the line as a mapping
+head_start_ray_commands:
+  - /home/harshav/benchmark-evals/.venv/bin/ray stop
+  - RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --head --port=6379 --num-cpus=0 --resources='{"benchmark_slot":0}' --include-dashboard=false --autoscaling-config=~/ray_bootstrap_config.yaml
+
+worker_start_ray_commands:
+  - /home/harshav/benchmark-evals/.venv/bin/ray stop
+  # resources repeated here so the raylet matches what the autoscaler plans with
+  - RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --address=$RAY_HEAD_IP:6379 --num-cpus=16 --resources='{"benchmark_slot":{{SLOTS}}}'
+  # TODO stage 4: start the per-node metering shim and monitors here (or as AMI services)
