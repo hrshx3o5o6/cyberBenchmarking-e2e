@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stage-3 test: drive the autoscaler with sleeping tasks, no cybergym code and no model spend.
 
-Run on the head:  RAY_AUTH_MODE=token python dummy_demand.py --tasks 24 --seconds 240
+Run on the head:  RAY_AUTH_MODE=token python dummy_demand.py --address <head private ip>:<port> --tasks 20 --seconds 300 --tail 480
 Each task asks for the same resources as a real execution (num_cpus=1, benchmark_slot=1), sleeps,
 and reports which host ran it. With 0 workers up, the pending tasks are the demand that makes the
 autoscaler launch workers; when they finish and the nodes sit idle it stops them again.
@@ -30,13 +30,14 @@ def snapshot():
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
+    ap.add_argument("--address", required=True, help="head host:port. Required: 'auto' can attach to ANOTHER Ray head running on the same machine")
     ap.add_argument("--tasks", type=int, default=24)
     ap.add_argument("--seconds", type=float, default=240)
     ap.add_argument("--poll", type=float, default=15)
     ap.add_argument("--tail", type=float, default=0, help="keep watching this long after the tasks finish (to see scale-down)")
     args = ap.parse_args()
 
-    ray.init(address="auto")
+    ray.init(address=args.address)
     start = time.time()
     refs = [work.remote(i, args.seconds) for i in range(args.tasks)]
     print(f"submitted {len(refs)} tasks of {args.seconds:.0f}s")

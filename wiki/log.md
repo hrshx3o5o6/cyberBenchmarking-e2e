@@ -231,3 +231,78 @@ Wrote [[wiki/syntheses/ray-autoscaler-build-plan]]: what the 2.59.0 AWS provider
 
 ## [2026-10-29] experiment | Stage 1: worker/head AMI built from a recipe and verified
 Launched a clean `m7i.xlarge`, ran the AMI recipe (found and fixed three recipe bugs: unpullable image IDs used as digests, `unless-stopped` proxy not restarting after a manual stop in the scrub step, a self-matching `pgrep`), created the image, verified it on a cold-booted test instance (12/12 checks, volume grew from 60 to 100 GiB at launch), then deleted the faulty first image and terminated all build and test instances. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 8.
+
+## [2026-10-29] synthesis | Living codebase guide created; AMI base-image note corrected
+Created [[wiki/syntheses/benchmark-evals-codebase-guide]] from a read of the runner (`config.py`, `cli.py`, `worker.py`, `db.py`, `prepare.py`), the VM-only shim/gate/tools and the upstream harness layout; it carries a changelog and an update checklist and is to be updated with every code change. Corrected [[wiki/syntheses/ray-autoscaler-build-plan]]: the base-image digests are pullable (`prepare.py` pulls one by digest); the earlier "image IDs" explanation was wrong, the failure was shell quoting. Recipe and verify scripts updated accordingly.
+
+## [2026-10-29] synthesis | Autoscaler run procedure and open gaps recorded
+Added section 9 to [[wiki/syntheses/ray-autoscaler-build-plan]]: how a run will work once built (render, `ray up`, driver on the head, autoscaler launches and stops workers, `ray down`) and what is not automatic yet: task images and data per node, shared state and artifacts, the metering shim and a cluster-wide budget, secret delivery. Marked as a sketch; nothing run.
+
+## [2026-10-29] experiment | Instance role received; probed from the VM
+The owner created `RayHeadRole` (EC2 role and profile) and attached it to the primary VM. Probed with dry-runs through the role's own credentials: describe, RunInstances (tagged and untagged), Stop/Terminate on instances that are not ours are all allowed (not tag-scoped); launching with the profile attached is denied (no PassRole). Recorded in [[wiki/syntheses/ray-autoscaler-build-plan]] section 10 with the consequences for the head layout.
+
+## [2026-10-29] synthesis | Autoscaler finds its head by EC2 tags (source read)
+Read `autoscaler.py` (Ray 2.59.0): head discovery is tag based, so a head on the existing VM needs Ray tags on that instance (his VM, needs his OK) and `ray down` must never be used for it. Added to [[wiki/syntheses/ray-autoscaler-build-plan]] section 10, point 6.
+
+## [2026-10-29] experiment | Autoscaler step 1: cluster YAML adjusted for the existing-VM head
+Rewrote `cluster.template.yaml` and `autoscaler.local.env.example` for a head started by hand on the existing VM (head type describes that VM, worker start line uses a head-port placeholder, no jump host, no `ray up`/`ray down`). Validated offline with Ray 2.59.0; rejects a bad value; nothing run against AWS. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 11.
+
+## [2026-10-29] experiment | Worker-only teardown script written and tested
+Wrote `stop_workers.sh` (selects only nodes tagged cluster + worker + project; dry run by default; stop or terminate; `--max` guard). Tested with a stub `aws` (found and fixed a bug: a pending instance cannot be stopped) and against real AWS (no matches). Never run on live workers. See [[wiki/syntheses/ray-autoscaler-build-plan]] section 12.
+
+## [2026-10-29] synthesis | Correction: the head needs four Ray tags, not three
+Re-read `autoscaler.py` and `tags.py` (Ray 2.59.0): besides cluster name, node kind and user node type, the node-type loop also requires `ray-node-status`, else the node is skipped. Corrected [[wiki/syntheses/ray-autoscaler-build-plan]] section 10 point 6. Decision recorded: head on the existing VM with these tags, subject to the owner's OK; nothing tagged yet.
+
+## [2026-10-29] experiment | Four Ray head tags added to the existing VM
+Added the four head tags (conditional OK from the owner); verified the VM and both Ray processes untouched and the teardown/guardrail scripts still ignore it. Undo command and open question in [[wiki/syntheses/ray-autoscaler-build-plan]] section 13.
+
+## [2026-10-29] experiment | Autoscaling head running on the existing VM
+Copied the worker key to the VM (fingerprint verified), rendered and validated the YAML there, started a third Ray head (port 6381) with the autoscaler. First start crashed with `KeyError: 'cluster_synced_files'` (a hand-started head needs Ray's prepared config): added `prepare_cluster.py` and a free metrics port; killed my own SSH session once with a self-matching process filter. Result: `ray status` shows 1 head, no failures, empty error log; no workers launched, no spend. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 14.
+
+## [2026-10-30] experiment | Dummy scale-up test: worker launched but could not join (Python patch mismatch)
+Ran the stage-3 dummy test (20 sleeping tasks, `max_workers 1`). The autoscaler launched a worker within about 10 s; SSH and the three secret-file syncs worked; `ray start` failed with a Ray version check: head Python 3.12.15 vs the AMI's 3.12.16 (the recipe let uv fetch the newest 3.12). Also found: the vCPU quota is 32 (one worker fits next to the head VM), and a worker whose update fails is not retried. Worker stopped by the teardown script; about 12 minutes billed. Recipe and verify now pin the Python version. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 15.
+
+## [2026-10-30] experiment | AMI v3 built with the pinned Python and verified
+Rebuilt the image with Python pinned to the head's 3.12.15 (three bugs in the pinning step found and fixed), verified 13/13 on a cold-booted test instance, deleted the faulty v2 image and snapshot, terminated the build and test instances and the stale v2-based worker (via the worker-only script). Only the v3 image and snapshot remain. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 16.
+
+## [2026-10-30] experiment | Dummy scale-up and scale-down passed on real EC2
+Re-ran the stage-3 test with the v3 image: the autoscaler launched one worker, it joined about 86 s later, 20 sleeping tasks ran across the head and the worker (10 and 10, 20 slots), and after the idle timeout the autoscaler stopped the worker. About 12 minutes of one `m7i.4xlarge`, no model spend. Details, timings and the remaining untested items (restart reuse, real task data/images, shim and budget, more than one worker, reboot survival) in [[wiki/syntheses/ray-autoscaler-build-plan]] section 17.
+
+## [2026-10-30] synthesis | Shared Postgres state: design written, first version built and tested on a branch
+Wrote [[wiki/syntheses/shared-postgres-state-design]] and built the write path on the local branch `shared-postgres-state` (`c2ec6e0`, not pushed): `pgstore.py`, hooks in `execute()` and `run()`, off unless `CYBERGYM_DATABASE_URL` is set. 15 new tests (11 against a throwaway Postgres 14 on the Mac, deleted afterwards); the whole suite passes (32), and mutation checks confirm the tests catch a broken read-back and a broken budget cap. Not built: driver/CLI reads, dead-worker handling in the driver, shim usage and cluster budget, node-metric streaming, hosting on the head VM, the AMI with `psycopg`. Nothing was installed on the owner's VM.
+
+## [2026-10-30] experiment | Driver and CLI read from Postgres; dead workers handled
+Built on the local branch `shared-postgres-state` (`69560b4`, not pushed): `--source postgres` for `status`, `report`, `recover` and `run --resume`; the driver no longer crashes when a task is lost (it records `infra_error` locally and in Postgres and carries on); `recover --source postgres` marks rows with no heartbeat for 5 minutes as `stale_running` without reading the dead node's disk; `sync-check` compares a node's local files with Postgres (the check for the rollout: keep workers stopping, verify, then terminate). 14 new tests (46 in the suite) against a throwaway Postgres 14 (deleted afterwards); mutation checks found one uncovered comparison (the result compare in `sync-check`), a test was added. Hosting on the head VM decided; the owner's OK is still to be obtained. Details in [[wiki/syntheses/shared-postgres-state-design]] sections 5 to 5c.
+
+## [2026-10-30] experiment | Postgres hosted on the head VM
+Started `postgres:16` as a container on the always-on head VM with the owner's go-ahead: published on the private address only, scram-sha-256 with a generated password, a pg_hba that rejects everything outside the VPC, restart `always`, a Docker volume, a 4 GB limit. Checked: only the private address listens; correct login works and wrong password, no password, wrong user and loopback are refused. Ran the whole test suite (46) from the VM against it, all pass. Restored a dump into a scratch database with matching row counts; found and fixed a backup-script bug (same-second dumps overwrote each other). Added the connection URL to the `.env` workers receive. Not done: a scheduled backup and an off-machine copy; exporting the URL into each node's Ray environment (workers do not inherit the driver's environment); merging the branch code into the VM's working copy; the AMI with `psycopg`. Details in [[wiki/syntheses/shared-postgres-state-design]] section 5d.
+
+## [2026-10-30] experiment | Postgres branch merged onto the VM copy and deployed; worker config prepared
+Compared the VM's working copy with the PR branch (it also carries the shim integration, the concurrency gate, tools and manifests), merged the Postgres commits onto it (`cli.py` from the branch, `worker.py` merged by hand), tested the merged tree (58 passed, incl. the gate tests and a new shim-plus-Postgres test, which fails when its code is broken), deployed it to the VM with backups, installed `psycopg` in the VM venv, and ran the whole suite on the VM against the hosted test database (58 passed). Slip: the backup step failed while the copy ran; the backups were rebuilt from a pristine copy pulled minutes earlier and verified. Prepared (validated offline, unused): a worker shim start script, and cluster-template changes for code, manifest, Postgres library, `prepare` and environment variables. No tasks run, no worker launched, no spend. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 18.
+
+## [2026-10-30] synthesis | Quota raised to 40 vCPUs; worker size and slots parameterised; 20-task test proposed
+Recorded the quota increase (32 to 40, relayed), that the limit is counted in vCPUs and who can change it, that worker size is set in the YAML and slots per node must match the instance (the template hard-coded 16 CPUs and the 4xlarge type: fixed and validated offline), and the proposed 20-task test with expected cost from the earlier Kimi K3 runs. Not run. Details in [[wiki/syntheses/ray-autoscaler-build-plan]] section 19.
+
+## [2026-10-30] experiment | 30-task full-path test planned; tasks selected
+Selected 30 light patch-only tasks that were never used on the VM (checked against every manifest, state file and run log, and against this wiki) and that have data on the Hugging Face dataset; created the living page [[wiki/syntheses/autoscaler-30-task-test]] with the plan, spend ceiling and safeguards. Nothing launched yet.
+
+## [2026-10-30] experiment | 30-task run in progress: two workers launched, a latent SQLite race, higher task cost
+Launched the 30-task run at 11:59 UTC. The autoscaler started two workers at once (so the quota is above the relayed 40); 10 tasks (5 per worker) failed within seconds with a SQLite WAL lock race on the fresh workers' state files (latent runner bug; the driver recorded them as infra_error in Postgres and carried on); model spend about $18.7 at 12:10 with 11 passed and 9 running, about twice the estimated cost per task. Details and plan in [[wiki/syntheses/autoscaler-30-task-test]].
+
+## [2026-10-30] experiment | 30-task run mostly done; SQLite race reproduced and fixed locally
+At 12:32 UTC: 19 passed, 1 running, 10 infra_error (the SQLite first-use race), both workers stopped by the autoscaler once idle; Postgres holds 76 artifacts (19 x 4). Reproduced the race with simultaneous processes (14 of 40 and 18 of 40 rounds failing), fixed `db.connect` with a lock-only retry (0 of 200 rounds failing), tests fail on the old code. Caught two mistakes of mine before deploying: a non-matching import patch on the VM copy and a test that hung instead of failing. Details in [[wiki/syntheses/autoscaler-30-task-test]].
+
+## [2026-10-30] experiment | gdal stopped, race fix deployed, re-run prepared
+Stopped the 46-minute gdal task on request (agent SIGTERM, row recorded as infra_error with its upload confirmed, orphan container removed). First-run totals: 19 passed, 11 infra_error. Deployed the `db.connect` retry to the VM with a verified backup and 33 passing tests there. Prepared manifest `new30r.json` with the 10 race-failed tasks in a fresh work directory. All 20 results that reached the Postgres sink report `observations_synced: true`. Details in [[wiki/syntheses/autoscaler-30-task-test]].
+
+## [2026-10-30] experiment | Stopped workers terminated; terminate-on-idle switched on; re-run on hold
+On explicit approval: terminated the two stopped first-run workers (none left), restarted the autoscaling head with `cache_stopped_nodes: false` (idle window 3 min, max 3 workers, 10 head slots) and verified the loaded configuration, the head's environment (names only) and the other heads untouched. The re-run of the 10 race-failed tasks is on hold pending the owner's confirmation of a larger run. Improved `stop_head.py` (rescans for late orphans). Details in [[wiki/syntheses/autoscaler-30-task-test]].
+
+## [2026-10-30] experiment | Postgres status check; first backup of real run data
+Checked the hosted Postgres after the first run: healthy, 30 executions and 78 artifacts, all completeness checks clean, three tables not yet fed. Found the run data had no backup; took one and restored it into a scratch database: counts matched and, after redoing a comparison that had falsely passed because of a quoting error, a content fingerprint of all execution rows and artifacts was identical. Open: scheduled backup and an off-machine copy. Details in [[wiki/syntheses/shared-postgres-state-design]] section 5e.
+
+## [2026-10-31] experiment | Snapshot branch of the VM's working copy
+Created the local branch `vm-live-2026-10-30` in the clone of the owner's repo: our Postgres branch plus the VM-only code (shim integration and gate in `worker.py`, `db.py`, `config.py`; `tools/`; the manifests; two VM-only tests; a provenance note). Secret scan of the added files: 0 hits; `.env` and `.bedrock_key` excluded. Verified identical to the VM (43 files, 0 differ); 67 tests pass against a throwaway Postgres. Local only, not pushed. See [[wiki/syntheses/benchmark-evals-codebase-guide]].
+
+## [2026-11-01] experiment | Qwen on Bedrock under Codex: availability check and translation layer
+Qwen3.8-27B is not in the Bedrock catalog (6 regions checked); the Bedrock Qwen models serve only Chat Completions while Codex needs Responses. Wrote and tested a Responses-to-Chat translator and a shim switch (`UPSTREAM_API=chat`): 12 unit and 2 end-to-end tests pass; real Bedrock multi-turn streaming test passed for `qwen3-coder-next` and `qwen3-32b-v1:0` (under $0.002). Not deployed; code lives in a local copy outside Git. Pages: [[wiki/syntheses/qwen-bedrock-responses-translation]], [[wiki/syntheses/benchmark-evals-codebase-guide]], index.

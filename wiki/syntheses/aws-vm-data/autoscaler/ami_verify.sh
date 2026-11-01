@@ -9,7 +9,9 @@ gw=$(docker network inspect cybergym-internal --format '{{(index .IPAM.Config 0)
 [[ "$gw" == 172.18.0.1 ]] && ok "gateway $gw" || bad "gateway '$gw'"
 v=$(~/benchmark-evals/.venv/bin/python -c 'import ray;print(ray.__version__)' 2>/dev/null)
 [[ "$v" == 2.59.0 ]] && ok "ray $v" || bad "ray '$v'"
-[[ "$(docker images -q 'gcr.io/oss-fuzz-base/base-builder' | wc -l)" -ge 1 ]] && ok "base-builder image" || bad "base image"
+py=$(~/benchmark-evals/.venv/bin/python -c 'import platform;print(platform.python_version())' 2>/dev/null)
+[[ "$py" == "${EXPECT_PYTHON:-3.12.15}" ]] && ok "python $py (must equal the head's exact patch version)" || bad "python '$py' (the head runs ${EXPECT_PYTHON:-3.12.15})"
+docker image inspect "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc" >/dev/null 2>&1 && ok "default base image (prepare.py DEFAULT_IMAGE)" || bad "default base image digest missing"
 ~/benchmark-evals/.venv/bin/cybergym-eval --help >/dev/null 2>&1 && ok "cybergym-eval CLI" || bad "CLI"
 for f in ~/benchmark-evals/config/.env ~/benchmark-evals/config/.bedrock_key ~/.ray/auth_token; do [[ -e "$f" ]] && bad "secret present: $f" || ok "absent $f"; done
 curl -s -m 3 -o /dev/null -w '%{http_code}' -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 60' http://169.254.169.254/latest/api/token | grep -q 200 && ok "IMDSv2 reachable" || bad "IMDS"

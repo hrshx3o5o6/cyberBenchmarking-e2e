@@ -1,7 +1,11 @@
-# Ray cluster-launcher config for the benchmark autoscaler (TEMPLATE).
+# Ray autoscaler config for the benchmark cluster (TEMPLATE). Layout: the head is an EXISTING VM that
+# runs our own Ray head by hand (not created by `ray up`); the autoscaler on it launches and stops workers.
 # Double-brace placeholders are filled by render_cluster.py from autoscaler.local.env (untracked).
-# Every AWS resource is named explicitly: left blank, Ray would try to create a key pair,
-# a security group and an IAM role (with full EC2 + S3 access) and our user cannot.
+# Every AWS resource is named explicitly: left blank, Ray would try to create a key pair, a security
+# group (SSH open to the world) and an IAM role with full EC2 + S3 access, none of which we want.
+#
+# Run the rendered file ON THE HEAD: paths below (key, file_mounts sources) are paths on the head.
+# Do NOT use `ray up` / `ray down` with this file: `ray down` would also stop the tagged head VM.
 cluster_name: benchmark-ray
 max_workers: {{MAX_WORKERS}}
 upscaling_speed: 1.0
@@ -11,38 +15,35 @@ provider:
   type: aws
   region: us-east-1
   availability_zone: us-east-1c
-  use_internal_ips: true          # reach nodes by private IP (the laptop's public IP rotates)
-  cache_stopped_nodes: true       # scale-down STOPS on-demand nodes; scale-up restarts a matching one
+  use_internal_ips: true          # the head reaches workers by private IP (same VPC)
+  # true: scale-down STOPS an idle worker (its disk stays and bills; scale-up reuses it WITHOUT resyncing code).
+  # false: scale-down TERMINATES an idle worker (disk deleted; every new worker gets the current code and data).
+  # Only use false once tasks confirm their uploads to Postgres (observations_synced: true).
+  cache_stopped_nodes: {{CACHE_STOPPED_NODES}}
 
 auth:
   ssh_user: harshav
-  ssh_private_key: {{SSH_KEY_PATH}}
-  # jump through the existing VM, which is reachable and in the same VPC
-  ssh_proxy_command: "ssh -i {{JUMP_KEY_PATH}} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -W %h:%p harshav@{{JUMP_HOST}}"
+  ssh_private_key: {{SSH_KEY_PATH}}   # private half of the worker key pair, on the head, mode 600
 
 available_node_types:
   head:
-    resources: {CPU: 0, benchmark_slot: 0}      # coordinates only: autoscaler + driver
+    # The existing VM. It also runs tasks, so it advertises its real CPUs and slots.
+    # node_config is required by the schema but unused for a head we start by hand.
+    resources: {CPU: {{HEAD_CPUS}}, benchmark_slot: {{HEAD_SLOTS}}}
     node_config:
       InstanceType: {{HEAD_TYPE}}
       ImageId: {{AMI_ID}}
       KeyName: {{KEY_NAME}}
       SubnetIds: [{{SUBNET_ID}}]
       SecurityGroupIds: [{{SECURITY_GROUP_ID}}]
-      IamInstanceProfile: {Arn: {{HEAD_INSTANCE_PROFILE_ARN}}}
-      MetadataOptions: {HttpTokens: required, HttpPutResponseHopLimit: 2}
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs: {VolumeSize: {{HEAD_DISK_GIB}}, VolumeType: gp3, DeleteOnTermination: true}
-      TagSpecifications:
-        - ResourceType: instance
-          Tags: [{Key: project, Value: benchmark-ray}]
   worker:
     min_workers: 0
     max_workers: {{MAX_WORKERS}}
-    resources: {CPU: 16, benchmark_slot: {{SLOTS}}}
+    # CPUs and slots must match the instance size: the autoscaler plans node counts from these numbers.
+    # Measured on 16 vCPUs: 8 to 10 light patch-only slots are comfortable, 16 saturates the CPU (about 0.5 slots per vCPU).
+    resources: {CPU: {{WORKER_CPUS}}, benchmark_slot: {{SLOTS}}}
     node_config:
-      InstanceType: m7i.4xlarge
+      InstanceType: {{WORKER_TYPE}}
       ImageId: {{AMI_ID}}
       KeyName: {{KEY_NAME}}
       SubnetIds: [{{SUBNET_ID}}]
@@ -54,28 +55,43 @@ available_node_types:
       TagSpecifications:
         - ResourceType: instance
           Tags: [{Key: project, Value: benchmark-ray}]
+        - ResourceType: volume
+          Tags: [{Key: project, Value: benchmark-ray}]
 
 head_node_type: head
 
-# Secrets are never in the AMI: they are synced from the machine running `ray up`
-# to the head, and from the head to every worker.
+# Synced from the head to each new worker (local side = paths on the head). Secrets are never in the AMI.
 file_mounts:
   /home/harshav/benchmark-evals/config/.env: {{LOCAL_ENV_FILE}}
   /home/harshav/benchmark-evals/config/.bedrock_key: {{LOCAL_BEDROCK_KEY_FILE}}
   /home/harshav/.ray/auth_token: {{LOCAL_RAY_TOKEN_FILE}}
+  # code and run configuration come from the head, so a worker always runs the same runner code as the driver
+  /home/harshav/benchmark-evals/src: {{LOCAL_SRC_DIR}}
+  /home/harshav/benchmark-evals/config/{{MANIFEST_NAME}}: {{LOCAL_MANIFEST}}
+  /home/harshav/benchmark-evals/tools/start_worker_services.sh: {{LOCAL_SERVICES_SCRIPT}}
 
 initialization_commands: []
 setup_commands: []                 # everything is baked into the AMI
 head_setup_commands: []
-worker_setup_commands: []
+worker_setup_commands:
+  # until the AMI carries the Postgres library (AMI v4)
+  - ~/.local/bin/uv pip install -q --python /home/harshav/benchmark-evals/.venv/bin/python 'psycopg[binary]'
+  # task data and images this manifest needs (the AMI has only the base images); the HF token comes with the .env
+  - cd /home/harshav/benchmark-evals && .venv/bin/cybergym-eval prepare --config config/{{MANIFEST_NAME}} --skip-firewall
 
-# NOTE: no space after the colon inside --resources JSON, or YAML reads the line as a mapping
-head_start_ray_commands:
-  - /home/harshav/benchmark-evals/.venv/bin/ray stop
-  - RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --head --port=6379 --num-cpus=0 --resources='{"benchmark_slot":0}' --include-dashboard=false --autoscaling-config=~/ray_bootstrap_config.yaml
+# head_start_ray_commands only matter for `ray up`; for the existing VM start the head by hand, e.g.
+#   1. prepare_cluster.py rendered/cluster.yaml rendered/cluster.prepared.yaml   (REQUIRED: without Ray's defaults the monitor dies with KeyError 'cluster_synced_files')
+#   2. (set -a; . <the .env>; set +a)  so the head's Ray process carries SHIM_MASTER_KEY and CYBERGYM_DATABASE_URL, then
+#      RAY_AUTH_MODE=token AUTOSCALER_METRIC_PORT=<free port> ray start --head --node-ip-address=<private ip> --port={{HEAD_PORT}} \
+#        --ray-client-server-port=<free port> --num-cpus={{HEAD_CPUS}} --resources='{"benchmark_slot":{{HEAD_SLOTS}}}' --include-dashboard=false \
+#        --autoscaling-config=<absolute path to cluster.prepared.yaml> --temp-dir=<short private dir>
+#   Other Ray heads on the same VM already use the default metrics port, so give this one a free AUTOSCALER_METRIC_PORT.
+head_start_ray_commands: []
 
 worker_start_ray_commands:
   - /home/harshav/benchmark-evals/.venv/bin/ray stop
-  # resources repeated here so the raylet matches what the autoscaler plans with
-  - RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --address=$RAY_HEAD_IP:6379 --num-cpus=16 --resources='{"benchmark_slot":{{SLOTS}}}'
-  # TODO stage 4: start the per-node metering shim and monitors here (or as AMI services)
+  # NOTE: no space after the colon inside the resources JSON, or YAML reads the line as a mapping.
+  # Resources are repeated here so the raylet matches what the autoscaler plans with.
+  - bash /home/harshav/benchmark-evals/tools/start_worker_services.sh {{SHIM_MODEL}} {{WORKER_SHIM_TOTAL_USD}} && set -a && . /home/harshav/benchmark-evals/config/.env && set +a && RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --address=$RAY_HEAD_IP:{{HEAD_PORT}} --num-cpus={{WORKER_CPUS}} --resources='{"benchmark_slot":{{SLOTS}}}'
+  # The shim is started by the script above; sourcing the .env puts the shim master key, the database URL and the other
+  # variables into this node's Ray process (a Ray task sees its node's environment, NOT the driver's).

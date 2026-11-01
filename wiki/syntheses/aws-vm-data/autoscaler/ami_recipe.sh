@@ -12,10 +12,18 @@ RUNNER_SRC="${RUNNER_SRC:?path to the runner source}"
 PUBKEYS="${PUBKEYS:?file with public keys}"
 CYBERGYM_COMMIT="${CYBERGYM_COMMIT:-d0ae0f0}"
 EXPECT_RAY="2.59.0"
-# base image our light tasks build FROM (a tag: the digests seen on the first VM were local image IDs,
-# which cannot be pulled). Other base variants are pulled on first use.
+# Ray refuses to join nodes whose Python PATCH version differs (3.12.15 on the head vs 3.12.16 from the first
+# AMI broke the first scale-up test). Pin it to what the head runs: `~/benchmark-evals/.venv/bin/python -V` there.
+EXPECT_PYTHON="${EXPECT_PYTHON:-3.12.15}"
+# base images the runner pulls by digest (DEFAULT_IMAGE in prepare.py is the second one). With Docker's
+# containerd image store the image ID equals the manifest digest, so `docker images --digests` on the
+# first VM showed pullable digests; the earlier "invalid reference format" came from shell quoting.
+# AMI v2 was built from the previous version of this list (base-builder:latest, plus both digests that
+# were present on the build instance); the exact digests in v2 are to be confirmed with
+# `docker image inspect <ref>` on the first instance launched from it.
 BASE_IMAGES=(
-  "gcr.io/oss-fuzz-base/base-builder:latest"
+  "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc"
+  "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b"
 )
 
 echo "== 1. user harshav (same name and home as the existing VMs: jobs carry absolute paths)"
@@ -40,11 +48,16 @@ sudo chown -R harshav:harshav /home/harshav/benchmark-evals
 sudo -iu harshav bash -euo pipefail <<INNER
 [ -d ~/cybergym-e2e/.git ] || git clone https://github.com/sunblaze-ucb/cybergym-e2e.git ~/cybergym-e2e
 git -C ~/cybergym-e2e checkout -q ${CYBERGYM_COMMIT}
-cd ~/benchmark-evals && bash scripts/bootstrap_ec2.sh      # uv, Python 3.12 envs, patches, cybergym-eval CLI
+# bootstrap_ec2.sh asks uv for "3.12", which now resolves to a newer patch than the head: run a pinned copy.
+# The copy must live next to the original (it finds the repo root from its own location) and is removed after.
+sed -e "s/uv python install 3.12/uv python install ${EXPECT_PYTHON}/" -e "s/--python 3.12 /--python ${EXPECT_PYTHON} /g" "\$HOME/benchmark-evals/scripts/bootstrap_ec2.sh" > "\$HOME/benchmark-evals/scripts/.bootstrap_pinned.sh"
+grep -q "${EXPECT_PYTHON}" "\$HOME/benchmark-evals/scripts/.bootstrap_pinned.sh" || { echo "pinning the python version failed" >&2; exit 1; }
+(cd ~/benchmark-evals && bash scripts/.bootstrap_pinned.sh); rm -f "\$HOME/benchmark-evals/scripts/.bootstrap_pinned.sh"   # uv, pinned Python, envs, patches, CLI
 ~/benchmark-evals/.venv/bin/python - <<PY
-import ray
+import platform, ray
 assert ray.__version__ == "${EXPECT_RAY}", ray.__version__
-print("ray", ray.__version__)
+assert platform.python_version() == "${EXPECT_PYTHON}", platform.python_version()
+print("ray", ray.__version__, "python", platform.python_version())
 PY
 INNER
 
