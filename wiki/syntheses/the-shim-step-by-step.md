@@ -20,12 +20,12 @@ It listens on the Docker gateway address of the internal network (the same addre
 ## The settings it reads at start (environment)
 | Group | Variables |
 |---|---|
-| Where to send calls | `UPSTREAM` (base URL, may carry a path prefix), `TARGET_MODEL` (forced on every call), `UPSTREAM_KEY` or `UPSTREAM_KEY_FILE`, `UPSTREAM_AUTH` (`x-api-key`, `bearer`, `both` or `google_adc`: a short-lived Google token from Application Default Credentials, fetched at start, cached and refreshed `GOOGLE_TOKEN_MARGIN_S` (default 300) seconds before expiry, sent as the bearer token plus the quota project header; needs the `google-auth` package, never logged) |
+| Where to send calls | `UPSTREAM` (base URL, may carry a path prefix), `TARGET_MODEL` (forced on every call), `UPSTREAM_KEY` or `UPSTREAM_KEY_FILE` or `UPSTREAM_KEY_ENV` (the name of an environment variable holding the key, used by the registry bridge), `UPSTREAM_AUTH` (`x-api-key`, `bearer`, `both` or `google_adc`: a short-lived Google token from Application Default Credentials, fetched at start, cached and refreshed `GOOGLE_TOKEN_MARGIN_S` (default 300) seconds before expiry, sent as the bearer token plus the quota project header; needs the `google-auth` package, never logged) |
 | Format | `UPSTREAM_API` = `responses` (default, pass through), `chat` (translate Responses calls to Chat Completions) or `auto` (decide once, see below), `UPSTREAM_RESPONSES_PATH` and `UPSTREAM_CHAT_PATH` (paths appended to the upstream URL, for endpoints like Vertex's that differ from `/v1/...`), `STRIP_FIELDS`, `RESPONSES_INPUT_FIX`, `PROVIDER_ORDER` (OpenRouter), `COUNT_CACHE_CREATION` |
 | Money | `PRICE_IN_PER_M`, `PRICE_CACHE_PER_M`, `PRICE_OUT_PER_M`, `MAX_SPEND_USD` (per key), `MAX_TOTAL_SPEND_USD`, `TOTAL_START` (spend already used, for restarts) |
 | Other caps | `MAX_REQUESTS`, `MAX_INPUT_TOKENS` (fresh input only), `MAX_CACHE_TOKENS` |
 | Behaviour | `UPSTREAM_SERIAL`, `UPSTREAM_TIMEOUT_STREAM` (seconds of silence tolerated on a stream), `UPSTREAM_TIMEOUT`, `KEYS_FILE` (preload keys on restart), `PORT`, `BIND`, `LOG_FILE`, `MASTER_KEY` |
-**Refuses to start** if: no `TARGET_MODEL`; `UPSTREAM_AUTH` is not one of the four values; `google_adc` cannot get a token; `MASTER_KEY` shorter than 16 characters; a dollar cap without all three prices; an HTTPS upstream with no real key; or an HTTPS upstream with no per-key cap (no uncapped paid spend, by design).
+**Refuses to start** if (unless `TOKEN_CAPS_ONLY=1` with `MAX_REQUESTS`, `MAX_INPUT_TOKENS` and `MAX_CACHE_TOKENS` all set, for a model with no price; the registry bridge sets them from defaults): no `TARGET_MODEL`; `UPSTREAM_AUTH` is not one of the four values; `google_adc` cannot get a token; `MASTER_KEY` shorter than 16 characters; a dollar cap without all three prices; an HTTPS upstream with no real key; or an HTTPS upstream with no per-key cap (no uncapped paid spend, by design).
 
 ## Routes
 | Route | Who calls it | What it does |

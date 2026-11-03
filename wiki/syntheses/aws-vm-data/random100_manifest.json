@@ -1,0 +1,822 @@
+{
+ "seed": "20261103",
+ "n": 100,
+ "pool": 915,
+ "rule": "sha256(seed:random:task) ascending, first N passing the gate",
+ "excluded": [
+  "hunspell/arvo_52195",
+  "igraph/arvo_29408",
+  "md4c/arvo_31332",
+  "libsndfile/arvo_27503",
+  "libssh2/arvo_65212"
+ ],
+ "rejected": [
+  [
+   "libcoap/arvo_26371",
+   "HF missing ['crash.log']"
+  ]
+ ],
+ "list_sha256": "8acd0cc32c7a457f3d5e0dc478a14aea07113d55de71806844af43e790317118",
+ "tasks": [
+  {
+   "task": "util-linux/arvo_53149",
+   "project": "util-linux",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "n132/arvo:53149-fix",
+   "fix_changed_lines": 24
+  },
+  {
+   "task": "leptonica/arvo_23433",
+   "project": "leptonica",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "radare2/arvo_13704",
+   "project": "radare2",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 2
+  },
+  {
+   "task": "libavc/oss-fuzz_434978682",
+   "project": "libavc",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:libavc",
+   "fix_changed_lines": 430
+  },
+  {
+   "task": "ghostscript/arvo_55443",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:55443-fix",
+   "fix_changed_lines": 13
+  },
+  {
+   "task": "ghostscript/arvo_45173",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:45173-fix",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "zstd/arvo_44239",
+   "project": "zstd",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:44239-fix",
+   "fix_changed_lines": 35
+  },
+  {
+   "task": "libwebp/oss-fuzz_382816119",
+   "project": "libwebp",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:382816119-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "libavc/oss-fuzz_42536279",
+   "project": "libavc",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42536279-fix",
+   "fix_changed_lines": 14
+  },
+  {
+   "task": "zeek/arvo_55430",
+   "project": "zeek",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:55430-fix",
+   "fix_changed_lines": 11
+  },
+  {
+   "task": "quickjs/oss-fuzz_416299802",
+   "project": "quickjs",
+   "id_kind": "oss-fuzz",
+   "language": "c",
+   "build_image": "cybergym/e2e:quickjs",
+   "fix_changed_lines": 3856
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537665",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537665-fix",
+   "fix_changed_lines": 2
+  },
+  {
+   "task": "qpdf/oss-fuzz_42535152",
+   "project": "qpdf",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42535152-fix",
+   "fix_changed_lines": 53
+  },
+  {
+   "task": "yara/arvo_3848",
+   "project": "yara",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 19
+  },
+  {
+   "task": "libdwarf/oss-fuzz_437060549",
+   "project": "libdwarf",
+   "id_kind": "oss-fuzz",
+   "language": "c",
+   "build_image": "cybergym/e2e:libdwarf",
+   "fix_changed_lines": 18
+  },
+  {
+   "task": "wireshark/arvo_5914",
+   "project": "wireshark",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 657
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537562",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537562-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "opensc/arvo_64898",
+   "project": "opensc",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:64898-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "opensc/arvo_20131",
+   "project": "opensc",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 2
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42538238",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42538238-fix",
+   "fix_changed_lines": 68
+  },
+  {
+   "task": "mruby/arvo_65996",
+   "project": "mruby",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "libraw/arvo_46244",
+   "project": "libraw",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:46244-fix",
+   "fix_changed_lines": 10
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537564",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537564-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "harfbuzz/arvo_58662",
+   "project": "harfbuzz",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:58662-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "h2o/arvo_2623",
+   "project": "h2o",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 97
+  },
+  {
+   "task": "opensc/oss-fuzz_447805091",
+   "project": "opensc",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:opensc",
+   "fix_changed_lines": 15
+  },
+  {
+   "task": "mruby/arvo_45192",
+   "project": "mruby",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:45192-fix",
+   "fix_changed_lines": 2
+  },
+  {
+   "task": "libavc/arvo_58278",
+   "project": "libavc",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:58278-fix",
+   "fix_changed_lines": 25
+  },
+  {
+   "task": "boringssl/arvo_9808",
+   "project": "boringssl",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "ghostscript/oss-fuzz_399390672",
+   "project": "ghostscript",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:ghostscript",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "yara/arvo_38952",
+   "project": "yara",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:38952-fix",
+   "fix_changed_lines": 18
+  },
+  {
+   "task": "mruby/arvo_52724",
+   "project": "mruby",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:52724-fix",
+   "fix_changed_lines": 16
+  },
+  {
+   "task": "libxml2/oss-fuzz_420638555",
+   "project": "libxml2",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:libxml2",
+   "fix_changed_lines": 13
+  },
+  {
+   "task": "mruby/arvo_62500",
+   "project": "mruby",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "fluent-bit/arvo_51132",
+   "project": "fluent-bit",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 2
+  },
+  {
+   "task": "upx/arvo_66287",
+   "project": "upx",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:66287-fix",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "ghostscript/arvo_55898",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:55898-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "ghostscript/arvo_44258",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:44258-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "binutils/arvo_55933",
+   "project": "binutils",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:55933-fix",
+   "fix_changed_lines": 33
+  },
+  {
+   "task": "c-blosc2/arvo_31705",
+   "project": "c-blosc2",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "upx/arvo_65765",
+   "project": "upx",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:65765-fix",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "ghostscript/arvo_42616",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:42616-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "libplist/arvo_44089",
+   "project": "libplist",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 11
+  },
+  {
+   "task": "libvips/arvo_39481",
+   "project": "libvips",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:39481-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "binutils/arvo_40683",
+   "project": "binutils",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:40683-fix",
+   "fix_changed_lines": 520
+  },
+  {
+   "task": "libxml2/arvo_61337",
+   "project": "libxml2",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "cpython3/arvo_61721",
+   "project": "cpython3",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:61721-fix",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537669",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537669-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "libaom/arvo_10574",
+   "project": "libaom",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 23
+  },
+  {
+   "task": "libheif/arvo_61718",
+   "project": "libheif",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:61718-fix",
+   "fix_changed_lines": 20
+  },
+  {
+   "task": "harfbuzz/arvo_38878",
+   "project": "harfbuzz",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:38878-fix",
+   "fix_changed_lines": 13
+  },
+  {
+   "task": "arrow/arvo_63679",
+   "project": "arrow",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:63679-fix",
+   "fix_changed_lines": 53
+  },
+  {
+   "task": "upx/arvo_65510",
+   "project": "upx",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:65510-fix",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "libheif/oss-fuzz_42536646",
+   "project": "libheif",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42536646-fix",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "ghostscript/arvo_47157",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:47157-fix",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537686",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537686-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "mruby/oss-fuzz_440058794",
+   "project": "mruby",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:mruby",
+   "fix_changed_lines": 43
+  },
+  {
+   "task": "fluent-bit/arvo_26327",
+   "project": "fluent-bit",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 14
+  },
+  {
+   "task": "libavc/arvo_58190",
+   "project": "libavc",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:58190-fix",
+   "fix_changed_lines": 11
+  },
+  {
+   "task": "librawspeed/arvo_5256",
+   "project": "librawspeed",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "harfbuzz/arvo_4099",
+   "project": "harfbuzz",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "readstat/oss-fuzz_420198855",
+   "project": "readstat",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:readstat",
+   "fix_changed_lines": 13
+  },
+  {
+   "task": "libxml2/oss-fuzz_417247563",
+   "project": "libxml2",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:libxml2",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "binutils/arvo_52228",
+   "project": "binutils",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:52228-fix",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "libhevc/arvo_23197",
+   "project": "libhevc",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 25
+  },
+  {
+   "task": "mongoose/arvo_51757",
+   "project": "mongoose",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:51757-fix",
+   "fix_changed_lines": 53
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42538574",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42538574-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "fluent-bit/arvo_26345",
+   "project": "fluent-bit",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 39
+  },
+  {
+   "task": "libxml2/arvo_57469",
+   "project": "libxml2",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "selinux/arvo_43209",
+   "project": "selinux",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "n132/arvo:43209-fix",
+   "fix_changed_lines": 6
+  },
+  {
+   "task": "hdf5/arvo_56076",
+   "project": "hdf5",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 817
+  },
+  {
+   "task": "opensc/arvo_64522",
+   "project": "opensc",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:64522-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "upx/arvo_66064",
+   "project": "upx",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:66064-fix",
+   "fix_changed_lines": 43
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537730",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537730-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "libxaac/arvo_63564",
+   "project": "libxaac",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:63564-fix",
+   "fix_changed_lines": 13
+  },
+  {
+   "task": "ghostscript/arvo_42298",
+   "project": "ghostscript",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:42298-fix",
+   "fix_changed_lines": 9
+  },
+  {
+   "task": "mruby/arvo_49259",
+   "project": "mruby",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 2
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537641",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537641-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "binutils/arvo_51010",
+   "project": "binutils",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:51010-fix",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "binutils/arvo_18615",
+   "project": "binutils",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "boringssl/arvo_55556",
+   "project": "boringssl",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 27
+  },
+  {
+   "task": "libwebp/oss-fuzz_447958064",
+   "project": "libwebp",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:libwebp",
+   "fix_changed_lines": 45
+  },
+  {
+   "task": "assimp/arvo_33238",
+   "project": "assimp",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:33238-fix",
+   "fix_changed_lines": 6
+  },
+  {
+   "task": "binutils/arvo_47101",
+   "project": "binutils",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:47101-fix",
+   "fix_changed_lines": 9
+  },
+  {
+   "task": "libxml2/arvo_57284",
+   "project": "libxml2",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_385167047",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:385167047-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42537584",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42537584-fix",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "openjpeg/arvo_47500",
+   "project": "openjpeg",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:8eda74a11e800aead5a041ee479a65b33dab3150d6e89e5694e2b6eb27be98fc",
+   "fix_changed_lines": 5
+  },
+  {
+   "task": "mruby/arvo_56991",
+   "project": "mruby",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 8
+  },
+  {
+   "task": "libxaac/arvo_62261",
+   "project": "libxaac",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:62261-fix",
+   "fix_changed_lines": 37
+  },
+  {
+   "task": "libsndfile/arvo_26026",
+   "project": "libsndfile",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_438780119",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:ffmpeg",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "libxaac/arvo_62183",
+   "project": "libxaac",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "n132/arvo:62183-fix",
+   "fix_changed_lines": 128
+  },
+  {
+   "task": "kamailio/oss-fuzz_391689728",
+   "project": "kamailio",
+   "id_kind": "oss-fuzz",
+   "language": "c",
+   "build_image": "cybergym/e2e:kamailio",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_42538351",
+   "project": "ffmpeg",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:42538351-fix",
+   "fix_changed_lines": 4
+  },
+  {
+   "task": "c-blosc2/arvo_27934",
+   "project": "c-blosc2",
+   "id_kind": "arvo",
+   "language": "c++",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 3
+  },
+  {
+   "task": "fluent-bit/arvo_30090",
+   "project": "fluent-bit",
+   "id_kind": "arvo",
+   "language": "c",
+   "build_image": "gcr.io/oss-fuzz-base/base-builder@sha256:fba1033c6a64433642ab97b6ea987ddaa9938e06596c6cace1c786130fc1461b",
+   "fix_changed_lines": 7
+  },
+  {
+   "task": "libwebp/oss-fuzz_438294033",
+   "project": "libwebp",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:libwebp",
+   "fix_changed_lines": 112
+  },
+  {
+   "task": "ghostscript/oss-fuzz_401846983",
+   "project": "ghostscript",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/e2e:ghostscript",
+   "fix_changed_lines": 26
+  },
+  {
+   "task": "uriparser/oss-fuzz_389731913",
+   "project": "uriparser",
+   "id_kind": "oss-fuzz",
+   "language": "c++",
+   "build_image": "cybergym/oss-fuzz:389731913-fix",
+   "fix_changed_lines": 3
+  }
+ ]
+}
