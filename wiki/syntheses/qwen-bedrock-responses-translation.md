@@ -19,7 +19,7 @@ Part of [[wiki/syntheses/benchmark-evals-codebase-guide]]. **Status: translator 
 | `qwen3-32b-v1:0` on `/responses` | 404 model_not_found |
 | Both on `/chat/completions` | work, including tool calls and tool-result turns, streaming with a final usage chunk |
 
-Cause: Bedrock decides per model which API formats it serves. Codex speaks only Responses, so for these models a translation is needed. Neither the models nor Codex are at fault. Usage from Bedrock's chat route carries no cached-token field (observed on both), so cache share cannot be measured on this route.
+Cause: Bedrock decides per model which API formats it serves. Codex speaks only Responses, so for these models a translation is needed. Neither the models nor Codex are at fault. Usage from Bedrock's chat route carried no cached-token field for `qwen3-coder-next` and `qwen3-32b-v1:0`, so cache share cannot be measured for them; `qwen3-coder-30b-a3b-v1:0` did report cached tokens (see section 3).
 
 ## 2. Design
 - New module `tools/responses_chat.py` (pure functions, no network): `responses_to_chat`, `chat_to_responses`, `StreamTranslator` (Chat chunks to Responses SSE events).
@@ -32,7 +32,7 @@ Cause: Bedrock decides per model which API formats it serves. Codex speaks only 
 |---|---|
 | 12 unit tests (`tests/test_responses_chat.py`): message and tool mapping, custom tools both ways, usage, streaming order, name-before-arguments chunks, parallel calls, truncation | pass |
 | 2 end-to-end tests (`tests/test_shim_chat_mode.py`): Codex-style call through the real shim to a fake chat upstream, stream and non-stream, metering, missing-usage estimate | pass |
-| Real Bedrock, 3-turn streaming conversation through the shim on a spare port, tool call then result then another call, with an echoed reasoning item and a freeform tool declared, for each model | `qwen3-coder-next` and `qwen3-32b-v1:0` both pass: tool calls come back as proper `function_call` items, final text correct, usage metered, 0 errors, about $0.0007 and $0.0005 at placeholder prices |
+| Real Bedrock, 3-turn streaming conversation through the shim on a spare port, tool call then result then another call, with an echoed reasoning item and a freeform tool declared, for each model | `qwen3-coder-next`, `qwen3-32b-v1:0` and (2026-11-01, later) `qwen3-coder-30b-a3b-v1:0` all pass: tool calls come back as proper `function_call` items, final text correct, usage metered, 0 errors, about $0.0007, $0.0005 and $0.0006 at placeholder prices. Only the 30B coder model reported cached tokens (384 of 417 input on the second turn), one small request, not a hit-rate measurement |
 
 ## 4. Not yet done
 - No real Codex run; no e2e task; nothing on the cluster. Streaming events were checked by our own client, not by Codex itself.

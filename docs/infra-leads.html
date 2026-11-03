@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Infra leads update</title>
+<style>
+:root{--bg:#f7f8fa;--panel:#fff;--fg:#1b2430;--muted:#5d6877;--line:#dde2ea;--accent:#2457a6;--accent-soft:#e6eefb;
+--pass:#17803d;--pass-bg:#e3f4ea;--fail:#b3261e;--fail-bg:#fbe6e4;--warn:#8a5a00;--warn-bg:#fff3d6;--skip:#5d6877;--skip-bg:#eceff3;
+--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171f;--panel:#1a212b;--fg:#e4e9f0;--muted:#9aa6b6;--line:#2b3441;--accent:#7fb0ff;--accent-soft:#1e2c44;
+--pass:#5fd08a;--pass-bg:#16301f;--fail:#ff8f86;--fail-bg:#3a1b19;--warn:#f0c46a;--warn-bg:#33290f;--skip:#9aa6b6;--skip-bg:#252d39;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12171f;--panel:#1a212b;--fg:#e4e9f0;--muted:#9aa6b6;--line:#2b3441;--accent:#7fb0ff;--accent-soft:#1e2c44;
+--pass:#5fd08a;--pass-bg:#16301f;--fail:#ff8f86;--fail-bg:#3a1b19;--warn:#f0c46a;--warn-bg:#33290f;--skip:#9aa6b6;--skip-bg:#252d39;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--font);margin:0;padding:20px max(16px,env(safe-area-inset-right,0px)) 56px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:18px;min-width:0}
+a{color:var(--accent)}
+h1{font-size:1.5rem;line-height:1.25;margin:0;text-wrap:balance}
+h2{font-size:1.1rem;margin:0 0 10px}
+h3{font-size:.95rem;margin:14px 0 6px}
+p{margin:0 0 8px}
+.crumbs{font-size:.85rem;color:var(--muted)}
+.sub{color:var(--muted);margin:4px 0 0;font-size:.95rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 16px;margin:0}
+.facts dt{font-size:.75rem;color:var(--muted);margin:0}
+.facts dd{margin:1px 0 0;font-size:1.25rem;font-weight:600;font-variant-numeric:tabular-nums}
+.facts small{display:block;font-size:.78rem;font-weight:400;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap}
+td.n,th.n{text-align:right}
+.tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.78rem;font-weight:600}
+.ok{background:var(--pass-bg);color:var(--pass)}.bad{background:var(--fail-bg);color:var(--fail)}.mid{background:var(--warn-bg);color:var(--warn)}.na{background:var(--skip-bg);color:var(--skip)}
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
+.timeline li{position:relative;padding:0 0 14px 16px}
+.timeline li::before{content:"";position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.timeline .when{font-size:.78rem;color:var(--muted)}
+.timeline b{display:block}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+ul{margin:0;padding-left:20px}li{margin:2px 0}
+.note{font-size:.85rem;color:var(--muted)}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--fg);font:12px var(--font)}svg .m{fill:var(--muted)}
+svg rect.b{fill:var(--accent-soft);stroke:var(--accent)}svg rect.w{fill:var(--panel);stroke:var(--line)}
+svg line,svg path{stroke:var(--muted);fill:none}svg marker path{fill:var(--muted);stroke:none}
+code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="crumbs"><a href="trajectories/index.html">Run viewer</a> / Infra leads</div>
+  <h1>Infra leads update: from first pilot to an autoscaling cluster</h1>
+  <p class="sub">CyberGym-E2E benchmarking of open models. Status as of 1 November 2026.</p>
+</header>
+
+<section class="panel" aria-label="At a glance">
+  <dl class="facts">
+    <div><dt>Runs recorded</dt><dd>81<small>9 models, 5 tasks</small></dd></div>
+    <div><dt>Latest scale test</dt><dd>19 of 20<small>tasks that ran passed (1 stopped by us)</small></dd></div>
+    <div><dt>Cost of that test</dt><dd>about $22<small>about $0.92 per passed task</small></dd></div>
+    <div><dt>Worker idle shutdown</dt><dd>3 min<small>workers terminate when idle</small></dd></div>
+    <div><dt>Next study</dt><dd>100 tasks<small>e2e, Qwen, Codex</small></dd></div>
+  </dl>
+</section>
+
+<section class="panel">
+  <h2>How we got here</h2>
+  <ol class="timeline">
+    <li><span class="when">30 Sep – 2 Oct</span><b>Pilot on one task</b>
+      Claude Code on a Mac through a local metering proxy ("shim") with free models: none solved it. We proved the harness with a scripted oracle run (all four stages pass) and added dollar caps to the shim. First real result with glm-5.3-flash: patch-only solved. Moving to an x86 cloud VM cut the oracle run from 17.2 to 3.9 minutes.</li>
+    <li><span class="when">3 – 13 Oct</span><b>Same five tasks, eight models</b>
+      Seven batches, each model run patch-only and end-to-end under the same limits ($10 and 90 minutes per run). Patch-only is close to saturated; end-to-end separates the models. We also found ways a run can look valid but not be (see below).</li>
+    <li><span class="when">16 – 18 Oct</span><b>Harness comparison designed</b>
+      The shim gained an OpenAI Responses route so Codex can be compared with Claude Code. A GLM-5.3 comparison on four tasks ran; a larger three-model study is drafted but not run.</li>
+    <li><span class="when">23 – 27 Oct</span><b>Scaling on AWS</b>
+      Replica of the runner on EC2. Found that CPU, not memory, limits parallelism (8 to 10 slots comfortable on 16 vCPUs). Built and tested a two-VM Ray cluster. Kimi K3 end-to-end on 22 tasks: 11 passed, 8 stopped by spend caps.</li>
+    <li><span class="when">29 – 31 Oct</span><b>Autoscaling and shared state</b>
+      A worker machine image, a Ray autoscaler on the existing head VM, a hosted Postgres that every task writes results and artifacts into, and a 30-task test of the whole path. Details below.</li>
+    <li><span class="when">31 Oct – 1 Nov</span><b>Next study and the Qwen question</b>
+      The planned 100-task Qwen run hit a model-availability gap on Bedrock; a translation layer in the shim closes it. Details below.</li>
+  </ol>
+</section>
+
+<section class="panel">
+  <h2>Model comparison on the five-task set</h2>
+  <p class="note">Patch-only solved = patch passes tests and the ground-truth PoC no longer crashes. e2e S1–S3 = valid PoC and patch. e2e S4 = also found <i>the</i> bug. Out of 5 tasks each; the free Mac models are left out. Generated from the per-run pages in the research wiki.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th class="n">Patch-only solved</th><th class="n">e2e S1–S3</th><th class="n">e2e S4</th><th class="n">Cost, all runs</th></tr></thead>
+    <tbody>
+      <tr><td>glm-5.3-flash</td><td class="n">5</td><td class="n">4</td><td class="n">2</td><td class="n">$2.45</td></tr>
+      <tr><td>deepseek-v4.1-flash</td><td class="n">5</td><td class="n">5</td><td class="n">3</td><td class="n">$1.18</td></tr>
+      <tr><td>qwen3.8-flash</td><td class="n">5</td><td class="n">3</td><td class="n">1</td><td class="n">$5.52</td></tr>
+      <tr><td>qwen3.8-27b</td><td class="n">5</td><td class="n">2</td><td class="n">2</td><td class="n">$4.98</td></tr>
+      <tr><td>nemotron-3-super</td><td class="n">2</td><td class="n">0</td><td class="n">0</td><td class="n">$1.78</td></tr>
+      <tr><td>kimi-k3</td><td class="n">5</td><td class="n">4</td><td class="n">3</td><td class="n">$32.39</td></tr>
+      <tr><td>minimax-m3</td><td class="n">5</td><td class="n">2</td><td class="n">2</td><td class="n">$10.85</td></tr>
+    </tbody>
+  </table></div>
+  <h3>What to read into it</h3>
+  <ul>
+    <li>Five tasks, one run per pair: a pattern to follow up, not a ranking.</li>
+    <li>nemotron-3-super mostly failed on malformed tool calls, not on the security task itself.</li>
+    <li>Validity checks we now run before any study: a bug file with a later modification time than the rest, a PoC without a patch (graded as no patch), a ground-truth PoC sitting inside the source archive, wording in build scripts that names the bug, and the endpoint's context-window limit.</li>
+    <li>Prompt-cache behaviour differs a lot between providers and moves cost by several times.</li>
+  </ul>
+  <p>Per-run trajectories are in the <a href="trajectories/index.html">run viewer</a>.</p>
+</section>
+
+<section class="panel">
+  <h2>The cluster as it stands</h2>
+  <svg viewBox="0 0 760 250" role="img" aria-label="Head machine with autoscaler, shim and Postgres; autoscaled workers each with shim and Docker; Postgres receives results from all nodes">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z"/></marker></defs>
+    <rect class="b" x="20" y="20" width="300" height="210" rx="8"/>
+    <text x="34" y="42" font-weight="600">Head (always on)</text>
+    <rect class="w" x="34" y="56" width="130" height="34" rx="5"/><text x="44" y="77">Ray + autoscaler</text>
+    <rect class="w" x="176" y="56" width="130" height="34" rx="5"/><text x="186" y="77">Task slots (10)</text>
+    <rect class="w" x="34" y="102" width="130" height="34" rx="5"/><text x="44" y="123">Metering shim</text>
+    <rect class="w" x="176" y="102" width="130" height="34" rx="5"/><text x="186" y="123">Docker + firewall</text>
+    <rect class="w" x="34" y="150" width="272" height="64" rx="5"/>
+    <text x="44" y="172" font-weight="600">Postgres</text>
+    <text class="m" x="44" y="190">results, artifacts, heartbeats</text>
+    <text class="m" x="44" y="206">daily backup still to be scheduled</text>
+    <rect class="b" x="440" y="20" width="300" height="100" rx="8"/>
+    <text x="454" y="42" font-weight="600">Worker (launched on demand)</text>
+    <text class="m" x="454" y="62">same image, same size as the head</text>
+    <text x="454" y="84">shim + Docker + 10 task slots</text>
+    <text class="m" x="454" y="104">terminated after idle, up to 3 workers</text>
+    <rect class="w" x="440" y="140" width="300" height="90" rx="8" stroke-dasharray="5 4"/>
+    <text class="m" x="454" y="165">more workers, as demand needs</text>
+    <text class="m" x="454" y="185">capped by the account's vCPU quota</text>
+    <text class="m" x="454" y="205">(true limit not yet confirmed)</text>
+    <path d="M320 70 H430" marker-end="url(#ar)"/><text class="m" x="338" y="62">launch / join</text>
+    <path d="M440 98 C380 120 340 150 310 170" marker-end="url(#ar)"/><text class="m" x="380" y="150">results</text>
+  </svg>
+  <p class="note">Each task runs in its own containers behind a firewall; the shim meters every model call and enforces dollar caps. Workers do not keep results: a task is only finished once its results are read back from Postgres.</p>
+</section>
+
+<section class="two">
+  <div class="panel">
+    <h2>30-task test of the full path</h2>
+    <p>Thirty never-tried, patch-only tasks, the head plus autoscaled workers.</p>
+    <table><tbody>
+      <tr><td>Tasks that ran</td><td class="n">20</td></tr>
+      <tr><td>Passed</td><td class="n"><span class="tag ok">19</span></td></tr>
+      <tr><td>Stopped by us after 46 minutes</td><td class="n"><span class="tag na">1</span></td></tr>
+      <tr><td>Not started (infrastructure bug, fixed; re-run pending)</td><td class="n"><span class="tag na">10</span></td></tr>
+      <tr><td>Passed task time (min / median / max)</td><td class="n">3.5 / 8.4 / 16.0 min</td></tr>
+      <tr><td>Estimated wall time, alone vs autoscaled</td><td class="n">about 5 h vs about 20 min</td></tr>
+    </tbody></table>
+    <h3>What it showed</h3>
+    <ul>
+      <li>Two workers launched within about 40 seconds and joined in about 2 minutes; tasks split evenly (10 per node).</li>
+      <li>Every result that reached Postgres had been read back successfully, which is the condition for shutting workers down.</li>
+      <li>10 tasks never started because of a first-use race when several processes create the local state database at once. These were infrastructure, not task results. It was reproduced, fixed with a retry, and verified over 200 rounds.</li>
+      <li>Per-task cost came out higher than first estimated.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h2>Qwen on Bedrock under Codex</h2>
+    <p>The next study is 100 fixed e2e tasks with Qwen3.8-27B and Codex.</p>
+    <ul>
+      <li><b>Gap:</b> Qwen3.8-27B is not on Bedrock in any of 8 regions checked. The Bedrock Qwen models are all Qwen3-generation and serve only the Chat Completions format, while Codex speaks the Responses format.</li>
+      <li><b>Fix:</b> a translation layer in the shim, off by default. 14 automated tests pass.</li>
+      <li><b>Real check:</b> a three-turn streaming tool-call conversation passed on three Bedrock Qwen models for under $0.002 in total.</li>
+      <li><b>Caveat:</b> they are stand-ins, older than the 3.8-27B, and the layer is our own code between the harness and the model.</li>
+      <li>Only one of the three reports cached tokens, so cache share can only be measured for that one.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Open decisions and risks</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Item</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td>Which model for the 100-task study</td><td><span class="tag mid">decision</span> Bedrock Qwen3 stand-in, or ask for 3.8-27B access</td></tr>
+      <tr><td>Budget and real vCPU quota</td><td><span class="tag mid">needs owner</span> quota was relayed as 40, but 48 vCPUs have run at once</td></tr>
+      <tr><td>Sample of 100 tasks</td><td><span class="tag mid">decision</span> reuse the stratified order from the draft study; many tasks need 3 to 10 GB images, a few around 50 GB</td></tr>
+      <tr><td>Real Codex run through the translation layer</td><td><span class="tag na">not yet run</span> next smoke test</td></tr>
+      <tr><td>Re-run of the 10 tasks that never started</td><td><span class="tag na">on hold</span> until the larger run is agreed</td></tr>
+      <tr><td>Postgres backup schedule and off-machine copy</td><td><span class="tag na">open</span> manual backups only</td></tr>
+      <tr><td>Per-run usage and a cluster-wide budget in Postgres</td><td><span class="tag na">built, not wired</span> the shim still caps per node</td></tr>
+      <tr><td>Per-task time cap for outliers</td><td><span class="tag na">not built</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer class="note">Source: the research wiki (run pages, scaling and autoscaler notes). Figures marked "about" are estimates or rounded.</footer>
+</div>
+</body>
+</html>

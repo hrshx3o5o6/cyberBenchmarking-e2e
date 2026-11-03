@@ -306,3 +306,30 @@ Created the local branch `vm-live-2026-10-30` in the clone of the owner's repo: 
 
 ## [2026-11-01] experiment | Qwen on Bedrock under Codex: availability check and translation layer
 Qwen3.8-27B is not in the Bedrock catalog (6 regions checked); the Bedrock Qwen models serve only Chat Completions while Codex needs Responses. Wrote and tested a Responses-to-Chat translator and a shim switch (`UPSTREAM_API=chat`): 12 unit and 2 end-to-end tests pass; real Bedrock multi-turn streaming test passed for `qwen3-coder-next` and `qwen3-32b-v1:0` (under $0.002). Not deployed; code lives in a local copy outside Git. Pages: [[wiki/syntheses/qwen-bedrock-responses-translation]], [[wiki/syntheses/benchmark-evals-codebase-guide]], index.
+
+## [2026-11-01] experiment | Translation layer check on qwen3-coder-30b-a3b
+Same 3-turn streaming test through the translating shim on real Bedrock: passed, about $0.0006. Unlike the other two Qwen models it reported cached tokens (384 of 417 on turn 2). Page updated: [[wiki/syntheses/qwen-bedrock-responses-translation]].
+
+## [2026-11-01] synthesis | How a run works on the VM
+New runbook page: what is executed from a Claude Code session to a finished task (ssh, services, manifest and preflight, driver, per-task steps, scaling, monitoring). Page: [[wiki/syntheses/how-a-run-works-on-the-vm]].
+
+## [2026-11-02] experiment | PR branch prepared for the owner's repo (local only)
+Built a single-commit local branch `pr/postgres-store-and-race-fix` off the owner's `main` (the SQLite first-use race fix plus the optional shared Postgres store; 9 files, +1,361/-39; no `tools/`). Full suite on a throwaway local Postgres: 51 passed (34 passed, 17 DB tests skipped without a database URL); secret scan clean. Not pushed. The shim and autoscaler scripts are left for a later PR.
+
+## [2026-11-02] experiment | Pre-stop checks and backup of the head VM; stop and bring-up runbook
+The VM owner confirmed the VM can be stopped when idle. Checked: no run, no task containers, no EC2 workers (boto3 on the VM; the `aws` CLI is not installed there). New Postgres backup copied to the Mac and checksum-verified. Shim total spend 17.483334 of a 20 cap. Runbook: [[wiki/syntheses/vm-stop-and-bring-up-runbook]].
+
+## [2026-11-02] synthesis | Model registry design page
+Design for choosing a model and provider by a string (`model@provider`): where it plugs in (manifest key, worker key request, shim routing by key), provider profiles plus optional model entries, resolution order with no run-time guessing, `models find` and `models probe`, audit trail, shim changes, build order, open questions. Nothing built. Page: [[wiki/syntheses/model-registry-design]].
+
+## [2026-11-02] synthesis | Model registry design: Vertex AI added to version 1
+Access to a DeepSeek model on Vertex AI was granted (OpenAI-compatible chat endpoint, short-lived Google token). Design page updated with a `vertex` profile (auth style `google_adc`, token refreshed by the shim, chat format so the Responses adapter is needed), credential handling cautions and open questions. Nothing built or called. Page: [[wiki/syntheses/model-registry-design]].
+
+## [2026-11-02] synthesis | Switching by hand, and ideas for a plug-and-play layer
+Two new pages: [[wiki/syntheses/switching-provider-and-harness-by-hand]] (the current manual procedure and its pain points; Claude Code wiring and firewall behaviour for non-Bedrock hosts marked unverified) and [[wiki/syntheses/plug-and-play-layer-ideas]] (study file, commands, abstractions, build order; ideas only, to return to). Nothing built.
+
+## [2026-11-02] experiment | Vertex AI DeepSeek V4.1 Flash probe from the Mac
+After installing gcloud and logging in as the granted account, probed the OpenAI-compatible endpoint: plain, tool call and streamed tool-result turn pass on Chat Completions with a usage chunk; `/responses` gives 404, so the Responses-to-Chat adapter is needed for Codex. No cached-token field seen; price unknown. Under $0.001. Recorded in [[wiki/syntheses/model-registry-design]].
+
+## [2026-11-03] synthesis | The metering shim, step by step
+New walkthrough page for the shim: purpose, start-up settings and refusals, routes, one model call from authentication to the log line, failure behaviour, limits. Written from the code (local copy with the chat-mode change). Page: [[wiki/syntheses/the-shim-step-by-step]]. The upstream-harness file-by-file page still needs the VM.

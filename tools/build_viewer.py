@@ -270,6 +270,7 @@ CSS = r"""
 body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--font);margin:0;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .wrap{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:18px;min-width:0}
 a{color:var(--accent)}h1{font-size:1.45rem;line-height:1.25;margin:0;text-wrap:balance}h2{font-size:1.05rem;margin:0 0 8px}
+header.top{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}a.btn{display:inline-block;border:1px solid var(--accent);border-radius:6px;padding:6px 14px;font-weight:600;font-size:.9rem;text-decoration:none;color:var(--accent);background:var(--accent-soft);white-space:nowrap}a.btn:hover,a.btn:focus-visible{background:var(--accent);color:var(--panel);outline:none}
 .crumbs{font-size:.85rem;color:var(--muted)}.sub{color:var(--muted);margin:2px 0 0;font-size:.92rem}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 16px;margin:0}
@@ -521,8 +522,9 @@ def build_index(rows):
     for row in rows:
         by_task.setdefault(row["r"]["task"], []).append(row)
     h = head("CyberGym-E2E run viewer")
-    h += ('<header><h1>CyberGym-E2E run viewer</h1><p class="sub">One page per agent run: the prompt, every model step and tool call, and the grading outcome. '
-          '%d runs across %d tasks. <a href="how-to-read.html">How to read these pages</a>.</p></header>' % (len(rows), len(by_task)))
+    h += ('<header class="top"><div><h1>CyberGym-E2E run viewer</h1><p class="sub">One page per agent run: the prompt, every model step and tool call, and the grading outcome. '
+          '%d runs across %d tasks. <a href="how-to-read.html">How to read these pages</a>.</p></div>'
+          '<a class="btn" href="../infra-leads.html">Infra leads</a></header>' % (len(rows), len(by_task)))
     h += '<div class="banner info"><b>Read the Note column.</b> Some tasks leak the answer and some runs ended for reasons that say nothing about the model. Flagged runs repeat the explanation in a banner on their page.</div>'
     h += '<nav class="jump">' + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
     for t, rs in by_task.items():
