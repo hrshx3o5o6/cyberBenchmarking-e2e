@@ -48,8 +48,9 @@ Compared with a stratified draw (100 projects, one task each, 42 shared images, 
 Taken from the validity mechanisms found earlier ([[wiki/syntheses/cross-model-observations]]): compare each task's PoC with the files in its source tarball; scan helper and build scripts for wording that names the bug; list file modification times for the later-modified marker; read the endpoint's context-window limit and check it is large enough for the harness prompt. Any task that fails goes through the replacement rule above.
 
 ## 5. Capacity, time and cost (arithmetic, not measurements)
+Full analysis, with the measured context sizes from the earlier Qwen3.8-27B runs (median call about 85,000 tokens, largest about 172,000, 23% of calls over 131,072) and the estimated bottlenecks: [[wiki/syntheses/qwen27b-serving-capacity-analysis]]. In short: output speed is the likely limit; for 100 e2e tasks the generation alone is roughly 6 to 38 hours on one A100 (estimate); at most about 3 to 6 agents fit in the cache memory at once.
 - **Time:** 100 tasks of up to 90 minutes is up to 150 slot-hours. At the head's 10 slots that is up to about 15 hours; with autoscaled workers (30 slots) about 5 hours. Earlier Qwen3.8-27B e2e runs had a median of about 91 minutes, so many tasks will run to the limit.
-- **The real limit is probably the model server:** the endpoint is one A100 with one replica in Singapore, called from a VM in Virginia. Concurrent agents queue behind it. To be measured with a concurrency test before the full run (section 6, gate 5).
+- **The real limit is probably the model server (see the analysis page):** the endpoint is one A100 with one replica in Singapore, called from a VM in Virginia. Concurrent agents queue behind it. To be measured with a concurrency test before the full run (section 6, gate 5).
 - **Where the credential is:** only nodes holding a Google credential can call Vertex; today that would be the head only (10 slots), until a service account or federation exists.
 - **Cost:** not per-token. The endpoint's hourly price on the project times the hours it stays deployed. Not known to us.
 - **Images:** 67 non-shared images to pull; the head holds 227 GB of images today; fresh workers would hold only the two shared base images. See [[wiki/syntheses/how-a-run-works-on-the-vm]] for why workers do not pull images themselves.
@@ -72,7 +73,7 @@ Qwen3.8-27B through OpenRouter (used in earlier batches, provider price swings o
 |---|---|
 | Per-run cap: token cap instead of dollars | proposed, not agreed |
 | Total budget and who approves it | open |
-| Endpoint replicas and hours it stays up | with the owner |
+| Endpoint replicas, GPU type, context length (at least 131,072) and hours it stays up | with the owner; the endpoint currently has a 2,048-token context and no tool calling |
 | Credential path (service account or federation) | requested |
 | Whether to keep the five pilot tasks excluded | proposed: yes |
 
