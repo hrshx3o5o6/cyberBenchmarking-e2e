@@ -20,12 +20,12 @@ It listens on the Docker gateway address of the internal network (the same addre
 ## The settings it reads at start (environment)
 | Group | Variables |
 |---|---|
-| Where to send calls | `UPSTREAM` (base URL, may carry a path prefix), `TARGET_MODEL` (forced on every call), `UPSTREAM_KEY` or `UPSTREAM_KEY_FILE`, `UPSTREAM_AUTH` (`x-api-key`, `bearer` or `both`) |
-| Format | `UPSTREAM_API=chat` (translate Responses calls to Chat Completions), `STRIP_FIELDS`, `RESPONSES_INPUT_FIX`, `PROVIDER_ORDER` (OpenRouter), `COUNT_CACHE_CREATION` |
+| Where to send calls | `UPSTREAM` (base URL, may carry a path prefix), `TARGET_MODEL` (forced on every call), `UPSTREAM_KEY` or `UPSTREAM_KEY_FILE`, `UPSTREAM_AUTH` (`x-api-key`, `bearer`, `both` or `google_adc`: a short-lived Google token from Application Default Credentials, fetched at start, cached and refreshed `GOOGLE_TOKEN_MARGIN_S` (default 300) seconds before expiry, sent as the bearer token plus the quota project header; needs the `google-auth` package, never logged) |
+| Format | `UPSTREAM_API` = `responses` (default, pass through), `chat` (translate Responses calls to Chat Completions) or `auto` (decide once, see below), `UPSTREAM_RESPONSES_PATH` and `UPSTREAM_CHAT_PATH` (paths appended to the upstream URL, for endpoints like Vertex's that differ from `/v1/...`), `STRIP_FIELDS`, `RESPONSES_INPUT_FIX`, `PROVIDER_ORDER` (OpenRouter), `COUNT_CACHE_CREATION` |
 | Money | `PRICE_IN_PER_M`, `PRICE_CACHE_PER_M`, `PRICE_OUT_PER_M`, `MAX_SPEND_USD` (per key), `MAX_TOTAL_SPEND_USD`, `TOTAL_START` (spend already used, for restarts) |
 | Other caps | `MAX_REQUESTS`, `MAX_INPUT_TOKENS` (fresh input only), `MAX_CACHE_TOKENS` |
 | Behaviour | `UPSTREAM_SERIAL`, `UPSTREAM_TIMEOUT_STREAM` (seconds of silence tolerated on a stream), `UPSTREAM_TIMEOUT`, `KEYS_FILE` (preload keys on restart), `PORT`, `BIND`, `LOG_FILE`, `MASTER_KEY` |
-**Refuses to start** if: no `TARGET_MODEL`; `MASTER_KEY` shorter than 16 characters; a dollar cap without all three prices; an HTTPS upstream with no real key; or an HTTPS upstream with no per-key cap (no uncapped paid spend, by design).
+**Refuses to start** if: no `TARGET_MODEL`; `UPSTREAM_AUTH` is not one of the four values; `google_adc` cannot get a token; `MASTER_KEY` shorter than 16 characters; a dollar cap without all three prices; an HTTPS upstream with no real key; or an HTTPS upstream with no per-key cap (no uncapped paid spend, by design).
 
 ## Routes
 | Route | Who calls it | What it does |
@@ -41,7 +41,7 @@ It listens on the Docker gateway address of the internal network (the same addre
 ## One model call, step by step (`_forward`)
 1. **Authenticate.** The key presented must exist, else 401.
 2. **Parse and rewrite.** Read the JSON body, remember the original model name (logged as `orig_model`), and overwrite `model` with `TARGET_MODEL`. Drop any `STRIP_FIELDS`. For the Responses route, optionally fix Codex's echoed reasoning items (`strip_encrypted` or `drop_reasoning`). If a provider order is set, add it.
-3. **Translate (chat mode only).** For a Responses call with `UPSTREAM_API=chat`, convert the request to Chat Completions and send to `/v1/chat/completions`.
+3. **Translate (chat route only).** For a Responses call on a chat route, convert the request to Chat Completions and send it to the chat path. With `UPSTREAM_API=auto` the first such call decides once, under a lock, with two tiny calls (Responses; if that says unsupported or not found, a chat call) and pins the result; 5xx, 429, timeouts or both failing pin nothing and the real error is returned. The adapter used is in `/health`, on the key and in every log line.
 4. **Check the caps before sending.** If the key is over its request, token or dollar cap, or the shim is over its total dollar cap, log `cap_hit` and return 400 "shim budget exhausted"; nothing is sent upstream. The per-key dollar cap is the stricter of the shim's own cap and the `max_budget` the worker asked for.
 5. **Send upstream** with the configured auth. A 429 is retried up to 3 more times with 3, 6, 9 seconds of waiting. With `UPSTREAM_SERIAL` on (default for plain HTTP upstreams such as Ollama) calls go one at a time.
 6. **Return the answer.**
@@ -49,7 +49,7 @@ It listens on the Docker gateway address of the internal network (the same addre
    - *Plain:* read the whole body, translate it back if in chat mode, and return it.
 7. **Read usage.** Responses format: `input_tokens` includes cached tokens, so fresh input is input minus cached. Anthropic format: fresh and cache-read are separate fields. If the provider sends a cost figure it is used; otherwise the shim computes it from the price table. In chat mode, if the upstream reports no usage at all, the shim estimates input from the request size so caps still count.
 8. **Account.** Add requests, tokens and spend to the key and to the shim total; count an error if the status is not 200.
-9. **Log one line**: route, alias, original model, stream, number of tools, status, input, cache and output tokens, seconds, cost, how the cost was obtained, running spend and total. On an upstream error, the first 200 characters of the error and, for Responses, only the shapes of the input items, never content.
+9. **Log one line**: route, adapter, alias, original model, stream, number of tools, status, input, cache and output tokens, seconds, cost, how the cost was obtained, running spend and total. On an upstream error, the first 200 characters of the error and, for Responses, only the shapes of the input items, never content.
 
 ## Failure behaviour
 - An upstream exception or timeout returns 502 to the agent and is logged; the shim itself keeps running.
@@ -60,5 +60,5 @@ It listens on the Docker gateway address of the internal network (the same addre
 - **In memory only.** Counters and keys vanish if the shim restarts, unless `KEYS_FILE` and `TOTAL_START` are supplied (`swap_shim.py` does this for a live restart; `start_worker_services.sh` does it for an idle one).
 - **Per node, not cluster-wide.** Every node has its own total; the cluster-wide budget in Postgres is built but not wired to the shim.
 - **One model per process**; changing model means a restart (the registry design replaces this with routing by key).
-- **Token-based providers** with expiring tokens (Google) are not supported yet; the shim only knows static keys.
+- **Google tokens:** supported through `UPSTREAM_AUTH=google_adc`, but only with a credential on the node itself; which credential workers should use is an open question (see [[wiki/syntheses/model-registry-design]], section 5a). The shim exits at start with a clear message if the login or the package is missing.
 - Prices are a manual table; a wrong price means a wrong dollar cap.

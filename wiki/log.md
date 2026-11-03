@@ -333,3 +333,12 @@ After installing gcloud and logging in as the granted account, probed the OpenAI
 
 ## [2026-11-03] synthesis | The metering shim, step by step
 New walkthrough page for the shim: purpose, start-up settings and refusals, routes, one model call from authentication to the log line, failure behaviour, limits. Written from the code (local copy with the chat-mode change). Page: [[wiki/syntheses/the-shim-step-by-step]]. The upstream-harness file-by-file page still needs the VM.
+
+## [2026-11-03] experiment | Shim: automatic Responses/chat detection and configurable upstream paths (local, not deployed)
+Added `UPSTREAM_API=auto` (decide once per process with two tiny calls, pin, never switch, never fall back on 5xx/429/timeouts, show the real error when nothing works), `UPSTREAM_RESPONSES_PATH` and `UPSTREAM_CHAT_PATH` (Vertex needs `/chat/completions`), and the adapter in /health, key info and every log line. 5 new tests plus the earlier 14 pass (19 total, no network). Not tried against a real provider; the VM's live shim is unchanged. Pages: [[wiki/syntheses/model-registry-design]], [[wiki/syntheses/the-shim-step-by-step]].
+
+## [2026-11-03] experiment | Shim: Google token auth (`google_adc`), tested against Vertex through auto mode
+Added `UPSTREAM_AUTH=google_adc` (token from Application Default Credentials, cached, refreshed before expiry, quota-project header, clear start-up failure). 4 new stub-based tests, 23 shim tests pass. Real run from the Mac: shim in auto mode against the Vertex DeepSeek V4.1 Flash endpoint with a Codex-style three-turn streaming client: detection pinned chat (Responses 404, chat 200), all turns 200, tool calls correct, metered, about $0.0005 at placeholder prices. Local only, not deployed. Pages: [[wiki/syntheses/model-registry-design]], [[wiki/syntheses/the-shim-step-by-step]].
+
+## [2026-11-03] experiment | Qwen3.8-27B endpoint on Vertex AI: access check
+The owner shared a self-deployed endpoint (Qwen3.8-27B on one A100 80GB, vLLM 0.25.0). Read its metadata and called it from the Mac: plain chat works through the SDK and an OpenAI-style route; tool calls fail with a 400 because the server was started without auto tool choice and a tool-call parser; reasoning comes inline before a closing think marker. Not usable by an agent harness until redeployed with those flags. A few cents. Page: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
