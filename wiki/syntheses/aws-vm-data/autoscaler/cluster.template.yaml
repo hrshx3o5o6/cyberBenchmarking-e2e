@@ -68,7 +68,15 @@ file_mounts:
   # code and run configuration come from the head, so a worker always runs the same runner code as the driver
   /home/harshav/benchmark-evals/src: {{LOCAL_SRC_DIR}}
   /home/harshav/benchmark-evals/config/{{MANIFEST_NAME}}: {{LOCAL_MANIFEST}}
-  /home/harshav/benchmark-evals/tools/start_worker_services.sh: {{LOCAL_SERVICES_SCRIPT}}
+  # our metering shim, the translation layer, the model registry and the script that starts a shim from it, and the task-data download
+  # (the AMI holds only an older shim; these overwrite it on every new worker)
+  /home/harshav/benchmark-evals/tools/llm_shim_new.py: {{LOCAL_TOOLS_DIR}}/llm_shim_new.py
+  /home/harshav/benchmark-evals/tools/responses_chat.py: {{LOCAL_TOOLS_DIR}}/responses_chat.py
+  /home/harshav/benchmark-evals/tools/model_registry.py: {{LOCAL_TOOLS_DIR}}/model_registry.py
+  /home/harshav/benchmark-evals/tools/models.toml: {{LOCAL_TOOLS_DIR}}/models.toml
+  /home/harshav/benchmark-evals/tools/start_shim.sh: {{LOCAL_TOOLS_DIR}}/start_shim.sh
+  /home/harshav/benchmark-evals/tools/fetch_task_data.py: {{LOCAL_TOOLS_DIR}}/fetch_task_data.py
+  /home/harshav/benchmark-evals/tools/mem_sampler.py: {{LOCAL_TOOLS_DIR}}/mem_sampler.py
 
 initialization_commands: []
 setup_commands: []                 # everything is baked into the AMI
@@ -76,8 +84,13 @@ head_setup_commands: []
 worker_setup_commands:
   # until the AMI carries the Postgres library (AMI v4)
   - ~/.local/bin/uv pip install -q --python /home/harshav/benchmark-evals/.venv/bin/python 'psycopg[binary]'
-  # task data and images this manifest needs (the AMI has only the base images); the HF token comes with the .env
-  - cd /home/harshav/benchmark-evals && .venv/bin/cybergym-eval prepare --config config/{{MANIFEST_NAME}} --skip-firewall
+  # task DATA this manifest needs (the HF token comes with the .env). The data is fetched before the node joins; the IMAGES are prefetched in the
+  # background in manifest order (3 at a time, stopping at 150 GB free) so the node joins at once and its first tasks find most images already
+  # pulled. A task whose image is still being pulled just waits on `docker run`, which pulls it itself (Docker shares layers between the two pulls).
+  - cd /home/harshav/benchmark-evals && .venv/bin/python tools/fetch_task_data.py config/{{MANIFEST_NAME}}
+  # node memory and load every 30 s into the shared Postgres node_metrics table (the data outlives the node); needs the psycopg install above
+  - cd /home/harshav/benchmark-evals && set -a && . config/.env && set +a && nohup setsid .venv/bin/python tools/mem_sampler.py > /home/harshav/mem-sampler.log 2>&1 < /dev/null &
+  - cd /home/harshav/benchmark-evals && nohup setsid .venv/bin/python tools/fetch_task_data.py config/{{MANIFEST_NAME}} --images-only > /home/harshav/prefetch-images.log 2>&1 < /dev/null &
 
 # head_start_ray_commands only matter for `ray up`; for the existing VM start the head by hand, e.g.
 #   1. prepare_cluster.py rendered/cluster.yaml rendered/cluster.prepared.yaml   (REQUIRED: without Ray's defaults the monitor dies with KeyError 'cluster_synced_files')
@@ -86,12 +99,17 @@ worker_setup_commands:
 #        --ray-client-server-port=<free port> --num-cpus={{HEAD_CPUS}} --resources='{"benchmark_slot":{{HEAD_SLOTS}}}' --include-dashboard=false \
 #        --autoscaling-config=<absolute path to cluster.prepared.yaml> --temp-dir=<short private dir>
 #   Other Ray heads on the same VM already use the default metrics port, so give this one a free AUTOSCALER_METRIC_PORT.
+#   3. (only for a Google model while there is no service account) the head's own shim and the token relay, then the Mac-side refresher:
+#        TOKEN_FILE=$HOME/.secrets/vertex_token VERTEX_PROJECT=<project> bash tools/start_shim.sh <MODEL_REF> tokens
+#        RELAY_TOKEN_FILE=$HOME/.secrets/vertex_token RELAY_BIND=<head private ip> MASTER_KEY=<SHIM_MASTER_KEY from the .env> python tools/token_relay.py
+#        (Mac)  python3 tools/push_vertex_token.py --host harshav@<head public address> --key ~/.ssh/id_ed25519
+#      Workers then fetch the token from the relay (WORKER_SHIM_ENV in the local env file sets TOKEN_URL and the project).
 head_start_ray_commands: []
 
 worker_start_ray_commands:
   - /home/harshav/benchmark-evals/.venv/bin/ray stop
   # NOTE: no space after the colon inside the resources JSON, or YAML reads the line as a mapping.
   # Resources are repeated here so the raylet matches what the autoscaler plans with.
-  - bash /home/harshav/benchmark-evals/tools/start_worker_services.sh {{SHIM_MODEL}} {{WORKER_SHIM_TOTAL_USD}} && set -a && . /home/harshav/benchmark-evals/config/.env && set +a && RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --address=$RAY_HEAD_IP:{{HEAD_PORT}} --num-cpus={{WORKER_CPUS}} --resources='{"benchmark_slot":{{SLOTS}}}'
-  # The shim is started by the script above; sourcing the .env puts the shim master key, the database URL and the other
+  - {{WORKER_SHIM_ENV}} bash /home/harshav/benchmark-evals/tools/start_shim.sh {{MODEL_REF}} {{WORKER_SHIM_CAPS}} && set -a && . /home/harshav/benchmark-evals/config/.env && set +a && RAY_AUTH_MODE=token /home/harshav/benchmark-evals/.venv/bin/ray start --address=$RAY_HEAD_IP:{{HEAD_PORT}} --num-cpus={{WORKER_CPUS}} --resources='{"benchmark_slot":{{SLOTS}}}'
+  # The shim is started by start_shim.sh from the model reference (the registry says where it sends calls); sourcing the .env puts the shim master key, the database URL and the other
   # variables into this node's Ray process (a Ray task sees its node's environment, NOT the driver's).

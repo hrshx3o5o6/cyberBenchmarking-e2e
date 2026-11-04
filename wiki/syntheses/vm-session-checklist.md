@@ -47,11 +47,24 @@ Run: `preflight`, then `run`; watch the shim log live.
 Whether the model solves the task does not matter here. Expected cost under 1 USD.
 
 ## E. Smoke 2: Codex on DeepSeek V4.1 Flash through Vertex
-Same shape as D (start the shim with `start_shim.sh deepseek-v4.1-flash@vertex tokens`, since no price is entered) with: the shim settings from `deepseek-v4.1-flash@vertex` (Vertex project and region from environment variables, `UPSTREAM_AUTH=bearer` with the one-hour token file as the key, `UPSTREAM_API=auto`, `UPSTREAM_CHAT_PATH=/chat/completions`, `UPSTREAM_RESPONSES_PATH=/responses`), a placeholder price, caps 2 USD. Must finish inside the token's hour. Afterwards delete the token file. Only the head can run this (no credential on workers).
+Same shape as D, started with `VERTEX_PROJECT=<project> TOKEN_FILE=<file> start_shim.sh deepseek-v4.1-flash@vertex tokens` (no price is entered, so token and request caps apply and cost shows as 0). `TOKEN_FILE` turns the registry's Google login into a bearer key read from a file holding the one-hour token; everything else (`auto` format detection, the chat and responses paths, the endpoint) comes from the registry. The owner of the session creates the token file with one command that pipes the token straight over ssh, so it never appears in chat: `gcloud auth application-default print-access-token | ssh <vm> 'umask 077; cat > <file>'`. Must finish inside the token's hour. Afterwards delete the token file. Only the head can run this (no credential on workers).
 Extra to note: the 15-second detection delay seen on the first call; whether Codex's tool use is more reliable than on the Bedrock Qwen model; no cached tokens reported.
 
+## E-result. Smoke 2 done (2026-11-03): DeepSeek V4.1 Flash on Vertex, passed
+Run from the head VM with a one-hour access token copied by the session owner (never in chat), the shim from the scratch folder on a spare port, Codex on `md4c/arvo_31332` patch-only, 30-minute agent limit.
+| Check | Result |
+|---|---|
+| Harness result | `passed`, `all_stages_passed: true`, whole task 182 s (agent 116 s) |
+| Shim | 24 calls on the task's key (27 in the log including 3 from the earlier connectivity check), all status 200, adapter `chat`, 0 errors or exceptions |
+| Tokens (the task's key) | fresh input 328,585; cache reads 95,744 (Vertex did report cached tokens on a long conversation, unlike the tiny earlier calls); output 3,496; largest context 23,142 |
+| Cost | shown as 0 (no price entered; token and request caps applied, no dollar cap) |
+| Postgres | row `passed`, `observations_synced: true` |
+| Cleanup | token file deleted, test shim stopped by exact process id, backup taken and copied to the Mac with a matching checksum |
+What it proves: the whole path works with the translator in the middle, Codex's streaming and tool calls were accepted, the registry route drove the shim (`start_shim.sh` with a token file), and the result reached Postgres. What it does not prove: `auto` detection (the registry says chat for this model, so chat was used from the start), multi-node (see below), the Bedrock stand-in (not run), the 27B endpoint. The VM's SSH connection stalled twice during the day and recovered each time.
+Multi-node: this run used a private local Ray instance on the head; the autoscaler was not running, and autoscaled workers would have no Google token and would start the old Bedrock-only shim (item C2 still to do). For Vertex runs before a service account exists, either head only (`max_workers` 0) or a token relay from the Mac.
+
 ## F. Checks for the 100-task run (read-only unless noted)
-1. **What a fresh worker holds:** images (only the two shared base images are baked in) and task data. Confirm who downloads task data on a worker and when.
+1. **What a fresh worker holds:** images (only the two shared base images are baked in; others are pulled automatically by the harness's `docker run` on first use) and task data. Task data reaches a worker through the cluster template's worker setup, which runs `prepare` for the manifest (that pulls every image of the manifest too: fine for light manifests, too heavy for the random 100; see [[wiki/syntheses/autoscaled-vertex-run-plan]]).
 2. **Image sizes for the sample:** the 67 non-shared images of the 100 (list from `random100_manifest.json`); estimate sizes from the registry manifests without pulling, then decide: pull on the head only, bake into a larger image, or per-node pull at launch. Check free disk against the head's 227 GB of images.
 3. **Read the upstream harness** (`run_agent.py`, `validate.py`, `utils.py`, the firewall module) for the file-by-file wiki page.
 4. **Validity screens** on the 100 (protocol section 4): byte-compare PoCs with tarball files, scan scripts for bug wording, list file modification times.

@@ -44,7 +44,7 @@ libplist/arvo_44089
 libvips/arvo_39481
 binutils/arvo_40683
 libxml2/arvo_61337
-cpython3/arvo_61721
+binutils/arvo_60532
 ffmpeg/oss-fuzz_42537669
 libaom/arvo_10574
 libheif/arvo_61718
@@ -83,7 +83,7 @@ libwebp/oss-fuzz_447958064
 assimp/arvo_33238
 binutils/arvo_47101
 libxml2/arvo_57284
-ffmpeg/oss-fuzz_385167047
+ghostscript/oss-fuzz_399390078
 ffmpeg/oss-fuzz_42537584
 openjpeg/arvo_47500
 mruby/arvo_56991

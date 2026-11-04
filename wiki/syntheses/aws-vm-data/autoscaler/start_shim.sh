@@ -9,12 +9,16 @@
 #   a model with no price:     start_shim.sh qwen3.8-27b@vertex-endpoint tokens
 #                              (no dollars are tracked, cost shows as 0; per-key caps on requests and tokens use the registry module's
 #                               defaults, or set TOKEN_MAX_REQUESTS, TOKEN_MAX_INPUT and TOKEN_MAX_CACHE to override)
-# env (optional): TOTAL_START (spend already used, carried into a restarted shim), PORT (default 4100), REGISTRY, BE (runner dir),
+# env (optional): TOKEN_FILE (a google_adc model on a machine with no Google login: a file holding a one-hour access token; re-read when it changes),
+#                 TOKEN_URL (instead: fetch the current token from the head's token relay, e.g. http://<head private ip>:4110/token; needs SHIM_MASTER_KEY in .env),
+#                 TOTAL_START (spend already used, carried into a restarted shim), PORT (default 4100), REGISTRY, BE (runner dir),
+#                 TOOLS (folder holding llm_shim_new.py, model_registry.py and models.toml; default $BE/tools),
+#                 SHIM_LOG (the shim's usage log; its stdout goes to the same name ending .out; default ~/cybergym-work/shim.log),
 #                 PYTHON, GATEWAY (default: the Docker gateway of the cybergym-internal network), DRY_RUN=1 (print the settings, start nothing)
 set -euo pipefail
 REF="${1:?model reference, e.g. kimi-k3@bedrock}"; TOTAL="${2:?total spend cap in USD, or the word tokens}"; PERKEY="${3:-10}"
 BE="${BE:-$HOME/benchmark-evals}"; ENVF="$BE/config/.env"; PY="${PYTHON:-$BE/.venv/bin/python}"
-REGISTRY="${REGISTRY:-$BE/tools/models.toml}"; PORT="${PORT:-4100}"
+TOOLS="${TOOLS:-$BE/tools}"; REGISTRY="${REGISTRY:-$TOOLS/models.toml}"; PORT="${PORT:-4100}"; SHIM_LOG="${SHIM_LOG:-$HOME/cybergym-work/shim.log}"
 get() { grep -E "^$1=" "$ENVF" | head -1 | cut -d= -f2-; }
 
 GW="${GATEWAY:-$(docker network inspect cybergym-internal --format '{{(index .IPAM.Config 0).Gateway}}' 2>/dev/null || true)}"
@@ -33,9 +37,11 @@ else
   CAPS=(--per-key-usd "$PERKEY" --total-usd "$TOTAL")
   [ -z "${TOTAL_START:-}" ] || CAPS+=(--total-start "$TOTAL_START")
 fi
+[ -z "${TOKEN_FILE:-}" ] || CAPS+=(--token-file "$TOKEN_FILE")
+[ -z "${TOKEN_URL:-}" ] || CAPS+=(--token-url "$TOKEN_URL")
 
 # the provider key stays in this subshell's environment; the settings printed below name it but never contain it
-exports="$("$PY" "$BE/tools/model_registry.py" env "$REF" --registry "$REGISTRY" ${CAPS[@]+"${CAPS[@]}"})"
+exports="$("$PY" "$TOOLS/model_registry.py" env "$REF" --registry "$REGISTRY" ${CAPS[@]+"${CAPS[@]}"})"
 if [ -n "${DRY_RUN:-}" ]; then
   echo "would start the shim for $REF on $GW:$PORT with:"; echo "$exports"; exit 0
 fi
@@ -43,11 +49,11 @@ mkdir -p "$HOME/cybergym-work"; cd "$BE"
 (
   set -a; . "$ENVF"; set +a
   eval "$exports"
-  export MASTER_KEY="$MASTER" PORT="$PORT" BIND="$GW" LOG_FILE="$HOME/cybergym-work/shim.log"
-  exec nohup setsid "$PY" "$BE/tools/llm_shim_new.py" > "$HOME/cybergym-work/shim.out" 2>&1 < /dev/null
+  export MASTER_KEY="$MASTER" PORT="$PORT" BIND="$GW" LOG_FILE="$SHIM_LOG"
+  exec nohup setsid "$PY" "$TOOLS/llm_shim_new.py" > "${SHIM_LOG%.log}.out" 2>&1 < /dev/null
 ) &
 for _ in $(seq 1 40); do
   if curl -fs -m 2 "http://$GW:$PORT/health" >/dev/null; then echo "shim started for $REF on $GW:$PORT"; exit 0; fi
   sleep 0.5
 done
-echo "shim did not come up; see $HOME/cybergym-work/shim.out" >&2; tail -n 5 "$HOME/cybergym-work/shim.out" >&2; exit 1
+echo "shim did not come up; see ${SHIM_LOG%.log}.out" >&2; tail -n 5 "${SHIM_LOG%.log}.out" >&2; exit 1

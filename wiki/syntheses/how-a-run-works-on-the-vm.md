@@ -18,7 +18,7 @@ Every action is an SSH command from the Mac: `ssh -i <private key> <user>@<head 
 | Runner source | `~/benchmark-evals`, own Python environment `.venv` (Python pinned to the exact patch version the cluster uses) |
 | Upstream harness | `~/cybergym-e2e`, pinned to commit `d0ae0f0` plus local patches |
 | Task data | downloaded from Hugging Face by `cybergym-eval prepare` |
-| Docker images | base-builder images are baked into the worker image (AMI); other per-task images are pulled by `prepare` |
+| Docker images | base-builder images are baked into the worker image (AMI). Other per-task images are pulled by `prepare` (which the cluster template's worker setup runs for the whole manifest) **and also automatically by the harness**: every container is started with a plain `docker run`, which pulls a missing image (not counted in the agent timer; a failed pull fails the task). Corrected 2026-11-03; an earlier version of this page said the run code never pulls |
 | Firewall | a Squid proxy on an internal Docker network, started by `prepare` (agents can reach only the model endpoint) |
 | Secrets | `config/.env` (model key, shim master key, database URL, Hugging Face token); the Ray head and worker start commands load it so every Ray process inherits it |
 

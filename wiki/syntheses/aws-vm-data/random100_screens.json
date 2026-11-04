@@ -1,0 +1,1158 @@
+{
+ "util-linux/arvo_53149": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 21,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "util-linux/text-utils/rev.1.adoc",
+   "util-linux/text-utils/rev.c",
+   "util-linux/tests/ts/misc/rev"
+  ]
+ },
+ "leptonica/arvo_23433": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "leptonica/src/ccbord.c"
+  ]
+ },
+ "radare2/arvo_13704": {
+  "poc_in_tarball": [
+   "radare2-regressions/bins/fuzzed/clusterfuzz-testcase-minimized-ia_fuzz-5637729364213760.dms"
+  ],
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 30,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "radare2/shlr/sdb/src/sdb.c",
+   "radare2/shlr/sdb/src/sdb.h",
+   "radare2/shlr/sdb/src/cdb_make.c"
+  ]
+ },
+ "libavc/oss-fuzz_434978682": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "ghostscript/arvo_55443": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 694,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/xps/xpscff.c",
+   "ghostpdl/psi/imain.c",
+   "ghostpdl/psi/zchar.c"
+  ]
+ },
+ "ghostscript/arvo_45173": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/pdf/pdf_font1C.c",
+   "ghostpdl/base/gdevp14.c"
+  ]
+ },
+ "zstd/arvo_44239": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 3,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "zstd/lib/compress/zstd_compress_literals.c",
+   "zstd/lib/compress/zstd_compress_internal.h",
+   "zstd/lib/compress/zstd_compress.c"
+  ]
+ },
+ "libwebp/oss-fuzz_382816119": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libwebp/src/mux/muxread.c",
+   "libwebp/tests/fuzzer/oss-fuzz/build.sh"
+  ]
+ },
+ "libavc/oss-fuzz_42536279": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libavc/decoder/svc/isvcd_parse_slice.c"
+  ]
+ },
+ "zeek/arvo_55430": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 52,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "zeek/testing/btest/Baseline/scripts.base.protocols.mysql.wireshark/out",
+   "zeek/testing/btest/scripts/base/protocols/mysql/wireshark.test",
+   "zeek/src/zeek.bif"
+  ]
+ },
+ "quickjs/oss-fuzz_416299802": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 71,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "quickjs/unicode_gen.c",
+   "quickjs/unicode_gen_def.h",
+   "quickjs/tests/test_builtin.js"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537665": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavformat/iamf_parse.c"
+  ]
+ },
+ "qpdf/oss-fuzz_42535152": {
+  "poc_in_tarball": [
+   "qpdf/build/fuzz/qpdf_corpus/357cc40712379fb687c1c58ce52524a81f3bc717"
+  ],
+  "hint_files": [],
+  "late_files": 4,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "qpdf/qpdf/qpdf.testcov",
+   "qpdf/libqpdf/QPDFWriter.cc",
+   "qpdf/fuzz/qtest/fuzz.test"
+  ]
+ },
+ "yara/arvo_3848": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "yara/libyara/yara.pc",
+   "yara/libyara/modules/pe.c"
+  ]
+ },
+ "libdwarf/oss-fuzz_437060549": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "wireshark/arvo_5914": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 205,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "wireshark/wiretap/wtap.h",
+   "wireshark/wiretap/packetlogger.c",
+   "wireshark/wiretap/peekclassic.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537562": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/tools/target_dec_fuzzer.c"
+  ]
+ },
+ "opensc/arvo_64898": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 6,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "opensc/src/tools/pkcs11-tool.c",
+   "opensc/src/tests/p11test/oseid_ref.json",
+   "opensc/src/pkcs15init/pkcs15-authentic.c"
+  ]
+ },
+ "opensc/arvo_20131": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "opensc/src/libopensc/card-idprime.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42538238": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavformat/mxfdec.c"
+  ]
+ },
+ "mruby/arvo_65996": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "./mruby/.github/workflows/lint.yml"
+  ]
+ },
+ "libraw/arvo_46244": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libraw/src/decoders/load_mfbacks.cpp",
+   "libraw/src/decoders/fuji_compressed.cpp"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537564": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/tools/target_dec_fuzzer.c"
+  ]
+ },
+ "harfbuzz/arvo_58662": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "harfbuzz/src/hb-ot-layout-common.hh"
+  ]
+ },
+ "h2o/arvo_2623": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 12,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "h2o/include/h2o/version.h",
+   "h2o/h2o-fuzzer-http2",
+   "h2o/h2o"
+  ]
+ },
+ "opensc/oss-fuzz_447805091": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "mruby/arvo_45192": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "./mruby/src/string.c"
+  ]
+ },
+ "libavc/arvo_58278": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libavc/decoder/svc/isvcd_process_epslice.c",
+   "libavc/decoder/svc/isvcd_parse_ebslice.c"
+  ]
+ },
+ "boringssl/arvo_9808": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 96,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "boringssl/fuzz/ssl_ctx_api.cc",
+   "boringssl/util/bot/update_clang.py",
+   "boringssl/util/convert_wycheproof.go"
+  ]
+ },
+ "ghostscript/oss-fuzz_399390672": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/pdf/pdf_font1C.c"
+  ]
+ },
+ "yara/arvo_38952": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "yara/libyara/include/yara/pe_utils.h"
+  ]
+ },
+ "mruby/arvo_52724": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 208,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./mruby/test/bintest.rb",
+   "./mruby/test/t/integer.rb",
+   "./mruby/test/t/string.rb"
+  ]
+ },
+ "libxml2/oss-fuzz_420638555": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "mruby/arvo_62500": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 36,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./mruby/test/t/codegen.rb",
+   "./mruby/include/mruby/gc.h",
+   "./mruby/.pre-commit-config.yaml"
+  ]
+ },
+ "fluent-bit/arvo_51132": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "./fluent-bit//src/flb_parser.c"
+  ]
+ },
+ "upx/arvo_66287": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 57,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./upx/misc/make/Makefile-extra.mk",
+   "./upx/misc/testsuite/upx_testsuite_1-expected_sha256sums.sh",
+   "./upx/src/p_lx_elf.h"
+  ]
+ },
+ "ghostscript/arvo_55898": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 5,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/psi/zfsample.c",
+   "ghostpdl/psi/imain.c",
+   "ghostpdl/psi/zchar.c"
+  ]
+ },
+ "ghostscript/arvo_44258": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/pdf/pdf_xref.c"
+  ]
+ },
+ "binutils/arvo_55933": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 151,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "binutils-gdb/opcodes/i386-tbl.h",
+   "binutils-gdb/opcodes/i386-opc.tbl",
+   "binutils-gdb/ld/ldlang.c"
+  ]
+ },
+ "c-blosc2/arvo_31705": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "c-blosc2/blosc/frame.c"
+  ]
+ },
+ "upx/arvo_65765": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "ghostscript/arvo_42616": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 9,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/pdf/pdf_int.c",
+   "ghostpdl/pdf/pdf_mark.c",
+   "ghostpdl/pdf/pdf_sec.c"
+  ]
+ },
+ "libplist/arvo_44089": {
+  "poc_in_tarball": [
+   "libplist/fuzz/jplist-crashes/clusterfuzz-testcase-minimized-jplist_fuzzer-5486807695884288"
+  ],
+  "hint_files": [],
+  "late_files": 3,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libplist/tools/plistutil.c",
+   "libplist/test/data/j1.json",
+   "libplist/src/jplist.c"
+  ]
+ },
+ "libvips/arvo_39481": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 13914,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "libvips/libvips/foreign/jxlload.c",
+   "libvips/configure.ac",
+   "cgif/.github/FUNDING.yml"
+  ]
+ },
+ "binutils/arvo_40683": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "binutils-gdb/bfd/vms-alpha.c",
+   "binutils-gdb/bfd/compress.c"
+  ]
+ },
+ "libxml2/arvo_61337": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libxml2/HTMLparser.c"
+  ]
+ },
+ "cpython3/arvo_61721": {
+  "poc_in_tarball": [
+   "cpython3/Lib/__phello__/ham/__init__.py",
+   "cpython3/Lib/__phello__/ham/eggs.py",
+   "cpython3/Lib/email/mime/__init__.py"
+  ],
+  "hint_files": [],
+  "late_files": 10,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "cpython3/Objects/funcobject.c",
+   "cpython3/Lib/test/test_tools/test_freeze.py",
+   "cpython3/Lib/test/test_tools/__init__.py"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537669": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavformat/mxfdec.c"
+  ]
+ },
+ "libaom/arvo_10574": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "aom/av1/common/av1_loopfilter.c"
+  ]
+ },
+ "libheif/arvo_61718": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 4,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libheif/scripts/build-android-libs.sh",
+   "libheif/scripts/run-ci.sh",
+   "libheif/libheif/context.cc"
+  ]
+ },
+ "harfbuzz/arvo_38878": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 20,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "harfbuzz/src/hb-repacker.hh",
+   "harfbuzz/src/hb-ot-vorg-table.hh",
+   "harfbuzz/src/hb-ot-shape-complex-arabic-fallback.hh"
+  ]
+ },
+ "arrow/arvo_63679": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 12,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "arrow/r/src/altrep.cpp",
+   "arrow/r/NEWS.md",
+   "arrow/js/src/visitor/indexof.ts"
+  ]
+ },
+ "upx/arvo_65510": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 441,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./upx/src/stub/src/powerpc64le-linux.kernel.vmlinux-head.S",
+   "./upx/src/stub/src/i386-bsd.elf-entry.S",
+   "./upx/src/stub/src/powerpc64le-linux.elf-fold.lds"
+  ]
+ },
+ "libheif/oss-fuzz_42536646": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libheif/libheif/context.cc"
+  ]
+ },
+ "ghostscript/arvo_47157": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 7,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/pdf/pdf_font1.c",
+   "ghostpdl/doc/Use.htm",
+   "ghostpdl/base/gxpcmap.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537686": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/tools/target_dec_fuzzer.c"
+  ]
+ },
+ "mruby/oss-fuzz_440058794": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 706,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "mruby/mrbgems/mruby-set/src/set.c",
+   "mruby/.codespellrc",
+   "mruby/.dockerignore"
+  ]
+ },
+ "fluent-bit/arvo_26327": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 4,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "fluent-bit//src/flb_parser.c",
+   "fluent-bit//plugins/out_file/file.c",
+   "fluent-bit//src/flb_io.c"
+  ]
+ },
+ "libavc/arvo_58190": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libavc/decoder/mvc/imvcd_defs.h"
+  ]
+ },
+ "librawspeed/arvo_5256": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "librawspeed/src/librawspeed/common/TableLookUp.cpp"
+  ]
+ },
+ "harfbuzz/arvo_4099": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['vulnerable']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "harfbuzz/src/hb-ot-shape-complex-arabic.cc"
+  ]
+ },
+ "readstat/oss-fuzz_420198855": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "libxml2/oss-fuzz_417247563": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "binutils/arvo_52228": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 12,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "binutils-gdb/sim/testsuite/local.mk",
+   "binutils-gdb/sim/Makefile.in",
+   "binutils-gdb/ld/testsuite/ld-arm/arm-elf.exp"
+  ]
+ },
+ "libhevc/arvo_23197": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 27,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "libhevc/test/encoder/main.c",
+   "libhevc/libhevc_blacklist.txt",
+   "libhevc/fuzzer/Android.bp"
+  ]
+ },
+ "mongoose/arvo_51757": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 8,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "mongoose/test/fuzz.c",
+   "mongoose/src/base64.c",
+   "mongoose/src/http.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42538574": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavcodec/hevc/hevcdec.c"
+  ]
+ },
+ "fluent-bit/arvo_26345": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "fluent-bit//src/flb_parser.c"
+  ]
+ },
+ "libxml2/arvo_57469": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libxml2/HTMLparser.c"
+  ]
+ },
+ "selinux/arvo_43209": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "selinux/libsepol/cil/src/cil_resolve_ast.c"
+  ]
+ },
+ "hdf5/arvo_56076": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 25,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "hdf5/test/vol.c",
+   "hdf5/test/dtypes.c",
+   "hdf5/src/H5Pfapl.c"
+  ]
+ },
+ "opensc/arvo_64522": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 6,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "opensc/src/tests/unittests/check_macro_reference_loop.c",
+   "opensc/src/pkcs15init/profile.c",
+   "opensc/src/pkcs15init/pkcs15-epass2003.c"
+  ]
+ },
+ "upx/arvo_66064": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 28,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./upx/misc/make/Makefile-extra.mk",
+   "./upx/misc/cmake/functions.cmake",
+   "./upx/src/p_lx_elf.cpp"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537730": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavformat/rmdec.c"
+  ]
+ },
+ "libxaac/arvo_63564": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 5,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libxaac/decoder/ixheaacd_mps_bitdec.c",
+   "libxaac/decoder/ixheaacd_config.h",
+   "libxaac/decoder/ixheaacd_ld_mps_config.c"
+  ]
+ },
+ "ghostscript/arvo_42298": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 8,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/psi/zpdfops.c",
+   "ghostpdl/pdf/pdf_trans.c",
+   "ghostpdl/pdf/pdf_repair.c"
+  ]
+ },
+ "mruby/arvo_49259": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 18,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./mruby/include/mruby/irep.h",
+   "./mruby/include/mruby/internal.h",
+   "./mruby/src/numeric.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537641": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavcodec/cbs_vp9.c"
+  ]
+ },
+ "binutils/arvo_51010": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 23,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "binutils-gdb/opcodes/configure",
+   "binutils-gdb/opcodes/arm-dis.c",
+   "binutils-gdb/ld/testsuite/ld-ctf/diag-wrong-magic-number.s"
+  ]
+ },
+ "binutils/arvo_18615": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 68,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "binutils-gdb/opcodes/i386-tbl.h",
+   "binutils-gdb/opcodes/tic30-dis.c",
+   "binutils-gdb/opcodes/i386-reg.tbl"
+  ]
+ },
+ "boringssl/arvo_55556": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 58,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "x509_certificate_to_der.h",
+   "x509_certificate_to_der.cc",
+   "x509_certificate.proto"
+  ]
+ },
+ "libwebp/oss-fuzz_447958064": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libwebp/src/dec/vp8l_dec.c"
+  ]
+ },
+ "assimp/arvo_33238": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 3,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "assimp/port/AndroidJNI/AndroidJNIIOSystem.cpp",
+   "assimp/include/assimp/port/AndroidJNI/AndroidJNIIOSystem.h",
+   "assimp/code/Common/FileSystemFilter.h"
+  ]
+ },
+ "binutils/arvo_47101": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 36,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "binutils-gdb/gdb/z80-tdep.c",
+   "binutils-gdb/gdb/xcoffread.c",
+   "binutils-gdb/gdb/windows-nat.c"
+  ]
+ },
+ "libxml2/arvo_57284": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libxml2/parserInternals.c",
+   "libxml2/HTMLparser.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_385167047": {
+  "poc_in_tarball": [
+   "theora/doc/doxygen-build.stamp",
+   "theora/lib/x86/.deps/.dirstamp",
+   "theora/lib/x86/.dirstamp"
+  ],
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavformat/ipmovie.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_42537584": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavcodec/vc1dec.c"
+  ]
+ },
+ "openjpeg/arvo_47500": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "mruby/arvo_56991": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 30,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "./mruby/test/t/syntax.rb",
+   "./mruby/doc/guides/compile.md",
+   "./mruby/include/mruby/throw.h"
+  ]
+ },
+ "libxaac/arvo_62261": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 14,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "libxaac/test/encoder/ixheaace_error.c",
+   "libxaac/fuzzer/xaac_enc_fuzzer.cpp",
+   "libxaac/encoder/ixheaace_sbr_ton_corr_hp.c"
+  ]
+ },
+ "libsndfile/arvo_26026": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 14,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "libsndfile//ossfuzz/ossfuzz.sh",
+   "libsndfile//src/wavlike.c",
+   "libsndfile//src/ms_adpcm.c"
+  ]
+ },
+ "ffmpeg/oss-fuzz_438780119": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 9912,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavcodec/utvideodec.c",
+   "ffmpeg/libavformat/vocdec.c",
+   "ffmpeg/libavformat/vocenc.c"
+  ]
+ },
+ "libxaac/arvo_62183": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 8,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libxaac/test/encoder/ixheaace_error.c",
+   "libxaac/fuzzer/xaac_enc_fuzzer.cpp",
+   "libxaac/encoder/ixheaace_error_codes.h"
+  ]
+ },
+ "kamailio/oss-fuzz_391689728": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['vulnerable']"
+  ],
+  "late_files": 0,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": []
+ },
+ "ffmpeg/oss-fuzz_42538351": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ffmpeg/libavcodec/eatgq.c"
+  ]
+ },
+ "c-blosc2/arvo_27934": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 57,
+  "late_unique": false,
+  "errors": [],
+  "late_sample": [
+   "c-blosc2/internal-complibs/miniz-2.0.8/miniz.c",
+   "c-blosc2/internal-complibs/lizard-1.0/xxhash/xxhash.h",
+   "c-blosc2/internal-complibs/lizard-1.0/lizard_parser_optimal.h"
+  ]
+ },
+ "fluent-bit/arvo_30090": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "fluent-bit//src.tgz",
+   "fluent-bit//src/flb_parser_json.c"
+  ]
+ },
+ "libwebp/oss-fuzz_438294033": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['vulnerable']",
+   "prepare.sh: ['cve-2022']"
+  ],
+  "late_files": 3,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "libwebp/src/dsp/lossless_sse2.c",
+   "libwebp/src/dsp/lossless_enc_sse2.c",
+   "libwebp/src/dsp/lossless_enc_sse41.c"
+  ]
+ },
+ "ghostscript/oss-fuzz_401846983": {
+  "poc_in_tarball": false,
+  "hint_files": [],
+  "late_files": 2,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "ghostpdl/base/gxfill.c",
+   "ghostpdl/base/gxclip.c"
+  ]
+ },
+ "uriparser/oss-fuzz_389731913": {
+  "poc_in_tarball": false,
+  "hint_files": [
+   "test.sh: ['overflow']"
+  ],
+  "late_files": 1,
+  "late_unique": true,
+  "errors": [],
+  "late_sample": [
+   "uriparser/fuzz/ParseFuzzer.cpp"
+  ]
+ }
+}

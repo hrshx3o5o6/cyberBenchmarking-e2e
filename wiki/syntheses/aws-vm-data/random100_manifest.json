@@ -16,7 +16,7 @@
    "HF missing ['crash.log']"
   ]
  ],
- "list_sha256": "8acd0cc32c7a457f3d5e0dc478a14aea07113d55de71806844af43e790317118",
+ "list_sha256": "c685e88be6d2699fc22ba863e5eba8c1832bd4694afca401e1658335cbc82ee7",
  "tasks": [
   {
    "task": "util-linux/arvo_53149",
@@ -387,12 +387,13 @@
    "fix_changed_lines": 3
   },
   {
-   "task": "cpython3/arvo_61721",
+   "task": "binutils/arvo_60532",
    "project": "cpython3",
    "id_kind": "arvo",
    "language": "c++",
    "build_image": "n132/arvo:61721-fix",
-   "fix_changed_lines": 5
+   "fix_changed_lines": 5,
+   "replacement_metadata": "not recomputed"
   },
   {
    "task": "ffmpeg/oss-fuzz_42537669",
@@ -699,12 +700,13 @@
    "fix_changed_lines": 7
   },
   {
-   "task": "ffmpeg/oss-fuzz_385167047",
+   "task": "ghostscript/oss-fuzz_399390078",
    "project": "ffmpeg",
    "id_kind": "oss-fuzz",
    "language": "c++",
    "build_image": "cybergym/oss-fuzz:385167047-fix",
-   "fix_changed_lines": 4
+   "fix_changed_lines": 4,
+   "replacement_metadata": "not recomputed"
   },
   {
    "task": "ffmpeg/oss-fuzz_42537584",
@@ -817,6 +819,19 @@
    "language": "c++",
    "build_image": "cybergym/oss-fuzz:389731913-fix",
    "fix_changed_lines": 3
+  }
+ ],
+ "list_sha256_original_draw": "8acd0cc32c7a457f3d5e0dc478a14aea07113d55de71806844af43e790317118",
+ "replaced_after_draw": [
+  {
+   "task": "cpython3/arvo_61721",
+   "replaced_by": "binutils/arvo_60532",
+   "reason": "runner preflight rejects an empty PoC file (poc.bin is 0 bytes in the dataset); decided before any scored run under the replacement rule, 2026-11-03"
+  },
+  {
+   "task": "ffmpeg/oss-fuzz_385167047",
+   "replaced_by": "ghostscript/oss-fuzz_399390078",
+   "reason": "runner preflight rejects an empty PoC file (poc.bin is 0 bytes in the dataset); decided before any scored run under the replacement rule, 2026-11-03"
   }
  ]
 }

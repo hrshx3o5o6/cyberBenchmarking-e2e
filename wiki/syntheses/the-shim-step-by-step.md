@@ -51,6 +51,12 @@ It listens on the Docker gateway address of the internal network (the same addre
 8. **Account.** Add requests, tokens and spend to the key and to the shim total; count an error if the status is not 200.
 9. **Log one line**: route, adapter, alias, original model, stream, number of tools, status, input, cache and output tokens, seconds, cost, how the cost was obtained, running spend and total. On an upstream error, the first 200 characters of the error and, for Responses, only the shapes of the input items, never content.
 
+## Temporary key sources, the 401 retry and the 429 budget (added 2026-11-03, local, not deployed)
+For a short-lived token that something else keeps fresh: `UPSTREAM_KEY_RELOAD=1` (re-read `UPSTREAM_KEY_FILE` when it changes) or `UPSTREAM_KEY_URL` (fetch from the head's token relay with the master key; at start, then every `UPSTREAM_KEY_REFRESH_S` seconds). With either, a 401 or 403 from the upstream re-reads the key at once and retries the call once; a fixed key is never retried. `UPSTREAM_RETRY_429*` set how often a 429 is retried (default 3 times, 3 seconds base, as before). The key is never logged; `/health` reports the key source (`static`, `file-reload` or `url`). The relay is `tools/token_relay.py`. See [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## Stream failures and the log's `finish` field (added 2026-11-03 after the first real e2e run)
+On the chat route, a stream that ends with no finish reason after content, or that carries an error object, reaches the harness as `response.failed` (so it retries), is counted as an error on the key, and the log line gets `finish` (why the model stopped) and `stream_failed` (`upstream_stream_truncated` or `upstream_stream_error`), metadata only. The translator also replaces tool-call arguments that are not a valid JSON object with `{}` when it sends the conversation history upstream, because chat servers reject a request whose earlier tool call has malformed arguments. See [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
 ## Failure behaviour
 - An upstream exception or timeout returns 502 to the agent and is logged; the shim itself keeps running.
 - Accounting errors are logged, never raised into the response.

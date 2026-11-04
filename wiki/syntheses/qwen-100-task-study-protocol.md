@@ -53,12 +53,12 @@ Full analysis, with the measured context sizes from the earlier Qwen3.8-27B runs
 - **The real limit is probably the model server (see the analysis page):** the endpoint is one A100 with one replica in Singapore, called from a VM in Virginia. Concurrent agents queue behind it. To be measured with a concurrency test before the full run (section 6, gate 5).
 - **Where the credential is:** only nodes holding a Google credential can call Vertex; today that would be the head only (10 slots), until a service account or federation exists.
 - **Cost:** not per-token. The endpoint's hourly price on the project times the hours it stays deployed. Not known to us.
-- **Images:** 67 non-shared images to pull; the head holds 227 GB of images today; fresh workers would hold only the two shared base images. See [[wiki/syntheses/how-a-run-works-on-the-vm]] for why workers do not pull images themselves.
+- **Images:** 67 non-shared images to pull; the head holds 227 GB of images today; fresh workers hold only the two shared base images. **Correction (2026-11-03):** the harness starts every container with a plain `docker run`, which pulls a missing image by itself, so a task whose image is absent pulls it when it starts (outside the agent timer, inside the task deadline). What costs us is the cluster template's worker setup, which runs the runner's `prepare` for the whole manifest and would try to pull all 67 images on every worker before it joins; see [[wiki/syntheses/autoscaled-vertex-run-plan]].
 
 ## 6. Gates before the full run
 1. The endpoint's tool calling works (the three-turn streaming tool test passes against it).
 2. The same test passes through the shim in chat mode with the endpoint's own settings, and the thinking text is handled (server reasoning parser, or a deliberate strip rule).
-3. Real Codex smoke tasks on stand-in models pass (Bedrock Qwen, DeepSeek on Vertex), see [[wiki/syntheses/vm-session-checklist]].
+3. Real Codex smoke tasks on stand-in models pass (Bedrock Qwen: not run yet; DeepSeek on Vertex: passed 2026-11-03, head only), see [[wiki/syntheses/vm-session-checklist]].
 4. The 67 images are pulled where they are needed, or a pull strategy is agreed.
 5. A concurrency test of the endpoint (5 to 10 parallel streams): latency, tokens per second, errors.
 6. A Google credential path for the nodes that will run it (service account or federation).

@@ -45,6 +45,9 @@ Consequence: the model must be uploaded again with a large `--max-model-len` (ho
 
 See [[wiki/syntheses/qwen27b-serving-capacity-analysis]] for how much context and capacity the benchmark actually needs and where a single A100 would bottleneck.
 
+## Undeployed (2026-11-03)
+With the owner's agreement, the one deployed model was undeployed from the endpoint to stop the GPU charge while the endpoint cannot run the benchmark. Verified afterwards: the endpoint has no deployed models, the endpoint itself still exists (so its address is unchanged), and the uploaded model record (version 1, with the serving settings above) still exists. The undeploy took 2 seconds. **To bring it back:** deploy again to the same endpoint (one A100 80GB machine, one replica); because the old serving settings have a 2,048-token context and no tool-call or reasoning flags, redeploying the old version is pointless: upload a new version with the settings listed under "What would make it usable" first. A GPU of that type may not be available at the moment of redeployment, and the weights are downloaded from Hugging Face on every start, so allow some minutes.
+
 ## What would make it usable
 1. Upload the model again and redeploy the vLLM server with a large context length (`--max-model-len`), tool calling enabled (`--enable-auto-tool-choice` and the tool-call parser that matches Qwen3.8; the right parser name is to be taken from the model's own documentation) and a reasoning parser, so thinking is returned separately.
 2. Then repeat the three-turn streaming tool test, through the shim in chat mode (the translation layer is already built for chat-only upstreams).

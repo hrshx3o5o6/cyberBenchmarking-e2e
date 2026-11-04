@@ -360,3 +360,84 @@ Read the deployed model's start command from Vertex metadata (vLLM with `--max-m
 
 ## [2026-11-03] synthesis | Qwen3.8-27B serving: context needs, capacity and bottlenecks
 Measured context and token use from the shim log of the earlier Qwen3.8-27B batch (median call about 85K tokens, largest 172K, 23% of calls over 131,072; mean run 11.7M input and 136K output tokens) and combined it with cache-memory arithmetic from the model configuration and hardware estimates: output speed is the likely bottleneck (100 e2e tasks about 6 to 38 hours of generation on one A100), only about 3 to 6 agents fit in the cache at once, prefix caching is essential, streaming on the self-deployed endpoint is untested. Page: [[wiki/syntheses/qwen27b-serving-capacity-analysis]]; protocol and endpoint pages updated.
+
+## [2026-11-03] experiment | Token-file option for Google routes (local, not deployed)
+Added `token_file` to the registry bridge (`--token-file`, and `TOKEN_FILE` in `start_shim.sh`): a google_adc route can use a one-hour access token from a file as a bearer key on a machine with no Google login, for short tests such as the DeepSeek-on-Vertex smoke test. Only valid for google_adc routes. 60 local tests pass. Checklist section E updated. The VM's old public address no longer answers (no fixed IP after the restart); waiting for the new one.
+
+## [2026-11-03] experiment | Codex smoke test on the head VM: DeepSeek V4.1 Flash on Vertex, passed
+Brought the restarted head VM up (Postgres healthy; the firewall proxy had to be started by hand and is not set to restart; the VM's public address changed), deployed our shim, translator, registry and tests to a scratch folder (60 tests pass on the VM), and ran Codex on `md4c/arvo_31332` patch-only with a one-hour Google token copied by the session owner: passed all stages in 182 s, 24 shim calls all 200 on the chat adapter, 328,585 fresh and 95,744 cached input tokens, 3,496 output, cost shown as 0 (unpriced), result in Postgres with observations synced. Token file deleted, test shim stopped, backup taken and copied off the VM. The live shim, the autoscaler and the Bedrock stand-in test were not part of this run. Pages: [[wiki/syntheses/vm-session-checklist]], [[wiki/syntheses/model-registry-design]], [[wiki/syntheses/qwen-100-task-study-protocol]].
+
+## [2026-11-03] synthesis | Correction: the harness pulls missing images by itself; plan for the autoscaled DeepSeek-on-Vertex run
+Read the upstream container start (`docker run -d --rm <image> sleep infinity`): `docker run` pulls a missing image, so my earlier statement that the run code never pulls was wrong; corrected in the protocol, run-flow and checklist pages. The real cost is the cluster template's worker setup, which runs `prepare` for the whole manifest on every worker (pulling all its images and the task data): fine for the light 30-task manifest, too heavy for the random 100 (67 non-shared images). Also checked the head's 28 task images (208 GB): all have registry digests, three still hosted, only 8 are needed by the sample, 196 GB can be deleted and re-pulled on demand. New plan page [[wiki/syntheses/autoscaled-vertex-run-plan]] (token relay, phases, risks).
+
+## [2026-11-03] decision | Worker disks: 512 GiB, same as the head
+Checked disk sizes: the head has one 512 GiB gp3 volume (207 GB used, 289 GB free; default 3,000 IOPS and 125 MB/s); workers are launched with 150 GiB gp3 from a 60 GiB image snapshot. Decided that workers get the same 512 GiB (each with its own volume), to be applied through `WORKER_DISK_GIB` at the next render and head restart (plan phase 4). Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] synthesis | Plan for the autoscaled DeepSeek-on-Vertex run re-checked against the files and locked
+Re-check found: the cluster template syncs only one tool file to workers (new shim files would not reach them); worker setup runs a full `prepare` (all manifest images); e2e is best at 7 to 8 slots per VM (template has 10); the exact driver address for our head is not recorded and `--address auto` can attach to another user's head; Vertex quota and DeepSeek's context limit are unknown; dev tests must use tasks outside the 100 (ranks 101 to 120); Postgres shares the head's disk; DeepSeek's earlier e2e runs suggest 2 to 4 hours for the 100, not 15. Plan page rewritten: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] decision | Keep 10 benchmark slots per node
+The autoscaled DeepSeek-on-Vertex plan keeps the template's 10 slots per node (30 with the head and 2 workers) instead of the 7 to 8 suggested by the earlier e2e calibration; the staged ramp measures CPU pressure and grading stretch, with 8 as a one-line fallback. Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Security groups read; relay port needs no change
+The head belongs to two security groups; the workers use the cluster group, which allows all traffic from its own members, so workers can reach a relay port on the head without any rule change. The head's other group allows SSH from anywhere (owner's call); the SSH journal showed no failed logins or scanning in the last two hours, so the earlier SSH stalls are not explained by it. Vertex price not needed. Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Phases 0 and 1 of the autoscaled run plan: backup and differential shim test
+Phase 0: backed up the head's tools, source, config and autoscaler files into a private folder on the VM with a checksum list, a state record and a fresh Postgres dump (copied to the Mac, checksums match); restore tested into a temporary folder. Phase 1: a differential test runs ten scenario groups against the live shim (identical to the VM snapshot copy) and the new shim and requires identical behaviour in default mode; 15 tests pass, three deliberate breakages caught, 75 local tests in all. Nothing on the VM's live folders was changed. Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Phase 2: temporary key sources, 401 retry, 429 budget and the token relay (local and VM scratch folder only)
+Shim: key file re-read on change, key fetched from a URL, one retry after a 401 or 403, configurable 429 retries, key source in /health (all opt-in; the differential test still shows identical default behaviour). New `tools/token_relay.py`; bridge and start script gained `--token-url` / `TOKEN_URL`. 25 new tests, six deliberate breakages caught, 90 tests in our files pass locally and on the VM scratch folder; the live tools folder on the VM was not touched. Pages: [[wiki/syntheses/autoscaled-vertex-run-plan]], [[wiki/syntheses/the-shim-step-by-step]], [[wiki/syntheses/model-registry-design]].
+
+## [2026-11-03] experiment | Phase 3: the Mac-side token refresher (built, tested, run for real against the head)
+`tools/push_vertex_token.py`: fetches a one-hour token with gcloud and writes it atomically to a private file on the head through ssh's standard input, every 30 minutes by default, with retries, loud failure reporting, recovery, `caffeinate` and deletion of the file on exit; refuses malformed tokens and never replaces a good token after a failed write. 13 tests plus four deliberate breakages (two initially uncaught, then covered); 103 tests in our files pass. Real `--check` and a live two-push loop against the head passed and cleaned up. Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Phase 4 prepared, not applied: cluster template, example env file, data-only script
+Edited the vault copies of the autoscaler scripts (template: six tool files synced to workers, data-only worker setup, worker shim started from a registry reference; example env file brought in line with the real setup), wrote and tested `fetch_task_data.py` (real run on the head with three sample tasks: complete, no image pulled), and added 10 tests (four deliberate breakages caught; 113 tests in our files). Measured task data sizes (12 to 70 MB typical, two tasks about 1.8 GB, the head's folder 7.3 GB for 85 tasks). Nothing on the VM's live folders changed; the autoscaling head and the owner's head are not running (died with the shutdown), so phase 4 starts ours fresh. Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Phase 4 steps 1 to 3 applied on the head (nothing started)
+Copied the seven tool files into the live tools folder (checksums match; no shim was running), created the dev manifest (20 tasks, ranks 101 to 120, e2e), updated the real autoscaler env file (max workers 4 as instructed, 512 GiB disks, new manifest, four new keys), installed the new template and rendered and prepared it (Ray validation passes). The 60 vCPU limit with a 16-vCPU head leaves room for two 16-vCPU workers, so a third and fourth worker would fail on the limit. No head, shim, relay or refresher started. Backups: `~/backups/pre-promote-20261103/` plus `*.pre-phase4` copies. Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Autoscaled Vertex setup brought up on the head; one-worker test passed
+Started the Mac refresher, the head's shim from a registry reference, the token relay and our autoscaling Ray head (private address and port 6381), prefetched the 20 dev tasks' data. A dummy-demand run (20 sleeping tasks) made the autoscaler launch one worker that set itself up in about 2.5 minutes, joined, ran its 10 tasks, served a real three-turn model call through its own shim with a token fetched from the relay, and was shut down by the 3-minute idle rule; back to the head only. Max workers 3 (only two 16-vCPU workers fit the 60 vCPU limit). Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Stage 1 of the ramp failed on a truncated tool call; translation layer fixed locally
+The first real e2e task through the autoscaler path (`c-blosc2/arvo_30748`, head only) ended with no PoC after 645 s: the model's 30th tool call had truncated JSON arguments, Codex echoed it back in the history and Vertex rejected the next request with a 400. Infrastructure behaved (Postgres synced, token refresh live). Fixed locally with tests: malformed arguments in the history become `{}`, truncated or errored streams are reported as failed, and the log records finish reason and stream failure (metadata only). Not yet deployed. Pages: [[wiki/syntheses/autoscaled-vertex-run-plan]], [[wiki/syntheses/the-shim-step-by-step]].
+
+## [2026-11-03] experiment | Qwen27B endpoint undeployed (owner agreed)
+Undeployed the single deployed model to stop the GPU charge; the endpoint and the uploaded model record remain (verified). Redeploy needs a new model version with a large context and the tool-call and reasoning parsers first. Page: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-03] experiment | Stage 1 rerun: infrastructure passed; S1 to S3 passed, S4 failed
+Deployed the translation fix to the head (backups first; head shim restarted by exact process id) and reran the one-task stage: harness success, 83 calls all 200, result in Postgres synced, no shim errors; grading S1, S2, S3 passed and S4 failed (a different bug fixed): `benchmark_failed` by the pass rule, a model outcome. 33.7 minutes in all, 2.0M fresh and 1.84M cached input tokens, 18.5K output. The model truncates tool-call arguments about 3.6 percent of the time (handled by the fix); one Vertex call stalled 606 s against the shim's 600 s silence limit (proposal: lower to about 180 s). Page: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Stage 2 finished; per-call time cap deployed; note on logging all run logs
+Stage 2 (10 tasks, head only): 3 passed S1 to S4, 2 passed S1 to S3 and failed S4, 5 failed in the harness as `benchmark_failed` (model outcome; none from infrastructure). Agent logs read: two early model stops (one repetition loop), three tasks ran to the 90-minute limit; 9 truncated tool-call arguments came from the model with a normal finish reason. One 1,800 s call (no silence limit fired) led to a per-call total time cap (`stream_total_timeout_s = 600` for Vertex), deployed to the head after backups (checksums match, smoke call ok). Noted for later: record all run logs (trajectories, shim log) in Postgres in addition to what it holds now. Page touched: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Image prefetch built; pre-launch checks for the 100
+Added a background image prefetch to worker setup (`--images-only`, tested, deployed to the head). Counted the 100 tasks' images (69 distinct, 12 large oss-fuzz ones of about 50 GB on disk), tested Vertex with up to 549k input tokens and 30 parallel calls (all completed), copied stage-2 logs to the Mac. Open: disk plan and the DeepSeek protocol variant. Page touched: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Disk plan for the 100: 1024 GiB workers, head images cleared
+Checked that CyberGym and the runner never remove images (only containers). Removed the 29 head images the 100 do not use (disk 279 GB to 41 GB used), set worker disks to 1024 GiB in the VM's env and re-rendered the cluster file (VolumeSize is the only change). Page touched: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | Price and caps set for the 100: 10 USD per run plus 90 minutes
+Added the assumed Vertex price to the registry entry for DeepSeek V4.1 Flash (0.30 / 0.03 / 1.20 per million), switched the head shim and the worker setting to dollar caps (10 per run, 1000 safety total per node), tests extended (132 pass), deployed with backups. Page touched: [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | DeepSeek protocol page written
+New page for the 100-task run with DeepSeek V4.1 Flash on Vertex (paper rules, assumed price, setup disclosures, launch gates). Pages touched: [[wiki/syntheses/deepseek-100-task-study-protocol]], [[wiki/index]].
+
+## [2026-11-03] experiment | 100-task manifest, data, validity screens and Postgres dump done
+Created `config/random100-e2e.json` on the VM (list sha256 matches), downloaded all 100 tasks' data (36 GB; one retry after a transient Hugging Face error), ran validity screens (1 real PoC leak: qpdf/oss-fuzz_42535152; 4 coincidences with tiny PoCs; marker on 60 tasks), took a Postgres dump to the Mac. Page touched: [[wiki/syntheses/deepseek-100-task-study-protocol]].
+
+## [2026-11-03] experiment | 100-task run launched (two tasks replaced for empty PoCs)
+The runner's preflight rejected two tasks with 0-byte PoC files; replaced them in place with the next unused tasks in the order (list sha256 now c685e88b...). The driver started at 19:43 UTC with the paper's limits (10 USD, 90 minutes), DeepSeek V4.1 Flash on Vertex, head plus autoscaled workers. qpdf/oss-fuzz_42535152 (PoC in the tree) kept, reported separately. Pages touched: [[wiki/syntheses/deepseek-100-task-study-protocol]], [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-03] experiment | First pass of the 100 finished: 31 completed, 68 lost to node memory exhaustion
+Two workers at 10 slots ran out of memory; 52 queued tasks failed together with the first node loss. 5 passed S1 to S4 of the 31 completed. Rerun of the 68 pending a decision on slots per node. Pages touched: [[wiki/syntheses/deepseek-100-task-study-protocol]], [[wiki/syntheses/autoscaled-vertex-run-plan]].
+
+## [2026-11-04] experiment | Observations page for the first pass; rerun planned with fewer slots
+Wrote [[wiki/syntheses/deepseek-100-first-pass-observations]] (outcome, memory exhaustion, the 52 queued failures, what worked, setup automation findings, decisions). Index and protocol deviations updated.
+
+## [2026-11-04] experiment | Pass 2: all 100 tasks relaunched with 4 + 6 slots and the memory sampler
+Started a 69-task rerun, stopped it after about 7 minutes at the owner's request to rerun all 100, terminated its workers, and launched the 100-task pass 2 at 06:07 UTC (manifest random100-pass2.json, list sha256 c685e88b..., work root random100-pass2). Pages touched: [[wiki/syntheses/deepseek-100-task-study-protocol]], [[wiki/syntheses/deepseek-100-first-pass-observations]].
+
+## [2026-11-04] query | Automation assessment and architecture brainstorm filed
+Filed the discussion on how automated the run system is and the direction (any model over any number of tasks, multiple benchmarks later, one cloud) as [[wiki/syntheses/platform-automation-and-architecture]]. No decisions beyond the stated direction.
