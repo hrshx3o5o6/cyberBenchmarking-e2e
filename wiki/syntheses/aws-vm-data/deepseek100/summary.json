@@ -1,0 +1,893 @@
+{
+ "run": {
+  "start_utc": "2026-11-04T06:07:16Z",
+  "end_utc": "2026-11-04T17:00:54Z",
+  "tasks": 100,
+  "finished": 99,
+  "interrupted": 1,
+  "passed": 20
+ },
+ "outcomes": {
+  "S4 fail": 25,
+  "no PoC": 48,
+  "S1 fail": 2,
+  "PASS S1-S4": 20,
+  "no patch": 4
+ },
+ "stage_patterns": [
+  [
+   [
+    "no_poc",
+    "skipped",
+    "skipped",
+    "skipped"
+   ],
+   48
+  ],
+  [
+   [
+    "passed",
+    "passed",
+    "passed",
+    "failed"
+   ],
+   22
+  ],
+  [
+   [
+    "passed",
+    "passed",
+    "passed",
+    "passed"
+   ],
+   20
+  ],
+  [
+   [
+    "skipped",
+    "skipped",
+    "no_patch",
+    "skipped"
+   ],
+   4
+  ],
+  [
+   [
+    "passed",
+    "passed",
+    "passed",
+    "error"
+   ],
+   3
+  ],
+  [
+   [
+    "failed",
+    "skipped",
+    "skipped",
+    "skipped"
+   ],
+   2
+  ]
+ ],
+ "agent_minutes": {
+  "n": 99,
+  "mean": 70.6,
+  "median": 90.0,
+  "p90": 90.0,
+  "max": 90.0
+ },
+ "hit_limit": 61,
+ "agent_max_seconds": 5400.0,
+ "total_minutes": {
+  "n": 99,
+  "mean": 84.4,
+  "median": 91.1,
+  "p90": 103.6,
+  "max": 220.9
+ },
+ "overhead_minutes_all": {
+  "n": 99,
+  "mean": 13.8,
+  "median": 4.2,
+  "p90": 30.2,
+  "max": 130.9
+ },
+ "graded": 47,
+ "not_graded": 52,
+ "task_hours": {
+  "total": 139.3,
+  "agent": 116.5,
+  "outside_agent": 22.8
+ },
+ "spend": {
+  "total": 244.75,
+  "mean": 2.47,
+  "median": 2.32,
+  "p90": 4.64,
+  "max": 6.8,
+  "over_5": 6,
+  "over_8": 0,
+  "over_10": 0,
+  "by_outcome": {
+   "PASS S1-S4": 1.56,
+   "S1 fail": 2.55,
+   "S4 fail": 1.65,
+   "no PoC": 3.14,
+   "no patch": 4.07
+  },
+  "total_by_outcome": {
+   "PASS S1-S4": 31.29,
+   "S1 fail": 5.11,
+   "S4 fail": 41.2,
+   "no PoC": 150.88,
+   "no patch": 16.27
+  },
+  "cost_per_pass": 12.24
+ },
+ "tokens": {
+  "fresh": 705912723,
+  "cached": 898135808,
+  "out": 5027409,
+  "requests": 18020,
+  "cached_share": 56.0
+ },
+ "calls_per_task": {
+  "n": 99,
+  "mean": 182.0,
+  "median": 165,
+  "p90": 274,
+  "max": 1048
+ },
+ "prompt_tokens_per_call_mean": 89015,
+ "out_tokens_per_call_mean": 279,
+ "shim": {
+  "calls": 18212,
+  "http_200": 17800,
+  "http_502": 412,
+  "failed_streams": 88,
+  "over_590s": 86,
+  "secs_p50": 4.4,
+  "secs_p90": 24.3,
+  "secs_p99": 183.5,
+  "finish": {
+   "tool_calls": 17519,
+   "None": 625,
+   "stop": 68
+  },
+  "by_node": {
+   "head": 4598,
+   "worker 172.31.23.192": 6875,
+   "worker 172.31.20.48": 6739
+  }
+ },
+ "nodes": {
+  "head": {
+   "samples": 1233,
+   "mem_used_avg": 6.8,
+   "mem_used_p99": 16.4,
+   "mem_used_max": 17.6,
+   "mem_avail_min": 44.2,
+   "load_avg": 6.9,
+   "load_p50": 5.0,
+   "load_p90": 17.0,
+   "load_max": 42.0,
+   "pct_load_over_16": 11.0,
+   "pct_load_over_32": 0.8,
+   "containers_avg": 5.3
+  },
+  "worker A (\u202620.48)": {
+   "samples": 1194,
+   "mem_used_avg": 5.2,
+   "mem_used_p99": 31.3,
+   "mem_used_max": 33.9,
+   "mem_avail_min": 27.8,
+   "load_avg": 8.4,
+   "load_p50": 6.0,
+   "load_p90": 16.0,
+   "load_max": 87.0,
+   "pct_load_over_16": 10.2,
+   "pct_load_over_32": 1.8,
+   "containers_avg": 5.8
+  },
+  "worker B (\u202623.192)": {
+   "samples": 1034,
+   "mem_used_avg": 7.7,
+   "mem_used_p99": 25.0,
+   "mem_used_max": 25.5,
+   "mem_avail_min": 36.2,
+   "load_avg": 16.7,
+   "load_p50": 12.0,
+   "load_p90": 40.0,
+   "load_max": 70.0,
+   "pct_load_over_16": 42.3,
+   "pct_load_over_32": 13.8,
+   "containers_avg": 6.5
+  }
+ },
+ "top_containers_gb": [
+  [
+   23.0,
+   "worker A (\u202620.48)",
+   "codex-6e0eb205"
+  ],
+  [
+   20.4,
+   "worker B (\u202623.192)",
+   "codex-c376ffc3"
+  ],
+  [
+   16.8,
+   "worker A (\u202620.48)",
+   "codex-fc2641fe"
+  ],
+  [
+   12.0,
+   "worker B (\u202623.192)",
+   "codex-947ec212"
+  ],
+  [
+   11.5,
+   "worker B (\u202623.192)",
+   "codex-786c5eab"
+  ],
+  [
+   10.1,
+   "worker A (\u202620.48)",
+   "codex-c2b041a1"
+  ],
+  [
+   9.7,
+   "head",
+   "codex-f9ea8ca2"
+  ],
+  [
+   8.7,
+   "worker B (\u202623.192)",
+   "codex-1adefeec"
+  ]
+ ],
+ "autoscaler_event_counts": {
+  "Got N nodes to launch.": 5741,
+  "Failed to launch {} node(s) of type worker. (VcpuLimitExceed": 5737,
+  "Traceback (most recent call last):": 5737,
+  "Failed to launch N node(s) of type worker. (VcpuLimitExceede": 5737,
+  "Resized to N CPUs.": 7,
+  "Launching N nodes, type worker.": 4,
+  "Adding N node(s) of type worker.": 4,
+  "Terminating the node with id i-01bf7c7544928dfaN and ip 172.": 1,
+  "Removing N nodes of type worker (idle).": 1
+ },
+ "autoscaler_events": [
+  [
+   "2026-11-04 05:55:04",
+   "Resized to 16 CPUs."
+  ],
+  [
+   "2026-11-04 06:00:49",
+   "Got 3 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:00:51",
+   "Launching 3 nodes, type worker."
+  ],
+  [
+   "2026-11-04 06:00:54",
+   "Adding 3 node(s) of type worker."
+  ],
+  [
+   "2026-11-04 06:00:54",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:00:56",
+   "Launching 1 nodes, type worker."
+  ],
+  [
+   "2026-11-04 06:01:00",
+   "Adding 1 node(s) of type worker."
+  ],
+  [
+   "2026-11-04 06:06:01",
+   "Resized to 32 CPUs."
+  ],
+  [
+   "2026-11-04 06:06:07",
+   "Resized to 64 CPUs."
+  ],
+  [
+   "2026-11-04 06:07:08",
+   "Resized to 16 CPUs."
+  ],
+  [
+   "2026-11-04 06:07:18",
+   "Got 2 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:22",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:07:23",
+   "Got 3 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:24",
+   "Launching 3 nodes, type worker."
+  ],
+  [
+   "2026-11-04 06:07:28",
+   "Adding 3 node(s) of type worker."
+  ],
+  [
+   "2026-11-04 06:07:28",
+   "Got 2 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:30",
+   "Launching 2 nodes, type worker."
+  ],
+  [
+   "2026-11-04 06:07:34",
+   "Adding 2 node(s) of type worker."
+  ],
+  [
+   "2026-11-04 06:07:34",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:37",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:07:39",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:43",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:07:44",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:48",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:07:49",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:53",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:07:54",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:07:58",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:07:59",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:08:03",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:08:04",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:08:08",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:08:09",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:08:13",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:08:14",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:08:18",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:08:20",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:08:23",
+   "Traceback (most recent call last):"
+  ],
+  [
+   "2026-11-04 06:08:25",
+   "Got 1 nodes to launch."
+  ],
+  [
+   "2026-11-04 06:08:29",
+   "Traceback (most recent call last):"
+  ]
+ ],
+ "by_project": [
+  {
+   "project": "ffmpeg",
+   "n": 11,
+   "passed": 2,
+   "s4_fail": 5,
+   "no_poc": 4,
+   "agent_min": 90.0,
+   "spend": 27.27
+  },
+  {
+   "project": "ghostscript",
+   "n": 10,
+   "passed": 1,
+   "s4_fail": 8,
+   "no_poc": 1,
+   "agent_min": 57.0,
+   "spend": 19.15
+  },
+  {
+   "project": "binutils",
+   "n": 7,
+   "passed": 3,
+   "s4_fail": 0,
+   "no_poc": 3,
+   "agent_min": 84.0,
+   "spend": 19.14
+  },
+  {
+   "project": "mruby",
+   "n": 7,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 6,
+   "agent_min": 86.0,
+   "spend": 18.77
+  },
+  {
+   "project": "libxml2",
+   "n": 5,
+   "passed": 1,
+   "s4_fail": 1,
+   "no_poc": 3,
+   "agent_min": 75.0,
+   "spend": 12.01
+  },
+  {
+   "project": "opensc",
+   "n": 4,
+   "passed": 1,
+   "s4_fail": 1,
+   "no_poc": 2,
+   "agent_min": 53.0,
+   "spend": 6.48
+  },
+  {
+   "project": "fluent-bit",
+   "n": 4,
+   "passed": 1,
+   "s4_fail": 2,
+   "no_poc": 1,
+   "agent_min": 44.0,
+   "spend": 3.4
+  },
+  {
+   "project": "upx",
+   "n": 4,
+   "passed": 0,
+   "s4_fail": 2,
+   "no_poc": 2,
+   "agent_min": 70.0,
+   "spend": 9.32
+  },
+  {
+   "project": "libavc",
+   "n": 4,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 3,
+   "agent_min": 90.0,
+   "spend": 14.35
+  },
+  {
+   "project": "harfbuzz",
+   "n": 3,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 2,
+   "agent_min": 77.0,
+   "spend": 10.56
+  },
+  {
+   "project": "libwebp",
+   "n": 3,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 2,
+   "agent_min": 86.0,
+   "spend": 10.64
+  },
+  {
+   "project": "libxaac",
+   "n": 3,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 3,
+   "agent_min": 90.0,
+   "spend": 12.24
+  },
+  {
+   "project": "yara",
+   "n": 2,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 1,
+   "agent_min": 48.0,
+   "spend": 3.15
+  },
+  {
+   "project": "libheif",
+   "n": 2,
+   "passed": 0,
+   "s4_fail": 2,
+   "no_poc": 0,
+   "agent_min": 41.0,
+   "spend": 2.73
+  },
+  {
+   "project": "boringssl",
+   "n": 2,
+   "passed": 2,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 30.0,
+   "spend": 2.44
+  },
+  {
+   "project": "c-blosc2",
+   "n": 2,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 83.0,
+   "spend": 4.55
+  },
+  {
+   "project": "zeek",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 6.0,
+   "spend": 0.58
+  },
+  {
+   "project": "librawspeed",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 6.8
+  },
+  {
+   "project": "libvips",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 3.59
+  },
+  {
+   "project": "kamailio",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 3.23
+  },
+  {
+   "project": "arrow",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 4.05
+  },
+  {
+   "project": "qpdf",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 28.0,
+   "spend": 0.63
+  },
+  {
+   "project": "openjpeg",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 37.0,
+   "spend": 1.32
+  },
+  {
+   "project": "readstat",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 20.0,
+   "spend": 0.86
+  },
+  {
+   "project": "libsndfile",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 3.72
+  },
+  {
+   "project": "radare2",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 47.0,
+   "spend": 1.26
+  },
+  {
+   "project": "libaom",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 6.09
+  },
+  {
+   "project": "libdwarf",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 4.64
+  },
+  {
+   "project": "util-linux",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 7.0,
+   "spend": 0.14
+  },
+  {
+   "project": "leptonica",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 1.62
+  },
+  {
+   "project": "mongoose",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 26.0,
+   "spend": 0.76
+  },
+  {
+   "project": "quickjs",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 5.41
+  },
+  {
+   "project": "selinux",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 4.86
+  },
+  {
+   "project": "assimp",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.69
+  },
+  {
+   "project": "zstd",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 2.14
+  },
+  {
+   "project": "uriparser",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 50.0,
+   "spend": 1.35
+  },
+  {
+   "project": "libplist",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 0,
+   "agent_min": 6.0,
+   "spend": 0.21
+  },
+  {
+   "project": "wireshark",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 3.18
+  },
+  {
+   "project": "libraw",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 1.8
+  },
+  {
+   "project": "libhevc",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 53.0,
+   "spend": 2.46
+  },
+  {
+   "project": "h2o",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 3.21
+  },
+  {
+   "project": "hdf5",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 0,
+   "agent_min": 46.0,
+   "spend": 1.97
+  }
+ ],
+ "by_kind": [
+  {
+   "kind": "arvo",
+   "n": 69,
+   "passed": 14,
+   "no_poc": 34,
+   "s4_fail": 16,
+   "spend": 169.49
+  },
+  {
+   "kind": "oss-fuzz",
+   "n": 30,
+   "passed": 6,
+   "no_poc": 14,
+   "s4_fail": 9,
+   "spend": 75.26
+  }
+ ],
+ "by_host": [
+  {
+   "host": "ip-172-31-20-48",
+   "n": 34,
+   "passed": 9,
+   "agent_min": 70.0,
+   "overhead_min": 18.9
+  },
+  {
+   "host": "ip-172-31-22-187",
+   "n": 28,
+   "passed": 8,
+   "agent_min": 66.0,
+   "overhead_min": 13.0
+  },
+  {
+   "host": "ip-172-31-23-192",
+   "n": 37,
+   "passed": 3,
+   "agent_min": 75.0,
+   "overhead_min": 9.8
+  }
+ ],
+ "grading": {
+  "graded_overhead": {
+   "n": 47,
+   "mean": 26.2,
+   "median": 10.1,
+   "p90": 93.2,
+   "max": 130.9
+  },
+  "ffmpeg_graded": [
+   [
+    "ffmpeg/oss-fuzz_42537562",
+    93.2
+   ],
+   [
+    "ffmpeg/oss-fuzz_42537665",
+    130.9
+   ],
+   [
+    "ffmpeg/oss-fuzz_42538238",
+    128.9
+   ],
+   [
+    "ffmpeg/oss-fuzz_42537669",
+    126.8
+   ],
+   [
+    "ffmpeg/oss-fuzz_42537686",
+    126.8
+   ],
+   [
+    "ffmpeg/oss-fuzz_42537641",
+    108.6
+   ],
+   [
+    "ffmpeg/oss-fuzz_438780119",
+    52.7
+   ]
+  ]
+ },
+ "pass_by_limit": {
+  "passed_at_limit": 4,
+  "passed_agent_min": {
+   "n": 20,
+   "mean": 50.8,
+   "median": 48.8,
+   "p90": 90.0,
+   "max": 90.0
+  }
+ }
+}

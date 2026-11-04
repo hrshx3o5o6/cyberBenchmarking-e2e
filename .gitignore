@@ -15,3 +15,7 @@ debug/
 # autoscaler infra: real IDs/paths live in the untracked local file
 wiki/syntheses/aws-vm-data/autoscaler/*.local.env
 wiki/syntheses/aws-vm-data/autoscaler/rendered/
+
+# exact cloud identifiers the run viewer must redact (never committed)
+tools/viewer_redact.local.txt
+tools/__pycache__/

@@ -20,6 +20,8 @@ WIKI = os.path.join(ROOT, "wiki", "syntheses")
 OUT = os.path.join(ROOT, "docs", "trajectories")
 RUN_AGENT = os.path.join(ROOT, "cybergym-bench", "cybergym-e2e", "scripts", "run_agent.py")
 ANNOT = os.path.join(ROOT, "tools", "viewer_annotations.json")
+DS_RUNS = os.path.join(RUNS, "deepseek100-pass2")                      # the 100 task run (local copy of its run folders; not in git)
+DS_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "deepseek100")   # the small result tables of that run (in git)
 REPO_BLOB = "https://github.com/hrshx3o5o6/cyberBenchmarking-e2e/blob/main/wiki/syntheses/"
 OUT_CAP = 20000          # characters of one tool output kept on a page
 THINK_CAP = 20000
@@ -35,12 +37,20 @@ REDACT = [  # (pattern, replacement) applied to ALL text before it reaches a pag
     (re.compile(r"/Users/[A-Za-z0-9._-]+"), "/Users/[user]"),
     (re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"), "[email]"),
     (re.compile(r"\b74\.235\.167\.7\b"), "[vm-ip]"),
+    (re.compile(r"\b[a-z]{3,}-[a-z]{3,}-\d{6}-[a-z0-9]{2}\b"), "[gcp-project]"),     # Google project ids look like word-word-123456-xx
+    (re.compile(r"\bi-0[0-9a-f]{16}\b"), "[instance-id]"),
 ]
 SECRET_PATTERNS = [  # the build FAILS if any of these survive redaction
     re.compile(r"sk-or-v1-[A-Za-z0-9]{10,}"), re.compile(r"\bhf_[A-Za-z0-9]{20,}"), re.compile(r"Bearer\s+[A-Za-z0-9_\-]{30,}"),
     re.compile(r"AKIA[0-9A-Z]{12,}"), re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), re.compile(r"ANTHROPIC_API_KEY=\S{12,}"),
 ]
 REDACTIONS = collections.Counter()
+LOCAL_REDACT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "viewer_redact.local.txt")   # untracked: one exact string per line (cloud ids, public IPs)
+if os.path.exists(LOCAL_REDACT):
+    for _l in open(LOCAL_REDACT):
+        _l = _l.strip()
+        if _l and not _l.startswith("#"):
+            REDACT.append((re.compile(re.escape(_l)), "[redacted-id]"))
 
 
 def clean(t):
@@ -150,6 +160,8 @@ def parse_codex(events):
 def discover():
     seen, runs = {}, []
     for f in sorted(glob.glob(os.path.join(RUNS, "**", "trajectory", "attempt_*.log"), recursive=True)):
+        if f.startswith(DS_RUNS + os.sep):          # shown in its own section (discover_ds100)
+            continue
         h = hashlib.sha256(open(f, "rb").read()).hexdigest()
         if h in seen:
             continue
@@ -183,6 +195,21 @@ def discover():
                          style=s.get("prompt_style", "iterative"), stages=[a.get("stage%d" % i) for i in (1, 2, 3, 4)],
                          minutes=s.get("duration_minutes"), ts=ts, events=events, summary=s))
     runs.sort(key=lambda r: (r["task"], mdl_rank(r["model"]), r["mode"], r["agent"], r["ts"]))
+    return runs
+
+
+def discover_ds100():
+    """Runs of the 100 task DeepSeek run, one per task, in the same shape as discover() returns."""
+    runs = []
+    for f in sorted(glob.glob(os.path.join(DS_RUNS, "*", "upstream", "*", "*", "trajectory", "attempt_*.log"))):
+        rd = f.split("/trajectory/")[0]
+        if not os.path.exists(rd + "/summary.json"):
+            continue
+        s_ = json.load(open(rd + "/summary.json")); a = s_["attempts"][0]
+        runs.append(dict(path=f, rd=rd, rel=os.path.relpath(f, RUNS), sha=hashlib.sha256(open(f, "rb").read()).hexdigest(), task=s_["task"], agent="codex", model="deepseek-v4.1-flash",
+                         mode="e2e", style=s_.get("prompt_style", "iterative"), stages=[a.get("stage%d" % i) for i in (1, 2, 3, 4)], minutes=s_.get("duration_minutes"),
+                         ts=os.path.basename(rd).split("_e2e")[0], events=load_events(f), summary=s_))
+    runs.sort(key=lambda r: r["task"])
     return runs
 
 
@@ -517,7 +544,7 @@ def build_run(r, wp, ann):
     return rid, h, dict(steps=nsteps, tools=tools_n, problems=problems, cost=cost, tk=tk, share=share, banners=bool(ann) or bool(meta.get("gaps")))
 
 
-def build_index(rows):
+def build_index(rows, ds_block=""):
     by_task = collections.OrderedDict()
     for row in rows:
         by_task.setdefault(row["r"]["task"], []).append(row)
@@ -526,7 +553,8 @@ def build_index(rows):
           '%d runs across %d tasks. <a href="how-to-read.html">How to read these pages</a>.</p></div>'
           '<a class="btn" href="../infra-leads.html">Infra leads</a></header>' % (len(rows), len(by_task)))
     h += '<div class="banner info"><b>Read the Note column.</b> Some tasks leak the answer and some runs ended for reasons that say nothing about the model. Flagged runs repeat the explanation in a banner on their page.</div>'
-    h += '<nav class="jump">' + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
+    h += ds_block
+    h += '<nav class="jump"><a href="#deepseek100"><b>100 task run</b></a>' + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
     for t, rs in by_task.items():
         h += '<section id="t-%s"><h3 class="task">%s</h3><div class="tablewrap"><table class="runs"><colgroup><col style="width:17%%"><col style="width:11%%"><col style="width:9%%"><col style="width:27%%"><col style="width:6%%"><col style="width:12%%"><col style="width:18%%"></colgroup><thead><tr><th>Model</th><th>Harness</th><th>Mode</th><th>S1 S2 S3 S4</th><th>Min</th><th>Cost</th><th>Note</th></tr></thead><tbody>' % (slug(t), esc(t))
         for row in rs:
@@ -582,7 +610,43 @@ def main():
         rows.append(dict(r=r, id=rid, info=info, note=note))
         report["pages"] += 1
         report["problems"] += len(info["problems"])
-    files["index.html"] = build_index(rows)
+    ds_block = ""
+    ds = discover_ds100()
+    if ds and os.path.isdir(DS_DATA):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import deepseek100_report as dsr
+        ctx = dict(head=head, TAIL=TAIL, chip=chip, esc=esc)
+        data = dsr.load(DS_DATA)
+        by_task = {t["task"]: t for t in data["tasks"]}
+        links = {}
+        for r in ds:
+            t = by_task.get(r["task"], {})
+            ann = [dict(level="info", title="Part of the 100 task run.", text="One of the 100 tasks of the DeepSeek V4.1 Flash run (Codex through Vertex AI, one attempt, 90-minute agent limit, 10 USD cap). Cost is at an assumed price. See the report for the whole run.")]
+            if r["task"] == "qpdf/oss-fuzz_42535152":
+                ann.append(dict(level="warn", title="Leak in this task.", text="The task's ground-truth PoC sits inside its source tree (a fuzz-corpus file). The run still ended without a PoC."))
+            if r["task"] in ("binutils/arvo_60532", "ghostscript/oss-fuzz_399390078"):
+                ann.append(dict(level="info", title="Replacement task.", text="Replaced a task of the drawn list whose PoC file was empty in the dataset (the runner rejects those), before any scored run."))
+            if t.get("status") == "interrupted":
+                ann.append(dict(level="fail", title="Not graded.", text="The operator stopped the run while this task was in grading (about 3 hours 20 minutes in); the agent had finished, so its trajectory, PoC and patch are shown, but no stage result exists."))
+            elif t.get("overhead_min") and t["overhead_min"] >= 60:
+                ann.append(dict(level="info", title="Long grading.", text="Setup plus grading took %d minutes on top of the 90-minute agent run (each grading stage rebuilds the project in a fresh container)." % t["overhead_min"]))
+            rid, h, info = build_run(r, None, ann)
+            h = h.replace('<a href="../index.html">All runs</a>', '<a href="../index.html#deepseek100">100 task run</a>')
+            h = h.replace("no matching wiki page", '<a href="../deepseek-100-report.html">100 task run report</a>')
+            if t.get("spend") is not None:
+                h = h.replace("<dd>see the wiki page</dd>", "<dd>$%.2f (assumed price)</dd>" % t["spend"])
+                h = re.sub(r"(<dt>Model responses</dt><dd>)n/a(</dd>)", r"\g<1>%d (from the shim)\g<2>" % (t["requests"] or 0), h)
+                h = re.sub(r"(<dt>Tokens \(fresh / cached / output\)</dt><dd>)[^<]*(</dd>)", r"\g<1>%s / %s / %s (from the shim)\g<2>" % (format(int(t["fresh_in"] or 0), ","), format(int(t["cached_in"] or 0), ","), format(int(t["out_tok"] or 0), ",")), h)
+            files["runs/%s.html" % rid] = h
+            links[r["task"]] = "runs/%s.html" % rid
+            report["pages"] += 1
+        files["deepseek-100-report.html"] = dsr.build_report(data, links, ctx)
+        S = data["S"]
+        ds_block = ('<section class="panel" id="deepseek100"><h2>100 task run: DeepSeek V4.1 Flash</h2><p>100 random CyberGym-E2E tasks, end to end, Codex through Vertex AI, one attempt each, the paper\'s limits (90 minutes, 10 USD). '
+                    '<b>%d of 100 graded, %d passed all four stages</b> (%d more passed S1 to S3); cost $%.2f at an assumed price; 10 h 54 min wall. <a class="btn" href="deepseek-100-report.html">Full report</a></p>'
+                    '<p class="note">Report: outcomes, time, money, model calls, memory and CPU per node, autoscaler, the first pass that lost 68 tasks. One row per task below; click a task for its whole run.</p>%s</section>'
+                    % (S["run"]["finished"], S["run"]["passed"], S["outcomes"].get("S4 fail", 0), S["spend"]["total"], dsr.task_table(data, links, ctx)))
+    files["index.html"] = build_index(rows, ds_block)
     files["how-to-read.html"] = head("How to read these pages") + HOWTO + TAIL
     files["README.md"] = ("# Run viewer pages\n\nGenerated by `tools/build_viewer.py` from the raw trajectory logs in `cybergym-bench/runs/`. Do not edit by hand.\n\n"
                           "- `index.html`: all runs, grouped by task\n- `runs/`: one page per run\n- `how-to-read.html`: glossary\n\nRebuild: `python3 tools/build_viewer.py`.\n")

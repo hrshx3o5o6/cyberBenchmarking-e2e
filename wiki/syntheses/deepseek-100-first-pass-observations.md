@@ -53,3 +53,16 @@ At 20:41:23 the driver log read "pending lease requests (10) reached limit (10),
 - Which task or step used the memory; does 6 slots per worker avoid the problem.
 - Whether Ray's queued-task failure can be avoided by submitting in smaller waves.
 - Vertex's sustained rate limit over several hours (no 429s seen).
+
+## 8. What is recorded for pass 2 (checked 2026-11-04, 4h15 in)
+| Data | Where | Survives the node? |
+|---|---|---|
+| Result per task (stages, usage totals, spend, host, times) | Postgres `executions` | yes |
+| Per finished task: `result.json`, `runner.log`, `summary.json` and the full agent trajectory `trajectory/attempt_1.log` (gzip) | Postgres `artifacts` (430 rows so far, all three nodes) | yes |
+| Node memory, load, container count and the largest containers every 30 s | Postgres `node_metrics` (12,600 rows) | yes |
+| **The PoC and patch files each task produced** (`output/poc.bin`, `output/fix.patch`) | only on the disk of the node that ran the task | **no, until the copy loop below** |
+| **Per-call model log of each worker's shim** (status, seconds, finish reason, tokens, stream failures) | only on that worker's disk (the head's own log is on the head) | **no, until the copy loop below** |
+| Per-call usage in Postgres `usage_events` | the table exists but nothing writes to it (0 rows); per-task totals are in the result | n/a |
+Fix applied 2026-11-04 10:21 UTC: a loop on the head (`~/pull_worker_data.sh`) copies each live worker's whole work folder (outputs, trajectories, shim log, memory log) to `~/cybergym-work/worker-backups/<worker ip>/` every 2 minutes. It must be stopped, and the folder copied to the Mac, when the run ends. Worker nodes terminate 3 minutes after going idle, so a last pull can be missed if the final tasks finish just before; the loop interval (2 minutes) is shorter than that.
+Added 2026-11-04 14:08 UTC: a second loop (`~/pull_worker_raylogs.sh`, every 5 minutes) copies each worker's Ray logs (raylet, worker stdout and stderr, memory-monitor messages, about 118 files and 47 MB per worker) and its home-directory logs (the sampler's own log) to `~/cybergym-work/worker-backups/<worker ip>/ray-logs/` and `home-logs/`; the first loop's copies of shim logs, outputs, trajectories and memory logs were verified equal to the live files on both workers (6,402 and 6,358 shim log lines, 110 and 67 output files). Not copied: Docker's own container logs (task containers are started with `--rm`, so they are gone when a task ends) and the cloud-init output of the worker machines. At the end of the run: stop both loops and copy `worker-backups` to the Mac.
+

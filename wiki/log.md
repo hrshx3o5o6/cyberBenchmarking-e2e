@@ -441,3 +441,27 @@ Started a 69-task rerun, stopped it after about 7 minutes at the owner's request
 
 ## [2026-11-04] query | Automation assessment and architecture brainstorm filed
 Filed the discussion on how automated the run system is and the direction (any model over any number of tasks, multiple benchmarks later, one cloud) as [[wiki/syntheses/platform-automation-and-architecture]]. No decisions beyond the stated direction.
+
+## [2026-11-04] experiment | New Qwen3.8-27B endpoint tested: tool calling and 262k context work, speed is the blocker
+The new dedicated endpoint (A100 80GB, one replica) serves tool calls, reasoning split and prompts up to 255k tokens; prefill about 2,000 tokens per second with no prompt caching, decode 9 tokens per second, parallel calls queue. One A100 serves roughly one agent at a time. Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | Qwen endpoint: prefix caching measured off, KV capacity estimated, agent prompts verified append-only
+Time to first token is the same 8.7 s for a new prompt, an identical repeat and a shared prefix, so no caching; prefill about 3,300 tokens per second. KV about 64 KiB per token (16 full-attention layers of 64), capacity roughly 250 to 300 thousand tokens, so about 2 agents at 128k. Real Codex 0.118.0 requests (captured in a throwaway container) are append-only through our translation and the Qwen chat template; the date appears only in the first user message. Startup log and metrics are not readable by us. Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | Pass 2 data coverage checked; worker data copy loop added
+Trajectories and results are in Postgres for every node; PoC and patch files and the workers' per-call shim logs were only on worker disks, so a loop now copies them to the head every 2 minutes. usage_events is empty. Page touched: [[wiki/syntheses/deepseek-100-first-pass-observations]].
+
+## [2026-11-04] experiment | Qwen endpoint undeployed (owner request)
+Undeployed the GPU deployment at 14:02 UTC after about 10 hours deployed (verified: endpoint and model record remain, no deployed model). Redeploy recipe recorded without ids. Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | Qwen project access checked
+The login can list and upload models and undeploy; logs, monitoring and GPU quotas are not readable (403). An empty-body upload probe created an empty model record, which was deleted. Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | Qwen redeployed with prefix caching: it works; warm capacity about 120 to 150 thousand tokens
+Repeated 28.6k-token prompt: time to first token 9.5 s cold, 0.49 s warm, 1.12 s with a shared prefix; append-only conversations stay near 2 s per turn; only about 120k tokens stay warm in total. Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | Qwen with CUDA graphs: decode 28 tokens/s per stream (3x), 210 tokens/s with 8 streams; warm cache still about 120k tokens
+Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | 100-task DeepSeek run ended (99 of 100 graded); report written, viewer section and per-task pages built
+The operator stopped the last ffmpeg grading at 17:00 UTC after a final data pull; backups verified on the Mac; analysis script, tables and report written; the run viewer got a section "100 task run: DeepSeek V4.1 Flash" with one page per task and a report page. Pages touched: [[wiki/syntheses/deepseek-100-task-run-report]], [[wiki/index]].
