@@ -7,6 +7,8 @@ tags: [vertex, qwen, qwen3-8-27b, endpoint, vllm, tool-calling, findings, benchm
 ---
 # Self-deployed Qwen3.8-27B endpoint on Vertex AI: access check (2026-11-03)
 
+**See also:** the consolidated before and after of the serving changes (prefix caching, CUDA graphs): [[wiki/syntheses/qwen27b-prefix-caching-and-cuda-graphs]]. This page keeps the chronological notes.
+
 Part of [[wiki/syntheses/model-registry-design]] (section 5, the `vertex` provider). The endpoint belongs to the shared Google project the owner granted access to; project and endpoint ids are deliberately not recorded here.
 
 ## What it is (read from the endpoint's own metadata)

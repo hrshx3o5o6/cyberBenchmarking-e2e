@@ -474,3 +474,12 @@ About 12 GPU-hours used today across three deployments. Page touched: [[wiki/syn
 
 ## [2026-11-05] experiment | Run observations completed in the vault: validation and model hours, fuzzers, what-if schedule, what is and is not recorded
 Added sections 13 to 16 to [[wiki/syntheses/deepseek-100-task-run-report]], the matching sections to the web report, the script `tools/analyze_deepseek100_extras.py` with its output `extras.json`, and the Qwen concurrency analysis and undeploy notes to [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-05] query | Assessment: can 8 task slots per worker be run safely
+Filed as section 17 of [[wiki/syntheses/deepseek-100-task-run-report]]: pass-2 memory evidence, why the resampling model cannot certify 8 (it misses the first pass's failures at 10), and the safety net needed first.
+
+## [2026-11-05] query | Takeaways of the 100-task run and non-compute speedups
+Section 18 of [[wiki/syntheses/deepseek-100-task-run-report]]: replay shows ordering ffmpeg first saves about 1.7 h and faster grading up to about 2.4 h more; the floor on 16 slots is about 8.9 h.
+
+## [2026-11-05] experiment | Consolidated page on the Qwen serving changes written
+New page [[wiki/syntheses/qwen27b-prefix-caching-and-cuda-graphs]] (three configurations side by side, measurements, agent-run model, open questions, next levers), data in `aws-vm-data/qwen27b/measurements.json`, sanitised probe script `tools/qwen_endpoint_probe.py`; pointer added to [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
