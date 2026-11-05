@@ -166,3 +166,24 @@ Change tested: `--enforce-eager` removed from the serving arguments (prefix cach
 So CUDA graphs fix the slow decoding step (the per-step cost was launch overhead: it did not grow with the number of streams) and cost nothing visible in cache capacity; prefill speed (about 3,300 tokens per second for a cache miss) and the roughly 120k warm tokens are unchanged. At the DeepSeek workload (mean 89k-token prompts, 280 output tokens) a cache miss still costs about 27 s of prefill, but decoding a call now takes about 10 s instead of 30 s; with caching a normal agent call (a few thousand new tokens) is about 2 s of prefill plus the decode.
 Remaining limits: only about 120k tokens of context stay warm, so about 1 to 2 agents at the 78k to 89k mean and about 4 at 30k; beyond that they evict each other and recompute at 3,300 tokens per second. Next levers: understand why the warm cache is only about 120k tokens (needs the server log), a quantised KV cache or weights, a second GPU.
 
+## How much better is it now? Concurrency test and model (2026-11-04, CUDA graphs and prefix caching on)
+**Live test:** each agent starts a conversation of about 50k tokens and adds about 3k tokens per turn for 6 turns, all agents calling back to back (time to first token, 1 output token):
+| Agents | First call (cold) | Later calls (mean / max) | Wall for 6 turns |
+|---|---|---|---|
+| 1 | 16.0 s | **1.9 s** / 2.0 s | 25 s |
+| 2 | 24.7 s | **4.2 s** / 16.2 s (some evictions) | 46 s |
+| 4 | 40.4 s | **76 s** / 88 s (every call a miss, queued behind the others) | 454 s |
+Round-robin access to a least-recently-used cache is a cliff, not a slope: once the agents' combined context passes the warm capacity (about 120k tokens), each agent's cache is evicted before its next turn and hit rates fall to about zero, so the earlier "warm share" interpolation is optimistic beyond 2 agents.
+**Calls an agent can make in 90 minutes** (model with stated assumptions: mean prompt 89k tokens, about 1,000 output tokens per call from the earlier Qwen batch, 15 s of tool time per call, prefill 3,300 tokens/s, cache hit 1.5 s; DeepSeek made 182 calls per task):
+| Configuration | 1 agent | 2 agents | 4+ agents (cache thrashing) | Aggregate ceiling |
+|---|---|---|---|---|
+| Original: eager, no caching | 36 | 36 | 36 down to 13 each | about 200 per 90 min, prefill-bound |
+| Caching on, eager | 43 | 40 | falls | about 200 |
+| Caching on and CUDA graphs (now) | **104** | about 70 (contexts above 60k miss) | about 50 each at 4, 25 at 8 | **about 200**: unchanged, because misses cost the same 27 s of prefill |
+So the change is large for one agent (about 2.9x more calls in the time limit) and about 2x for two, but 104 calls is still only 57% of DeepSeek's 182, and the ceiling for many agents did not move. A 100-task run is about 3 to 6 days at this configuration (one to two agents at a time, 90 minutes each, about 75 to 150 hours).
+**What would move it (not tried):** (1) more warm capacity: the official FP8 checkpoint `Qwen/Qwen3.8-27B-FP8` exists (weights about 27 GB instead of 54, freeing roughly 27 GB, about 400k more tokens of KV, so about 5 to 6 agents warm at 89k; weight-only FP8 on an A100; a different artifact than the bf16 model, which is a protocol decision); an fp8 KV cache (about 2x tokens); a higher GPU memory fraction (0.9 to 0.95: about +60k tokens); (2) two GPUs with tensor parallelism (about 5x the KV memory, faster prefill); (3) replicas with session-sticky routing (each adds about 120k warm tokens); (4) MTP speculative decoding (decode); (5) lower reasoning effort (fewer output tokens, but a change of the model's behaviour). The server log (KV cache size, why the warm cache stops at about 120k) is still unreadable to us.
+
+## Undeployed again (2026-11-04, 17:57 UTC)
+At the study owner's request, with Amit's `stop` action: the endpoint has no deployed model; the endpoint and the model records remain (four records now: the original, Amit's, and the two versions registered for the prefix-caching and CUDA-graph tests). GPU time used today (one `a2-ultragpu-1g`, an A100 80GB): about 10.2 hours for the first deployment (03:48 to 14:02), about 0.65 hours for the prefix-caching eager version (16:18 to 16:57) and about 1.0 hour for the caching plus CUDA-graph version (16:57 to 17:57): about 12 hours in all; the hourly price is not known to us.
+Redeploy kit (outside the repository because it holds the project id): the study owner's Mac, folder `spark/qwen-deploy/` (Amit's script, the copy with `--enable-prefix-caching` added and `--enforce-eager` removed, and a README). `start` registers the version if needed and deploys to the same endpoint in about 25 minutes.
+

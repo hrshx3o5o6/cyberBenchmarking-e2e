@@ -465,3 +465,12 @@ Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
 
 ## [2026-11-04] experiment | 100-task DeepSeek run ended (99 of 100 graded); report written, viewer section and per-task pages built
 The operator stopped the last ffmpeg grading at 17:00 UTC after a final data pull; backups verified on the Mac; analysis script, tables and report written; the run viewer got a section "100 task run: DeepSeek V4.1 Flash" with one page per task and a report page. Pages touched: [[wiki/syntheses/deepseek-100-task-run-report]], [[wiki/index]].
+
+## [2026-11-04] experiment | Qwen concurrency test: 1 agent 1.9 s per call, 2 agents 4 s, 4 agents 76 s; calls per agent in 90 minutes 36 to 104
+Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-04] experiment | Qwen GPU undeployed again (owner request); redeploy kit kept outside the repository
+About 12 GPU-hours used today across three deployments. Page touched: [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-05] experiment | Run observations completed in the vault: validation and model hours, fuzzers, what-if schedule, what is and is not recorded
+Added sections 13 to 16 to [[wiki/syntheses/deepseek-100-task-run-report]], the matching sections to the web report, the script `tools/analyze_deepseek100_extras.py` with its output `extras.json`, and the Qwen concurrency analysis and undeploy notes to [[wiki/syntheses/vertex-qwen27b-endpoint-check]].

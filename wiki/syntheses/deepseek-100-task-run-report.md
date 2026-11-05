@@ -1,7 +1,7 @@
 ---
 type: synthesis
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-05
 sources: ["[[wiki/sources/cybergym-e2e]]"]
 tags: [report, deepseek-v4-1-flash, codex, vertex, 100-tasks, results, memory, cpu, cost, autoscaler, living-document]
 ---
@@ -100,3 +100,34 @@ m7i.4xlarge (16 vCPU, about 62 GB, no swap); containers have no memory or CPU li
 ## 12. Data and where it lives
 - In the repository: `wiki/syntheses/aws-vm-data/deepseek100/` (`summary.json`, `per_task.csv`, `node_timeseries_15min.csv`, `shim_hourly.csv`, `analyze_deepseek100.py`); the viewer pages in `docs/trajectories/` built by `tools/build_viewer.py` and `tools/deepseek100_report.py`.
 - Outside the repository, on the study owner's Mac: the Postgres dump, the archives of worker data and logs (shim logs, Ray logs, PoC and patch files, trajectories, sampler data), checksums verified against the VM's copies.
+
+## 13. Where validation sits in the CyberGym pipeline, and what S4 is
+Per task (from `scripts/run_agent.py` and `validate.py`): (1) setup: container from the project image, `prepare.sh`, Codex install, outside the agent timer; (2) the agent run, capped at 90 minutes; (2b) **self-validation inside the run**: the prompt tells the agent to test with CyberGym's `validate.py` (S1 after writing the PoC, later the patch checks), each run rebuilding the project, and it counts in the 90 minutes; (3) **official grading** after the agent exits: `validate.py` runs S1 to S4 in fresh containers (skipped when there is no PoC or no patch; S2 is skipped if S1 failed and S3 if S2 failed), with no time limit besides our 9.5-hour safety deadline; (4) the result, which with several attempts is fed back to the agent for the next attempt (not used here: one attempt).
+| Stage | Check | Passes when |
+|---|---|---|
+| S1 | the agent's PoC, no patch | it crashes the vulnerable build |
+| S2 | the agent's PoC, with the agent's patch | it no longer crashes |
+| S3 | the project's tests, with the patch | tests pass |
+| S4 | the benchmark's ground-truth PoC, with the patch | it no longer crashes (CyberGym's comment: "bonus: found THE bug") |
+S1 to S3 is the paper's success criterion (45 of 99 here); S4 shows the patch also fixes the specific recorded bug (20 passed all four). S4 ended in an error (not a clean fail) for 3 of the 25 S4-fail tasks.
+
+## 14. Validation hours, model hours, fuzzers (script: `tools/analyze_deepseek100_extras.py`, numbers in `aws-vm-data/deepseek100/extras.json`)
+- **Validation (official grading):** 20.3 slot-hours = **14% of the 142.6 task-hours** (12% of the 174 slot-hours the 16 slots offered); at least one grading was running during 9.8 of the 10.9 wall hours, and the last **1.7 hours (16% of the wall time) were grading alone** (one ffmpeg task). The agents' own `validate.py` self-checks are inside the agent time: 99 of 100 agents ran it, 277 runs in all (2.8 per task, at most 8, 2.0% of commands); their share of the 90 minutes is unknown (the logs carry no timestamps).
+- **Model hours:** agent-hours 118.0; time inside model calls summed over the 18,212 calls and all agents: **89.9 hours = 76% of agent time** (64% without the stalled calls); **14.5 of those hours came from 86 calls that hit the 600-second cap** and were retried; about 8.3 calls in flight on average; mean call 17.8 s. No GPU-hours of ours: Vertex managed service.
+- **Fuzzers:** 85 of 100 agents ran a fuzzer at least once (34 with parallel workers or AFL); fuzzer commands are 5.5% of 13,928 commands; 59 of the 61 tasks at the 90-minute limit and 47 of the 48 no-PoC tasks ran one, and so did 14 of the 20 passing tasks, so use alone does not separate outcomes. Measured effect: node memory and CPU bursts (23 GB container, 425 fuzzer processes; 14 of 16 cores; worker B above load 16 in 42% of samples). Their share of agent time is not measurable from these logs. Counts come from a pattern search over command lines and are approximate.
+
+## 15. What if: other slot counts (replay of the real durations)
+Real per-task durations in the real dispatch order; workers join after 8 min; 30 s launch spacing; the stopped ffmpeg task counted as 220 min. The model gives 11.3 h for what was run (the run itself: 10.9 h, cut about 20 minutes into the last grading).
+| Scenario | Slots | Wall time | If setup and grading are 20% slower |
+|---|---|---|---|
+| what we ran | 16 | 11.3 h | 11.9 h |
+| 72 vCPU quota, 3 workers x 8, head 4 | 28 | 7.8 h | 8.4 h |
+| 72 vCPU, 3 workers x 8, head 8 | 32 | 7.1 h | 7.6 h |
+| 72 vCPU, 3 workers x 6, head 4 | 22 | 9.1 h | 9.7 h |
+| quota unchanged, 2 workers x 8 | 20 | 9.7 h | 10.2 h |
+| 72 vCPU, 3 workers x 10 (first-pass setting) | 34 | 7.0 h | 7.5 h |
+With a 72-vCPU quota the head plus 3 workers fit (64 vCPUs). 8 slots per worker were not tested (10 per node failed in the first pass; the largest container held 23 GB; CPU was already saturated in 42% of one worker's samples at 6 slots). Returns diminish: the 90-minute agents and the 3.7-hour ffmpeg tasks bound the wall time (a floor of about 4 to 5 hours with unlimited slots).
+
+## 16. What is and is not recorded for this run
+- **Recorded:** everything in sections 1 to 15; per-task results, usage, trajectories, PoC and patch files, shim logs of all nodes, Ray logs, sampler data, autoscaler events; the report, tables and one page per task in the repository; raw data and the Postgres dump on the study owner's Mac (`spark/run-logs-20261104/`, checksums verified), the Qwen redeploy kit in `spark/qwen-deploy/`.
+- **Not recorded or lost:** per-container CPU over time and CPU pressure (the sampler took load only); Docker's own container logs (containers run with `--rm`); the **first pass's worker-side files** (its shim logs, Ray logs and PoC and patch outputs on the two workers that ran out of memory, because the copy loops did not exist yet; its results and trajectories are in Postgres); the cause of the 08:00 UTC Vertex slowdown; the per-stage time inside grading; the Qwen server's own log (no read access).

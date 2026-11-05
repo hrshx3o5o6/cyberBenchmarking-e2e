@@ -1,0 +1,104 @@
+{
+ "model_calls": {
+  "calls": 18212,
+  "hours_all": 89.9,
+  "hours_normal": 75.4,
+  "stalled_calls": 86,
+  "hours_stalled": 14.5,
+  "agent_hours": 118.0,
+  "share_of_agent_time_all": 76,
+  "share_without_stalled": 64,
+  "mean_in_flight": 8.3,
+  "mean_call_s": 17.8
+ },
+ "fuzzers": {
+  "tasks": 100,
+  "ran_fuzzer": 85,
+  "ran_parallel_or_afl": 34,
+  "commands": 13928,
+  "fuzzer_commands": 768,
+  "at_limit": 61,
+  "at_limit_ran_fuzzer": 59,
+  "no_poc_tasks": 48,
+  "no_poc_ran_fuzzer": 47,
+  "pass_tasks": 20,
+  "pass_ran_fuzzer": 14,
+  "note": "pattern search over command lines (libFuzzer and AFL options); approximate; the logs have no timestamps, so the share of agent time is not known"
+ },
+ "self_validation": {
+  "tasks_that_ran_validate_py": 99,
+  "runs": 277,
+  "mean_per_task": 2.8,
+  "max_per_task": 8,
+  "share_of_commands": 2.0
+ },
+ "validation": {
+  "slot_hours": 20.3,
+  "share_of_task_hours": 14,
+  "task_hours": 142.6,
+  "share_of_slot_capacity": 12,
+  "wall_hours": 10.89,
+  "wall_hours_with_a_grading_running": 9.8,
+  "tail_only_grading_hours": 1.7,
+  "note": "grading intervals reconstructed from each task's finish time and its time outside the agent run; the slot-hour figures do not depend on the reconstruction"
+ },
+ "what_if": {
+  "model": "real per-task durations in the real dispatch order; workers join after 8 min; 30 s launch spacing; the stopped ffmpeg task counted as 220 min",
+  "scenarios": [
+   {
+    "name": "what we ran",
+    "head": 4,
+    "workers": 2,
+    "per_worker": 6,
+    "slots": 16,
+    "wall_hours": 11.3,
+    "wall_hours_if_overhead_20pct_slower": 11.9
+   },
+   {
+    "name": "72 vCPU quota, 3 workers x 8, head 4",
+    "head": 4,
+    "workers": 3,
+    "per_worker": 8,
+    "slots": 28,
+    "wall_hours": 7.8,
+    "wall_hours_if_overhead_20pct_slower": 8.4
+   },
+   {
+    "name": "72 vCPU, 3 workers x 8, head 8",
+    "head": 8,
+    "workers": 3,
+    "per_worker": 8,
+    "slots": 32,
+    "wall_hours": 7.1,
+    "wall_hours_if_overhead_20pct_slower": 7.6
+   },
+   {
+    "name": "72 vCPU, 3 workers x 6, head 4",
+    "head": 4,
+    "workers": 3,
+    "per_worker": 6,
+    "slots": 22,
+    "wall_hours": 9.1,
+    "wall_hours_if_overhead_20pct_slower": 9.7
+   },
+   {
+    "name": "quota unchanged, 2 workers x 8",
+    "head": 4,
+    "workers": 2,
+    "per_worker": 8,
+    "slots": 20,
+    "wall_hours": 9.7,
+    "wall_hours_if_overhead_20pct_slower": 10.2
+   },
+   {
+    "name": "72 vCPU, 3 workers x 10 (first-pass setting)",
+    "head": 4,
+    "workers": 3,
+    "per_worker": 10,
+    "slots": 34,
+    "wall_hours": 7.0,
+    "wall_hours_if_overhead_20pct_slower": 7.5
+   }
+  ]
+ }
+}
