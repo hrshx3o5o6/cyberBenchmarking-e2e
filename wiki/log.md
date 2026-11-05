@@ -483,3 +483,6 @@ Section 18 of [[wiki/syntheses/deepseek-100-task-run-report]]: replay shows orde
 
 ## [2026-11-05] experiment | Consolidated page on the Qwen serving changes written
 New page [[wiki/syntheses/qwen27b-prefix-caching-and-cuda-graphs]] (three configurations side by side, measurements, agent-run model, open questions, next levers), data in `aws-vm-data/qwen27b/measurements.json`, sanitised probe script `tools/qwen_endpoint_probe.py`; pointer added to [[wiki/syntheses/vertex-qwen27b-endpoint-check]].
+
+## [2026-11-05] experiment | Rerun record of the 100 tasks: list, settings, patches and versions pinned
+Section 19 of [[wiki/syntheses/deepseek-100-task-run-report]]; harness settings and the upstream patch diff saved under `aws-vm-data/deepseek100/`; code archive of the runner kept on the Mac outside the repository.
