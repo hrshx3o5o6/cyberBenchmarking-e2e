@@ -133,9 +133,6 @@ def build_report(data, links, ctx):
     out.append('<div class="crumbs"><a href="index.html">Run viewer</a> › 100 task run: DeepSeek V4.1 Flash</div>')
     out.append('<header><h1>100 task run: DeepSeek V4.1 Flash <span class="badge">report</span></h1><p class="sub">CyberGym-E2E, 100 random tasks, end to end, Codex through Google Vertex AI, one attempt per task, '
                'the paper\'s limits (90 minutes of agent time, 10 USD per run). Run on 3 EC2 nodes (the head and 2 autoscaled workers), 2026-11-04 06:07 to 17:00 UTC.</p></header>')
-    out.append('<div class="banner info"><b>Read this first.</b> 99 of the 100 tasks were graded; the 100th (<code>ffmpeg/oss-fuzz_42538351</code>) was still in grading after about 3 hours 20 minutes when the operator stopped the run, so it is shown as not graded. '
-               'Dollar figures use an <b>assumed</b> Vertex price (0.30 USD per million fresh input tokens, 0.03 cached, 1.20 output; read from third-party listings, not checked on Google\'s page). '
-               'This is the second pass: a first attempt at 10 task slots per node lost 68 tasks to node out-of-memory events and is described in the first-pass section below.</div>')
     out.append('<nav class="jump"><a href="#glance">At a glance</a><a href="#outcomes">Outcomes</a><a href="#time">Time</a><a href="#money">Money</a><a href="#calls">Model calls</a><a href="#nodes">Memory and CPU</a><a href="#infra">Infrastructure</a><a href="#first">First pass</a><a href="#extras">Fuzzers and validation</a><a href="#whatif">What if</a><a href="#projects">By project</a><a href="#tasks">Per task</a><a href="#method">Method</a></nav>')
     # at a glance
     facts = [("Tasks graded", "%d of 100" % R["finished"]), ("Passed S1 to S4", "%d (%.0f%% of graded)" % (R["passed"], 100 * R["passed"] / R["finished"])), ("Run time", "10 h 54 min wall"),
