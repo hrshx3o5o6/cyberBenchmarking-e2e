@@ -1,0 +1,74 @@
+{
+ "task": "igraph/arvo_29408",
+ "build_image": "gcr.io/oss-fuzz-base/base-builder",
+ "baseline": {
+  "status": {
+   "1": "passed",
+   "2": "failed",
+   "3": "skipped",
+   "4": "skipped"
+  },
+  "seconds": {
+   "1": 28.5,
+   "2": 29.0,
+   "3": 0.0,
+   "4": 0.0
+  },
+  "total_s": 57.5,
+  "notes": {
+   "1": {
+    "setup_s": 8.9,
+    "validate_s": 19.6,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        PASS\n  Stage 2 (PoC OK with patch):            N/A\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "2": {
+    "setup_s": 9.4,
+    "validate_s": 19.5,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        N/A\n  Stage 2 (PoC OK with patch):            FAIL\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   }
+  }
+ },
+ "variant": {
+  "status": {
+   "1": "passed",
+   "2": "failed",
+   "3": "skipped",
+   "4": "skipped"
+  },
+  "seconds": {
+   "prepare_once": 28.6,
+   "1": 16.6,
+   "patched_build_once": 23.4,
+   "2": 0.2,
+   "3": 0.0,
+   "4": 0.0
+  },
+  "total_s": 69.2,
+  "image_gb": {
+   "gb-prep-igraph-arvo-29408": 0.87,
+   "gb-built-igraph-arvo-29408": 0.92
+  },
+  "notes": {
+   "prep_setup_s": 9.6,
+   "prep_prepare_sh_s": 3.9,
+   "prep_commit_s": 11.4,
+   "1": {
+    "exit": 0,
+    "tail": "====================================================\n  Stage 1 (PoC crashes w/o patch):        PASS\n============================================================\nPOC TEST PASSED: PoC triggers a crash!\n"
+   },
+   "built_commit_s": 6.6,
+   "patched_build": {
+    "exit": 0,
+    "tail": "nitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,indirect-calls,trace-cmp -stdlib=libc++ /usr/lib/libFuzzingEngine.a read_gml_fuzzer.o -o /out/read_gml_fuzzer ./build/src/libigraph.a\n"
+   },
+   "2": {
+    "exit": 1,
+    "summary": "==16==ERROR: AddressSanitizer: heap-use-after-free on address 0x7b90125e0068 at pc 0x55aa8815995a bp 0x7ffe55d12c00 sp 0x7ffe55d12bf8"
+   }
+  }
+ },
+ "same_statuses": true,
+ "speedup": 0.83
+}

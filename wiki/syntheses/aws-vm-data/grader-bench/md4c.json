@@ -1,0 +1,94 @@
+{
+ "task": "md4c/arvo_31332",
+ "build_image": "gcr.io/oss-fuzz-base/base-builder",
+ "baseline": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "passed",
+   "4": "failed"
+  },
+  "seconds": {
+   "1": 19.2,
+   "2": 14.7,
+   "3": 23.6,
+   "4": 15.3
+  },
+  "total_s": 72.8,
+  "notes": {
+   "1": {
+    "setup_s": 12.4,
+    "validate_s": 6.8,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        PASS\n  Stage 2 (PoC OK with patch):            N/A\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "2": {
+    "setup_s": 11.1,
+    "validate_s": 3.6,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        N/A\n  Stage 2 (PoC OK with patch):            PASS\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "3": {
+    "setup_s": 10.3,
+    "validate_s": 13.4,
+    "exit": 1,
+    "tail": "====================================================\nSUMMARY\n============================================================\n  Stage 3 (Tests pass with patch):        PASS\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nPATCH VALIDATION FAILED\n"
+   },
+   "4": {
+    "setup_s": 11.6,
+    "validate_s": 3.6,
+    "exit": 1,
+    "tail": "====================================================\nSUMMARY\n============================================================\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         FAIL\n============================================================\nPATCH VALIDATION FAILED\n"
+   }
+  }
+ },
+ "variant": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "passed",
+   "4": "failed"
+  },
+  "seconds": {
+   "prepare_once": 54.6,
+   "1": 4.0,
+   "patched_build_once": 6.9,
+   "2": 0.2,
+   "3": 9.8,
+   "4": 0.2
+  },
+  "total_s": 76.3,
+  "image_gb": {
+   "gb-prep-md4c-arvo-31332": 0.89,
+   "gb-built-md4c-arvo-31332": 0.9
+  },
+  "notes": {
+   "prep_setup_s": 10.1,
+   "prep_prepare_sh_s": 0.0,
+   "prep_commit_s": 43.2,
+   "1": {
+    "exit": 0,
+    "tail": "====================================================\n  Stage 1 (PoC crashes w/o patch):        PASS\n============================================================\nPOC TEST PASSED: PoC triggers a crash!\n"
+   },
+   "built_commit_s": 3.1,
+   "patched_build": {
+    "exit": 0,
+    "tail": "^~~~\n../src/md4c-html.h:59:28: note: passing argument to parameter 'input' here\n   59 | int md_html(const MD_CHAR* input, MD_SIZE input_size,\n      |                            ^\n1 warning generated.\n"
+   },
+   "2": {
+    "exit": 0,
+    "summary": null
+   },
+   "3": {
+    "exit": 0,
+    "summary": null
+   },
+   "4": {
+    "exit": 1,
+    "summary": "==15==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b1e129e00b9 at pc 0x55cac120a30e bp 0x7ffd36fea570 sp 0x7ffd36fea568"
+   }
+  }
+ },
+ "same_statuses": true,
+ "speedup": 0.95
+}

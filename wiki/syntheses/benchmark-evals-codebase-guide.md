@@ -1,13 +1,13 @@
 ---
 type: synthesis
 created: 2026-10-29
-updated: 2026-11-01
+updated: 2026-11-05
 sources: ["[[wiki/sources/cybergym-e2e]]"]
 tags: [codebase, guide, benchmark-evals, ray, runner, shim, onboarding, living-document]
 ---
 # benchmark-evals codebase guide (living page)
 
-**Purpose:** brief yourself on the code that runs the CyberGym-E2E evaluations: what each file does, how a run flows, what exists only on our VM, and what we changed. **It is kept current:** every time we change code, the changelog at the bottom and the affected sections are updated in the same commit. Last verified against: owner's `main` `d88f145`, our PR branch `ray-isolation-stagger-spread` `dfa33e4`, upstream harness `d0ae0f0` (see section 8).
+**Purpose:** brief yourself on the code that runs the CyberGym-E2E evaluations: what each file does, how a run flows, what exists only on our VM, and what we changed. **It is kept current:** every time we change code, the changelog at the bottom and the affected sections are updated in the same commit. Last verified against: owner's `main` `c845c38` (2026-11-05; PRs #1 and #2 merged), our PR branch `ray-isolation-stagger-spread` `dfa33e4`, upstream harness `d0ae0f0` (see section 8).
 
 Related: [[wiki/syntheses/aws-vm-concurrent-setup-reference]] (the single-VM runner and its measured behaviour), [[wiki/syntheses/ray-autoscaler-build-plan]] (the autoscaler work), [[wiki/syntheses/two-vm-ray-cluster-setup]] (the manual two-node cluster).
 
@@ -38,6 +38,8 @@ Two layers: the **runner** (`benchmark-evals`, a small Ray scheduler, owned by t
 | `scripts/` | | `bootstrap_ec2.sh` (uv, Python 3.12 envs, patches, CLI), `patch_cybergym.py` (idempotent patches to the upstream checkout), `sync_ec2.sh`, `remote_probe.sh`. |
 
 ## 3. How a run flows
+For what the upstream harness does inside one execution (agent steps, then stages S1 to S4), see [[wiki/syntheses/cybergym-agent-and-validation-walkthrough]].
+
 **`run()` (cli.py)**
 1. `preflight`: upstream checkout and venv, Docker CLI and daemon, `vm.mmap_rnd_bits == 28`, memory ≥ 8 GiB, each task's `config.toml` and data files, HF token if data is missing, model credentials. Refuses to start if any check fails.
 2. Register every spec as `pending`; `--resume` skips ones already `passed`.
@@ -77,16 +79,22 @@ SQLite file `work_root/state/runs.sqlite3` (WAL mode) plus `work_root/artifacts/
 | `tools/controller.py` | the concurrency controller we built and dropped |
 | `tools/psilog.py`, `sampler.py`, `watchdog.py` | PSI logger, system sampler, memory/swap guard |
 | `config/*.json` | our manifests (smoke, ramp, e2e, calibration) |
+| `tools/model_registry.py`, `tools/models.toml`, `tools/start_shim.sh`, `tools/push_vertex_token.py` (local copy outside Git, deployed to the VM) | the string registry (`model@provider`; providers bedrock, openrouter, vertex, vertex-endpoint, `vertex-dedicated` added 2026-11-05 for an endpoint with its own DNS name), the bridge that starts the shim for any reference, and the Mac-side one-hour token pusher; see [[wiki/syntheses/model-registry-design]] section 14 and [[wiki/syntheses/plug-and-play-model-support]] |
+| shim additions in `tools/llm_shim_new.py` and `tools/responses_chat.py` (same copy) | per-call total stream cap `UPSTREAM_STREAM_TOTAL_S`, `StreamTranslator.abort()`, chunk-kind statistics, token-file reload; tests `test_responses_chat.py`, `test_shim_stream_failures.py`, `test_model_registry.py` (137 pass across 14 files on 2026-11-04) |
+| `tools/mem_sampler.py`, `tools/fetch_task_data.py` (same copy) | 30-second memory, load and container sampler into the Postgres `node_metrics` table; data and image prefetch per manifest (`--images-only`) |
+| `tools/grader_bench.py` (in this vault repository, not the runner) | compares the harness's validation (a fresh container per stage, each repeating setup and builds) with a variant that shares a prepared image and one patched-build image; runs on the VM, no model; see [[wiki/syntheses/grader-shared-images-experiment]] |
+| `tools/qwen_endpoint_probe.py`, `tools/qwen_ops/` (in this vault repository, not the runner) | probe for a Qwen endpoint (`cache`, `conversation`, `residency`, `decode`, `agents --counts --turns --start-words`, `needle`) and the operating scripts of the 2026-11-05 tests (suite runner, monitor, watcher, DNS-pinned shim restart); how to use them: [[wiki/syntheses/qwen-endpoint-redeploy-runbook]] |
 These live on the VM (and are baked into the AMI's `tools/`), not in the owner's repo or the PR.
 
 ## 8. Status of each copy of the code
 | Copy | Where | State |
 |---|---|---|
-| Owner's `main` | private repo | `d88f145` |
-| Our PR branch `ray-isolation-stagger-spread` | pushed to the owner's repo, no PR opened yet | `dfa33e4`: private local Ray, `prepare --skip-firewall`, `start_stagger_seconds`, `scheduling_strategy`, plus 4 tests; 17 tests pass |
-| Our branch `shared-postgres-state` | local only, on top of the PR branch, not pushed | `69560b4`: optional shared Postgres store (write path with read-back verification and heartbeat; `--source postgres` reads; dead-worker handling in the driver; `recover --source postgres`; `sync-check`), 29 new tests, 46 pass in the suite; shim budget, metric streaming and hosting not built |
+| Owner's `main` | private repo `prescera/benchmark-evals` | `c845c38` ("added gcp file", the endpoint script `src/gcp/manage_endpoint.py`), after **PR #1** (`ray-isolation-stagger-spread`, merged 2026-10-27) and **PR #2** (`pr/postgres-store-and-race-fix`, merged 2026-11-02); no PR open; the repository has no `tools/` folder, so the shim, translation layer, registry and sampler are not in it |
+| Our PR branch `ray-isolation-stagger-spread` | **merged as PR #1 (2026-10-27)** | `dfa33e4`: private local Ray, `prepare --skip-firewall`, `start_stagger_seconds`, `scheduling_strategy`, plus 4 tests; 17 tests pass |
+| Our branch `shared-postgres-state` | local; its content was merged as **PR #2 (2026-11-02)** from the branch `pr/postgres-store-and-race-fix` (`215ae51`); earlier state: | `69560b4`: optional shared Postgres store (write path with read-back verification and heartbeat; `--source postgres` reads; dead-worker handling in the driver; `recover --source postgres`; `sync-check`), 29 new tests, 46 pass in the suite; shim budget, metric streaming and hosting not built |
 | VM working copy | `~/benchmark-evals` on the primary VM | **Now contains the Postgres branch merged in** (2026-10-30): `pgstore.py`, a merged `worker.py` and the branch `cli.py`, plus its own shim integration, gate (`db.claim_slot`), tools and manifests; 58 tests pass on the VM; backups `*.bak-pre-pg` beside it; running Ray processes still hold the old code until restarted |
 | Our branch `vm-live-2026-10-30` | local only, on top of `shared-postgres-state`, not pushed | **a Git record of what ran on the VM**: the VM's own `worker.py`, `db.py`, `config.py` (shim integration, concurrency gate), `tools/`, the manifests and two VM-only tests; verified identical to the VM (43 files, 0 differ) and 67 tests pass with a real Postgres; secrets excluded; a record, not a PR candidate (see `VM_SNAPSHOT.md` in the branch) |
+| Local runner copy (registry, shim additions, sampler, prefetch, tests) | `spark/amit-repo/vm-copy-2026-11-01/benchmark-evals` on the study owner's Mac, **outside Git**; code archive kept next to the run logs | the newest copy of the runner `tools/` and tests; the VM's `tools/` matches it for the files deployed; no commit exists (design note in [[wiki/syntheses/platform-automation-and-architecture]]) |
 | Upstream harness | `~/cybergym-e2e` | `d0ae0f0` + local patches |
 | AMI v3 copy | baked into the worker/head image | runner as of 2026-10-30, Python 3.12.15 (matches the head); v2 deleted |
 
@@ -125,3 +133,6 @@ On any code change (runner, shim, tools, manifests, upstream patches, AMI conten
 | 2026-10-29 | Added a pointer to the autoscaler run procedure and its open gaps (images and data per node, shared state, shim and budget): [[wiki/syntheses/ray-autoscaler-build-plan]] section 9. No code change. |
 | 2026-10-29 | AMI v2 built and verified: runner source with `tools/`, upstream at `d0ae0f0`, squid proxy with `restart=always`, no secrets. |
 | 2026-11-01 | Responses-to-Chat translation layer (`tools/responses_chat.py`, shim env `UPSTREAM_API=chat`) plus 14 tests, developed in a local copy of the VM source outside Git; verified on real Bedrock with two Qwen models. Not deployed. See [[wiki/syntheses/qwen-bedrock-responses-translation]]. |
+| 2026-11-05 | **Catch-up entry** (changes of 2026-11-02 to 2026-11-05 were not logged here when made): model registry and `start_shim.sh` bridge, `vertex-dedicated` provider (2026-11-05), shim stream cap and chunk statistics, token-file reload and Mac token pusher, `mem_sampler.py`, `fetch_task_data.py --images-only`, hunks in the upstream harness patch list (`aws-vm-data/deepseek100/upstream-local-patches.diff`), and in this vault `tools/qwen_endpoint_probe.py` (`agents --counts --turns --start-words`, `needle`) and `tools/qwen_ops/` (suite runner, monitor, watcher, DNS-pinned shim restart). Sections 7 and 8 updated; none of it is in the owner's repo. |
+| 2026-11-05 | Status table corrected: PR #1 and PR #2 are merged, owner's `main` is `c845c38`; the code still outside the owner's repository is everything under `tools/` (shim, translation layer, registry, bridge script, sampler, prefetch, token tools), the shim hooks in `worker.py` (about 70 changed lines), `db.py` (concurrency gate) and `config.py` (a few keys), and most of their tests. Pull request plan: [[wiki/syntheses/pull-request-plan]]. |
+| 2026-11-06 | Added `tools/grader_bench.py` (validation experiment, no change to the runner or to the upstream harness) and the page [[wiki/syntheses/grader-shared-images-experiment]]; the PR branch `pr/model-shim-and-chat-translation` was pushed to the owner's remote the same day ([[wiki/syntheses/pull-request-plan]] section 5). |

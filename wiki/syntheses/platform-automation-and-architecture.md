@@ -1,7 +1,7 @@
 ---
 type: synthesis
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-05
 sources: ["[[wiki/sources/cybergym-e2e]]"]
 tags: [architecture, automation, brainstorm, registry, benchmarks, exploitgym, living-document]
 ---
@@ -61,3 +61,6 @@ Both big failures of the first pass came from the driver rather than the model p
 - Should a protocol (limits, prompt style, validity rules) be a versioned object referenced by the run spec? The protocol pages already play that role.
 - Does ExploitGym use the same container-per-task pattern?
 - How hands-off: approve the cost before each run, or fully automatic within a budget?
+
+## 8. Model and provider side, assessed (added 2026-11-05)
+The model plug-in layer is the part closest to done; its concrete status, costs of adding a model or provider, and the ordered gaps are in [[wiki/syntheses/plug-and-play-model-support]].

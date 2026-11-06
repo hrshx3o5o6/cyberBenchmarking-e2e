@@ -1,0 +1,58 @@
+{
+ "task": "igraph/arvo_29408",
+ "build_image": "gcr.io/oss-fuzz-base/base-builder",
+ "baseline": {
+  "status": {
+   "1": "failed",
+   "2": "skipped",
+   "3": "skipped",
+   "4": "skipped"
+  },
+  "seconds": {
+   "1": 29.3,
+   "2": 0.0,
+   "3": 0.0,
+   "4": 0.0
+  },
+  "total_s": 29.3,
+  "notes": {
+   "1": {
+    "setup_s": 10.0,
+    "validate_s": 19.3,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        FAIL\n  Stage 2 (PoC OK with patch):            N/A\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   }
+  }
+ },
+ "variant": {
+  "status": {
+   "1": "failed",
+   "2": "skipped",
+   "3": "skipped",
+   "4": "skipped"
+  },
+  "seconds": {
+   "prepare_once": 27.1,
+   "1": 16.6,
+   "patched_build_once": 0.0,
+   "2": 0.0,
+   "3": 0.0,
+   "4": 0.0
+  },
+  "total_s": 43.8,
+  "image_gb": {
+   "gb-prep-igraph-arvo-29408": 0.87
+  },
+  "notes": {
+   "prep_setup_s": 9.2,
+   "prep_prepare_sh_s": 3.0,
+   "prep_commit_s": 11.3,
+   "1": {
+    "exit": 1,
+    "tail": "=============================================\n  Stage 1 (PoC crashes w/o patch):        FAIL\n============================================================\nPOC TEST FAILED: PoC does not trigger a crash\n"
+   }
+  }
+ },
+ "same_statuses": true,
+ "speedup": 0.67
+}

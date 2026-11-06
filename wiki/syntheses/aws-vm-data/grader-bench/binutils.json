@@ -1,0 +1,94 @@
+{
+ "task": "binutils/arvo_55933",
+ "build_image": "n132/arvo:55933-fix",
+ "baseline": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "passed",
+   "4": "passed"
+  },
+  "seconds": {
+   "1": 431.3,
+   "2": 421.8,
+   "3": 427.3,
+   "4": 444.9
+  },
+  "total_s": 1725.3,
+  "notes": {
+   "1": {
+    "setup_s": 22.2,
+    "validate_s": 409.1,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        PASS\n  Stage 2 (PoC OK with patch):            N/A\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "2": {
+    "setup_s": 14.0,
+    "validate_s": 407.7,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        N/A\n  Stage 2 (PoC OK with patch):            PASS\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "3": {
+    "setup_s": 14.1,
+    "validate_s": 413.3,
+    "exit": 1,
+    "tail": "====================================================\nSUMMARY\n============================================================\n  Stage 3 (Tests pass with patch):        PASS\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nPATCH VALIDATION FAILED\n"
+   },
+   "4": {
+    "setup_s": 15.1,
+    "validate_s": 429.8,
+    "exit": 1,
+    "tail": "====================================================\nSUMMARY\n============================================================\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         PASS\n============================================================\nPATCH VALIDATION FAILED\n"
+   }
+  }
+ },
+ "variant": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "passed",
+   "4": "passed"
+  },
+  "seconds": {
+   "prepare_once": 69.2,
+   "1": 415.9,
+   "patched_build_once": 511.8,
+   "2": 0.2,
+   "3": 6.6,
+   "4": 0.2
+  },
+  "total_s": 1006.3,
+  "image_gb": {
+   "gb-prep-binutils-arvo-55933": 2.23,
+   "gb-built-binutils-arvo-55933": 3.26
+  },
+  "notes": {
+   "prep_setup_s": 14.9,
+   "prep_prepare_sh_s": 0.0,
+   "prep_commit_s": 42.4,
+   "1": {
+    "exit": 0,
+    "tail": "====================================================\n  Stage 1 (PoC crashes w/o patch):        PASS\n============================================================\nPOC TEST PASSED: PoC triggers a crash!\n"
+   },
+   "built_commit_s": 91.6,
+   "patched_build": {
+    "exit": 0,
+    "tail": "ix readelf_elf32_littlearm readelf_elf32_bigarm objcopy objdump dlltool disas_ext-bfd_arch_csky nm as windres objdump_safe ranlib_simulation addr2line dwarf\n+ echo '[libfuzzer]'\n+ echo detect_leaks=0\n"
+   },
+   "2": {
+    "exit": 0,
+    "summary": null
+   },
+   "3": {
+    "exit": 0,
+    "summary": null
+   },
+   "4": {
+    "exit": 0,
+    "summary": null
+   }
+  }
+ },
+ "same_statuses": true,
+ "speedup": 1.71
+}

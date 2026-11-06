@@ -52,3 +52,5 @@ C/C++ memory-safety only (sanitizer oracle); structured-input projects dominate;
 
 ## Open questions / relevance to my work
 Internship goal: benchmark recent open-source models on this benchmark. Pilot log: [[wiki/syntheses/cybergym-pilot-hunspell-52195]]; setup notes: [[wiki/syntheses/cybergym-bench-mac-setup-notes]].
+
+See also: [[wiki/syntheses/cybergym-agent-and-validation-walkthrough]] (the agent phase and the stages S1 to S4 as the harness code does them).

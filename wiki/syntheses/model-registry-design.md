@@ -1,7 +1,7 @@
 ---
 type: synthesis
 created: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-05
 sources: ["[[wiki/sources/cybergym-e2e]]"]
 tags: [design, model-registry, shim, bedrock, openrouter, providers, benchmark-evals, living-document]
 ---
@@ -114,6 +114,9 @@ Unit tests for loading and resolving (known entry, raw id, unknown provider, mis
 - **Token URL (added 2026-11-03):** `--token-url` / `TOKEN_URL=` makes the shim fetch the current token from the head's relay; exclusive with the token file; `--token-file` now also switches the file reload on. Both only for `google_adc` routes and temporary.
 - **Tests:** 11 for the bridge, the shim's new settings, the start script and an end-to-end run (a registry route drives a real shim against a fake provider); three deliberate breakages each made a test fail. With the rest, 59 local tests.
 - **Not done:** listing models from a provider, `models probe`, the shim routing by key, the manifest key and the worker change, the cluster config passing a reference to workers (build order steps 3 to 5).
+
+## 15. Status of plug-and-play (added 2026-11-05)
+How far the registry gets us toward "plug in a model and run", with the dedicated Qwen endpoint as the latest example, and what is still manual: [[wiki/syntheses/plug-and-play-model-support]]. The `vertex-dedicated` provider (an endpoint with its own DNS name) was added for Qwen3.8-27B; see [[wiki/syntheses/qwen-two-task-pilot]].
 
 ## 13. Open questions
 | Question | Proposed |

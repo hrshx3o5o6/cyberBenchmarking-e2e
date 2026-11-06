@@ -486,3 +486,60 @@ New page [[wiki/syntheses/qwen27b-prefix-caching-and-cuda-graphs]] (three config
 
 ## [2026-11-05] experiment | Rerun record of the 100 tasks: list, settings, patches and versions pinned
 Section 19 of [[wiki/syntheses/deepseek-100-task-run-report]]; harness settings and the upstream patch diff saved under `aws-vm-data/deepseek100/`; code archive of the runner kept on the Mac outside the repository.
+
+## [2026-11-05] query | Assessment: plug-and-play support for models and providers; expectations for the Qwen two-task pilot
+New pages [[wiki/syntheses/plug-and-play-model-support]] (registry inventory, cost of adding a model or provider, what stays manual, ordered fixes) and [[wiki/syntheses/qwen-two-task-pilot]] (setup, baselines, expectations written before the run, decision table; results to be filled). Pointers added in [[wiki/syntheses/model-registry-design]] (section 15), [[wiki/syntheses/platform-automation-and-architecture]] (section 8) and [[wiki/syntheses/qwen27b-prefix-caching-and-cuda-graphs]].
+
+## [2026-11-05] experiment | Qwen3.8-27B two-task pilot on the Vertex endpoint: both tasks passed S1 to S4
+igraph/arvo_29408 (111 calls, 90-minute limit reached, 92.9 min) and md4c/arvo_31332 (58 calls, 21.5 min), Codex, 2 at once. Results against the expectations written before the run, new findings (model calls are 80% to 97% of agent time, heavy-tailed reasoning, two silent-thinking calls lost 21% of igraph's time, cache warm to 103k) in [[wiki/syntheses/qwen-two-task-pilot]] section 7; per-call data in `aws-vm-data/qwen-pilot/calls.csv`; pointers added in [[wiki/syntheses/plug-and-play-model-support]] (section 5) and [[wiki/syntheses/qwen27b-prefix-caching-and-cuda-graphs]].
+
+## [2026-11-05] experiment | Qwen GPU undeployed after the pilot (owner request)
+Undeployed 11:16 UTC through `manage_endpoint.py stop`, status confirmed "no model deployed"; endpoint and model records kept. Today's second deployment: 08:36 to 11:16 UTC. Page touched: [[wiki/syntheses/qwen-two-task-pilot]].
+
+## [2026-11-05] query | Bottleneck check for the two parallel Qwen tasks; one finding corrected
+Section 7.6 of [[wiki/syntheses/qwen-two-task-pilot]]: no interference between the two tasks at the endpoint (decode 25.4 vs 25.9 tokens/s, call overhead 2.5 vs 2.8 s), head memory 4 to 5 GB, head CPU saturated late by the agent's own commands, queueing on the GPU not observable. Correction: the earlier statement that tool time was negligible was wrong (model calls are 80% of igraph's agent time once the two abandoned calls are excluded); fixed in section 7.3 and in the pages that repeated it.
+
+## [2026-11-05] query | Speed of the Vertex Qwen3.8-27B pilot against the OpenRouter (Wafer) batch 7 runs on the same two tasks
+Section 7.7 of [[wiki/syntheses/qwen-two-task-pilot]]: per request 1.5x (md4c) and 3.8x (igraph) slower; Wafer decode at least about 54 tokens/s against 25 to 28 on the single A100 (bandwidth ceiling about 37); harness differs, so a bound, not a benchmark.
+
+## [2026-11-05] experiment | Test plan for more warm cache and more concurrent Qwen agents (cap on sequences, then 8-bit KV); arm 1 deployed
+New page [[wiki/syntheses/qwen-capacity-levers-test]] (documentation findings, hypothesis, arms, tests and baselines, expectations, decision rules). The probe `tools/qwen_endpoint_probe.py` gained `agents --counts --turns --start-words` and a `needle` retrieval test. Arm 1 (`--max-num-seqs=16` on top of prefix caching and CUDA graphs) deployment started 12:28 UTC. Correction made in the conversation: with only 4 KV heads, tensor parallelism beyond 4 GPUs adds speed but almost no cache.
+
+## [2026-11-05] experiment | Arm 1 (cap of 16 sequences) measured: no change in warm capacity or agent cliff
+Section 7.1 of [[wiki/syntheses/qwen-capacity-levers-test]]: 4 warm 30k prompts and 2 warm 59k prompts as before (about 120k tokens), 2 agents fine (3.9 s per later call), 3 agents collapse (64.9 s), decode unchanged (28.5 tokens/s), retrieval at 90k tokens 6 of 6, warm hits about 2.4x slower than the baseline (cause unknown). Hypothesis rejected; arm 2 (8-bit KV on top) deploying from 13:24 UTC.
+
+## [2026-11-05] experiment | Arm 2 (8-bit KV cache on top of the cap) measured: +25% to +50% warm capacity, 3 agents fit, 4 collapse; real-task ramp of 6 started
+Section 7.2 of [[wiki/syntheses/qwen-capacity-levers-test]]: warm 30k prompts 5 (was 4), warm 59k prompts 3 (was 2), 3 agents later calls 6.9 s, 4 agents 93 s, retrieval at 90k 6 of 6, decode unchanged, cold prefill about 9% slower. Ray head restarted with 6 slots; six real tasks launched 14:14 UTC with a 4-minute stagger.
+
+## [2026-11-05] experiment | First 6-task ramp failed on DNS (head resolved a stale endpoint address); relaunched with the name pinned
+Details in section 7.3 of [[wiki/syntheses/qwen-capacity-levers-test]] and section 5 of [[wiki/syntheses/plug-and-play-model-support]]. Two tasks were marked benchmark_failed in the first attempt (14:14 to 14:19 UTC); the second attempt started 14:21 UTC.
+
+## [2026-11-05] query | Qwen findings written up: scaling plan, architecture page, redeploy runbook; operating scripts saved; codebase guide caught up
+New pages [[wiki/syntheses/qwen-scaling-plan]], [[wiki/syntheses/qwen3-8-27b-architecture]], [[wiki/syntheses/qwen-endpoint-redeploy-runbook]]; sanitized scripts in `tools/qwen_ops/` (no ids or addresses); cross-links added; [[wiki/syntheses/benchmark-evals-codebase-guide]] sections 7 and 8 and its changelog updated (catch-up entry for 2026-11-02 to 2026-11-05).
+
+## [2026-11-05] experiment | 8-bit run finished: igraph S1-S4 pass, md4c S1-S3 pass (S4 fail), boringssl no PoC; GPU undeployed 16:04 UTC
+Final table and reading in section 7.3 and the bottom line in section 7.4 of [[wiki/syntheses/qwen-capacity-levers-test]]: not a clean quality test (the tasks ran through the collapse; three were stopped by the operator). Undeployed with the arm 2 script, status "no model deployed"; Mac token pusher stopped. Runbook and scaling plan updated.
+
+## [2026-11-05] query | Correction: GPUs beyond four still add warm cache, but less than in proportion
+Fixed in [[wiki/syntheses/qwen-scaling-plan]] (section 2 notes), [[wiki/syntheses/qwen3-8-27b-architecture]] (section 4) and [[wiki/syntheses/qwen-capacity-levers-test]] (section 6). Earlier text said extra GPUs beyond 4 add almost no cache; estimate is about 1.6x for 8 GPUs against 4.
+
+## [2026-11-05] query | Pull request plan; codebase guide status corrected (PR #1 and #2 are merged, owner's main is c845c38)
+New page [[wiki/syntheses/pull-request-plan]]: nothing raised; the shim, translation layer, registry and tools exist only in our local copy; seven PRs proposed in order with dependencies and evidence. [[wiki/syntheses/benchmark-evals-codebase-guide]] status rows fixed.
+
+## [2026-11-06] experiment | Combined trimmed PR branch built locally (gcp args + translation layer + shim + runner hooks), 1,245 lines
+Branch `pr/model-shim-and-chat-translation` in the owner's repo clone (not pushed), description in `spark/amit-repo/PR_DESCRIPTION_shim-and-chat-translation.md`; details and the list of features deferred to the next PR in section 5 of [[wiki/syntheses/pull-request-plan]]. Suite: 59 passed, 17 skipped.
+
+## [2026-11-06] experiment | Branch pr/model-shim-and-chat-translation pushed to the owner's remote (no pull request opened)
+Four commits on top of main `c845c38`; the pull request is for the study owner to open from the link GitHub printed. See section 5 of [[wiki/syntheses/pull-request-plan]].
+
+## [2026-11-06] query | Walkthrough page: agent phase and validation stages S1 to S4
+New page [[wiki/syntheses/cybergym-agent-and-validation-walkthrough]], written from the upstream `run_agent.py`, `validate.py` and `utils.py`: two numberings, workspace and prompt, per-stage commands, skip rules, timeouts, success rules, subtleties (crash is a non-zero exit code; S2 to S4 each rebuild the patched tree), worked igraph example, code locations. One item not confirmed in the code: where `immutable_files` is enforced.
+
+## [2026-11-06] experiment | Validation with shared images vs the standard grader: first round on the head VM (igraph, md4c)
+New page [[wiki/syntheses/grader-shared-images-experiment]], script `tools/grader_bench.py`, raw results `aws-vm-data/grader-bench/`. Stage statuses identical in all four comparisons (including md4c S4 fail); total time ratio 1.49 and 1.08 (igraph), 0.95 (md4c): the saving is the repeated setup plus two of three patched builds, minus two image saves of about 0.9 GB that cost 11 to 43 s. A first variant crashed on docker commit after stop (containers use --rm); fixed. Negative controls, heavy tasks and repeats not yet run.
+
+## [2026-11-06] experiment | Shared-images validation: negative controls pass; binutils 1.71x faster with identical results
+Sections 4b and 4c of [[wiki/syntheses/grader-shared-images-experiment]]: four negative controls on igraph gave the same statuses in both methods (failed / failed / error / S3 failed), binutils `arvo_55933` gave passed x4 in both with 1,725 s (standard) against 1,006 s (variant); the variant's build shares pay off where the patched build is long and cost 134 s of image saves on binutils; load average stayed at 1.0 on 16 vCPUs, so parallel stages are the next lever. A first binutils start was discarded because the 6.8 GB task image had not been pulled and would have inflated the baseline.
+
+## [2026-11-06] query | Verdict on the shared-images validation experiment, added to the existing page
+No new page: the verdict section at the top of [[wiki/syntheses/grader-shared-images-experiment]] says it is correct (nine identical comparisons) and faster on heavy builds (binutils 1.71x), modest for the whole run (about 1.3 h of 11.3 h replayed, ffmpeg ratio assumed), and that ordering ffmpeg first and parallel stages are larger levers; pointer added in section 18 of [[wiki/syntheses/deepseek-100-task-run-report]].

@@ -7,7 +7,7 @@ tags: [qwen, qwen3-8-27b, vertex, vllm, prefix-caching, cuda-graphs, benchmark, 
 ---
 # Qwen3.8-27B on Vertex AI: what prefix caching and CUDA graphs changed (2026-11-04)
 
-Three serving configurations of the same model on the same endpoint, measured the same way. Background and the access check: [[wiki/syntheses/vertex-qwen27b-endpoint-check]]. Capacity reasoning before these tests: [[wiki/syntheses/qwen27b-serving-capacity-analysis]]. Where the model fits in the registry: [[wiki/syntheses/model-registry-design]]. Ids (project, endpoint) are deliberately not recorded in this repository.
+Three serving configurations of the same model on the same endpoint, measured the same way. **Later work (2026-11-05):** scaling plan [[wiki/syntheses/qwen-scaling-plan]], architecture [[wiki/syntheses/qwen3-8-27b-architecture]], redeploy runbook [[wiki/syntheses/qwen-endpoint-redeploy-runbook]]. Background and the access check: [[wiki/syntheses/vertex-qwen27b-endpoint-check]]. Capacity reasoning before these tests: [[wiki/syntheses/qwen27b-serving-capacity-analysis]]. Where the model fits in the registry: [[wiki/syntheses/model-registry-design]]. Ids (project, endpoint) are deliberately not recorded in this repository.
 
 ## 1. Summary
 | | A. original (Amit's) | B. prefix caching on | C. prefix caching + CUDA graphs |
@@ -85,6 +85,7 @@ Assumptions: mean prompt 89,000 tokens (from the DeepSeek run), about 1,000 outp
 | A. eager, no caching | 36 calls | 36 | 36 | 25 | about 200 |
 | B. caching, eager | 43 | 40 | 38 | 30 | about 238 |
 | C. caching + CUDA graphs | **104** | 90 | 73 | 30 | about 294 |
+**Update from the two-task pilot (2026-11-05):** model calls were 80% to 97% of agent time (tool time not negligible on igraph: four gaps of 2 to 5 minutes) and output per call was skewed (median about 270 tokens, mean 465 to 949), so the 15 s tool time and uniform 1,000 tokens above are rough; one agent stayed warm up to a 103k prompt. See [[wiki/syntheses/qwen-two-task-pilot]] section 7.
 The interpolated "warm share" for 2 and 4 agents is optimistic (section 3.7 shows the cliff: measured 4 agents behave like misses, so the aggregate ceiling is about 200 calls per 90 minutes there too). For one agent C is about 2.9 times better than A, but 104 calls is still 57% of DeepSeek's 182. A 100-task run is estimated at 3 to 6 days at this configuration (one to two agents at a time, 75 to 150 hours).
 
 ## 5. Why only about 120k tokens stay warm (open)
@@ -97,6 +98,7 @@ Real Codex 0.118.0 requests (captured in a throwaway container against a local s
 Model `Qwen/Qwen3.8-27B` revision `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`; serving image `pytorch-vllm-serve` tag `20260713_0916_RC01` (Google's prebuilt vLLM container); vLLM 0.25.0 as read from the endpoint metadata on 2026-11-03 (not re-confirmed); entry point `vllm.entrypoints.api_server`. MTP (the checkpoint has one multi-token-prediction layer) is **not** enabled in any configuration; whether this build supports it for this architecture is unknown.
 
 ## 8. What could improve it next (not tried)
+**Being tested (2026-11-05):** a cap on simultaneous sequences (`--max-num-seqs`) and an 8-bit KV cache; plan, expectations and results in [[wiki/syntheses/qwen-capacity-levers-test]]. Note on the list below: the single-GPU FP8 figures are paper numbers; the measured cache is about 0.45 of the arithmetic.
 1. **More warm capacity** (the binding limit): the official FP8 checkpoint `Qwen/Qwen3.8-27B-FP8` exists (weights about 27 GB instead of 54, freeing roughly 27 GB, about 400k more tokens of KV; weight-only FP8 on an A100; a different artifact than the bf16 model, so a protocol decision); an fp8 KV cache (about twice the tokens); memory fraction 0.95 (about 60k tokens more).
 2. **Two GPUs with tensor parallelism:** about 5 times the KV memory and faster prefill, at twice the hourly cost.
 3. **Replicas with session-sticky routing:** each adds about 120k warm tokens.
@@ -104,7 +106,7 @@ Model `Qwen/Qwen3.8-27B` revision `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`; se
 5. **Make caching visible:** add `--enable-prompt-tokens-details` so usage reports cached tokens (not verified that this entry point accepts it).
 
 ## 9. Not measured or not readable
-Decode speed under a long context; thinking-mode output length on benchmark tasks (the 1,000 tokens per call is derived); the server's log and metrics; behaviour over a full 90-minute agent run; the accuracy effect of any change (none of these changes should affect outputs, quantisation would). The two-task pilot (`igraph/arvo_29408`, `md4c/arvo_31332`) has not been run: it needs a registry entry for the dedicated DNS, a second shim and a Google token on the head.
+Decode speed under a long context; thinking-mode output length on benchmark tasks (the 1,000 tokens per call is derived); the server's log and metrics; behaviour over a full 90-minute agent run; the accuracy effect of any change (none of these changes should affect outputs, quantisation would). The two-task pilot (`igraph/arvo_29408`, `md4c/arvo_31332`) was run on 2026-11-05 (both tasks passed S1 to S4); expectations and results: [[wiki/syntheses/qwen-two-task-pilot]].
 
 ## 10. Reproduce
 `tools/qwen_endpoint_probe.py` (environment variables `QWEN_PROJECT_NUMBER`, `QWEN_REGION`, `QWEN_ENDPOINT_ID`; the Google login through `gcloud auth application-default login`): subcommands `cache`, `conversation`, `residency`, `decode`, `agents`. The numbers above came from earlier, identical logic with the ids written in; the sanitised script was only syntax-checked (the GPU was undeployed). Deployment: the redeploy kit, `manage_endpoint.py start` and `stop`. Each full test takes about 10 to 15 minutes of GPU time once deployed (plus the 25-minute start).
