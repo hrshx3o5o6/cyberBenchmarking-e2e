@@ -582,3 +582,6 @@ New page [[wiki/syntheses/benchmark-plugin-architecture]]: principles, generic v
 
 ## [2026-11-10] experiment | HTML report for the GLM 5.3 Flash run (51 valid tasks), built like the DeepSeek report
 New files: `tools/analyze_glm100.py`, `tools/analyze_glm100_extras.py`, `tools/glm100_report.py`, a GLM section in `tools/build_viewer.py`; tables in `wiki/syntheses/aws-vm-data/glm-flash-r3/`; `docs/trajectories/glm-100-report.html` and 54 run pages (uncommitted). Run log section 10 of [[wiki/syntheses/glm-5.3-flash-100-task-run]].
+
+## [2026-11-10] query | Comparison of the DeepSeek and GLM 100-task runs
+New page [[wiki/syntheses/deepseek-vs-glm-flash-comparison]] and `docs/trajectories/compare-deepseek-glm.html` (tools `compare_runs.py`, `compare_report.py`, a panel on the viewer index): on the first 47 tasks of the shared dispatch order DeepSeek passed S1 to S3 on 20 and GLM on 11 (exact sign test p = 0.022); GLM used about 3.5 times the calls per task on 1.8 times longer prompts with 98.5% cached; list of what differs between the runs and caveats.

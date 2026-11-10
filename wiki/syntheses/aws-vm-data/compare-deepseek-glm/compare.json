@@ -1,0 +1,581 @@
+{
+ "n_prefix": 47,
+ "prefix_last": "binutils/arvo_60532",
+ "prefix": {
+  "tasks": 47,
+  "deepseek": {
+   "n": 47,
+   "s1s3": 20,
+   "s1s3_pct": 42.6,
+   "s1s3_ci": [
+    29.5,
+    56.7
+   ],
+   "s1s4": 9,
+   "s1s4_pct": 19.1,
+   "s1s4_ci": [
+    10.4,
+    32.5
+   ],
+   "outcomes": {
+    "PASS S1-S4": 9,
+    "no PoC": 24,
+    "S4 fail": 11,
+    "no patch": 2,
+    "S1 fail": 1
+   },
+   "funnel": [
+    20,
+    20,
+    20,
+    9
+   ],
+   "agent_min": {
+    "mean": 68.59,
+    "median": 90.0,
+    "total": 3223.9
+   },
+   "at_limit": 30,
+   "total_min": {
+    "mean": 81.71,
+    "median": 91.1,
+    "total": 3840.5
+   },
+   "graded": 21,
+   "grading_overhead_min": {
+    "mean": 26.32,
+    "median": 10.1,
+    "total": 552.7
+   },
+   "spend": {
+    "mean": 2.02,
+    "median": 1.89,
+    "total": 95.04
+   },
+   "spend_pass": 10.56,
+   "tokens": {
+    "fresh": 268233731.0,
+    "cached": 397727744.0,
+    "out": 2199560.0,
+    "requests": 8198.0,
+    "cached_share": 59.7,
+    "prompt_per_call": 81235,
+    "out_per_call": 268,
+    "calls_per_task": 174.4,
+    "prompt_tokens_per_task_m": 14.17,
+    "out_tokens_per_task_k": 46.8
+   },
+   "cost_at_common_price": 95.04,
+   "cost_per_task_at_common_price": 2.02
+  },
+  "glm": {
+   "n": 47,
+   "s1s3": 11,
+   "s1s3_pct": 23.4,
+   "s1s3_ci": [
+    13.6,
+    37.2
+   ],
+   "s1s4": 3,
+   "s1s4_pct": 6.4,
+   "s1s4_ci": [
+    2.2,
+    17.2
+   ],
+   "outcomes": {
+    "no patch": 24,
+    "S1 fail": 6,
+    "no PoC": 5,
+    "S4 fail": 8,
+    "S2 fail": 1,
+    "PASS S1-S4": 3
+   },
+   "funnel": [
+    12,
+    11,
+    11,
+    3
+   ],
+   "agent_min": {
+    "mean": 78.89,
+    "median": 90.0,
+    "total": 3707.8
+   },
+   "at_limit": 35,
+   "total_min": {
+    "mean": 92.94,
+    "median": 92.7,
+    "total": 4368.2
+   },
+   "graded": 18,
+   "grading_overhead_min": {
+    "mean": 18.79,
+    "median": 10.0,
+    "total": 338.3
+   },
+   "spend": {
+    "mean": 2.8,
+    "median": 2.95,
+    "total": 131.63
+   },
+   "spend_pass": 43.88,
+   "tokens": {
+    "fresh": 62129508.0,
+    "cached": 4004648000.0,
+    "out": 4347513.0,
+    "requests": 28308.0,
+    "cached_share": 98.5,
+    "prompt_per_call": 143662,
+    "out_per_call": 154,
+    "calls_per_task": 602.3,
+    "prompt_tokens_per_task_m": 86.53,
+    "out_tokens_per_task_k": 92.5
+   },
+   "cost_at_common_price": 144.0,
+   "cost_per_task_at_common_price": 3.06
+  },
+  "agree_s1s3": {
+   "both": 9,
+   "deepseek_only": 11,
+   "glm_only": 2,
+   "neither": 25,
+   "sign_test_p": 0.0225
+  },
+  "agree_s1s4": {
+   "both": 1,
+   "deepseek_only": 8,
+   "glm_only": 2,
+   "sign_test_p": 0.1094
+  }
+ },
+ "glm51": {
+  "tasks": 51,
+  "deepseek": {
+   "n": 51,
+   "s1s3": 23,
+   "s1s3_pct": 45.1,
+   "s1s3_ci": [
+    32.3,
+    58.6
+   ],
+   "s1s4": 10,
+   "s1s4_pct": 19.6,
+   "s1s4_ci": [
+    11.0,
+    32.5
+   ],
+   "outcomes": {
+    "PASS S1-S4": 10,
+    "no PoC": 25,
+    "S4 fail": 13,
+    "no patch": 2,
+    "S1 fail": 1
+   },
+   "funnel": [
+    23,
+    23,
+    23,
+    10
+   ],
+   "agent_min": {
+    "mean": 67.04,
+    "median": 90.0,
+    "total": 3419.1
+   },
+   "at_limit": 31,
+   "total_min": {
+    "mean": 79.69,
+    "median": 90.9,
+    "total": 4064.1
+   },
+   "graded": 24,
+   "grading_overhead_min": {
+    "mean": 24.05,
+    "median": 9.95,
+    "total": 577.1
+   },
+   "spend": {
+    "mean": 2.07,
+    "median": 1.89,
+    "total": 105.64
+   },
+   "spend_pass": 10.56,
+   "tokens": {
+    "fresh": 297477116.0,
+    "cached": 451684352.0,
+    "out": 2368112.0,
+    "requests": 8969.0,
+    "cached_share": 60.3,
+    "prompt_per_call": 83528,
+    "out_per_call": 264,
+    "calls_per_task": 175.9,
+    "prompt_tokens_per_task_m": 14.69,
+    "out_tokens_per_task_k": 46.4
+   },
+   "cost_at_common_price": 105.64,
+   "cost_per_task_at_common_price": 2.07
+  },
+  "glm": {
+   "n": 51,
+   "s1s3": 15,
+   "s1s3_pct": 29.4,
+   "s1s3_ci": [
+    18.7,
+    43.0
+   ],
+   "s1s4": 5,
+   "s1s4_pct": 9.8,
+   "s1s4_ci": [
+    4.3,
+    21.0
+   ],
+   "outcomes": {
+    "no patch": 24,
+    "S1 fail": 6,
+    "no PoC": 5,
+    "S4 fail": 10,
+    "S2 fail": 1,
+    "PASS S1-S4": 5
+   },
+   "funnel": [
+    16,
+    15,
+    15,
+    5
+   ],
+   "agent_min": {
+    "mean": 74.64,
+    "median": 90.0,
+    "total": 3806.4
+   },
+   "at_limit": 35,
+   "total_min": {
+    "mean": 87.98,
+    "median": 91.7,
+    "total": 4487.1
+   },
+   "graded": 22,
+   "grading_overhead_min": {
+    "mean": 16.3,
+    "median": 7.25,
+    "total": 358.6
+   },
+   "spend": {
+    "mean": 2.66,
+    "median": 2.69,
+    "total": 135.84
+   },
+   "spend_pass": 27.17,
+   "tokens": {
+    "fresh": 64173494.0,
+    "cached": 4132313152.0,
+    "out": 4485984.0,
+    "requests": 29350.0,
+    "cached_share": 98.5,
+    "prompt_per_call": 142981,
+    "out_per_call": 153,
+    "calls_per_task": 575.5,
+    "prompt_tokens_per_task_m": 82.28,
+    "out_tokens_per_task_k": 88.0
+   },
+   "cost_at_common_price": 148.6,
+   "cost_per_task_at_common_price": 2.91
+  },
+  "agree_s1s3": {
+   "both": 12,
+   "deepseek_only": 11,
+   "glm_only": 3,
+   "neither": 25,
+   "sign_test_p": 0.0574
+  },
+  "agree_s1s4": {
+   "both": 2,
+   "deepseek_only": 8,
+   "glm_only": 3,
+   "sign_test_p": 0.2266
+  }
+ },
+ "own": {
+  "deepseek": {
+   "n": 99,
+   "s1s3": 45,
+   "s1s3_pct": 45.5,
+   "s1s3_ci": [
+    36.0,
+    55.2
+   ],
+   "s1s4": 20,
+   "s1s4_pct": 20.2,
+   "s1s4_ci": [
+    13.5,
+    29.2
+   ],
+   "outcomes": {
+    "no patch": 4,
+    "PASS S1-S4": 20,
+    "no PoC": 48,
+    "S1 fail": 2,
+    "S4 fail": 25
+   },
+   "funnel": [
+    45,
+    45,
+    45,
+    20
+   ],
+   "agent_min": {
+    "mean": 70.63,
+    "median": 90.0,
+    "total": 6992.4
+   },
+   "at_limit": 61,
+   "total_min": {
+    "mean": 84.44,
+    "median": 91.1,
+    "total": 8359.9
+   },
+   "graded": 47,
+   "grading_overhead_min": {
+    "mean": 26.23,
+    "median": 10.1,
+    "total": 1232.6
+   },
+   "spend": {
+    "mean": 2.47,
+    "median": 2.32,
+    "total": 244.75
+   },
+   "spend_pass": 12.24,
+   "tokens": {
+    "fresh": 705912723.0,
+    "cached": 898135808.0,
+    "out": 5027409.0,
+    "requests": 18020.0,
+    "cached_share": 56.0,
+    "prompt_per_call": 89015,
+    "out_per_call": 279,
+    "calls_per_task": 182.0,
+    "prompt_tokens_per_task_m": 16.2,
+    "out_tokens_per_task_k": 50.8
+   },
+   "cost_at_common_price": 244.75,
+   "cost_per_task_at_common_price": 2.47
+  },
+  "glm": {
+   "n": 51,
+   "s1s3": 15,
+   "s1s3_pct": 29.4,
+   "s1s3_ci": [
+    18.7,
+    43.0
+   ],
+   "s1s4": 5,
+   "s1s4_pct": 9.8,
+   "s1s4_ci": [
+    4.3,
+    21.0
+   ],
+   "outcomes": {
+    "no patch": 24,
+    "S1 fail": 6,
+    "no PoC": 5,
+    "S4 fail": 10,
+    "S2 fail": 1,
+    "PASS S1-S4": 5
+   },
+   "funnel": [
+    16,
+    15,
+    15,
+    5
+   ],
+   "agent_min": {
+    "mean": 74.64,
+    "median": 90.0,
+    "total": 3806.4
+   },
+   "at_limit": 35,
+   "total_min": {
+    "mean": 87.98,
+    "median": 91.7,
+    "total": 4487.1
+   },
+   "graded": 22,
+   "grading_overhead_min": {
+    "mean": 16.3,
+    "median": 7.25,
+    "total": 358.6
+   },
+   "spend": {
+    "mean": 2.66,
+    "median": 2.69,
+    "total": 135.84
+   },
+   "spend_pass": 27.17,
+   "tokens": {
+    "fresh": 64173494.0,
+    "cached": 4132313152.0,
+    "out": 4485984.0,
+    "requests": 29350.0,
+    "cached_share": 98.5,
+    "prompt_per_call": 142981,
+    "out_per_call": 153,
+    "calls_per_task": 575.5,
+    "prompt_tokens_per_task_m": 82.28,
+    "out_tokens_per_task_k": 88.0
+   },
+   "cost_at_common_price": 148.6,
+   "cost_per_task_at_common_price": 2.91
+  }
+ },
+ "price_lists": {
+  "deepseek_assumed": [
+   0.3,
+   0.03,
+   1.2
+  ],
+  "glm_openrouter_list": [
+   0.15,
+   0.03,
+   0.5
+  ]
+ },
+ "prefix_at_own_prices": {
+  "deepseek": 95.04,
+  "glm": 131.63
+ },
+ "runs": {
+  "deepseek": {
+   "start": "2026-11-04T06:07:16Z",
+   "end": "2026-11-04T17:00:54Z",
+   "wall_h": 10.9,
+   "graded": 99,
+   "interrupted": 1,
+   "task_hours": {
+    "total": 139.3,
+    "agent": 116.5,
+    "outside_agent": 22.8
+   },
+   "spend": 244.75,
+   "requests": 18020,
+   "calls": 18212,
+   "http_error": 412,
+   "failed_streams": 88,
+   "over_590": 86,
+   "secs": [
+    4.4,
+    24.3,
+    183.5
+   ],
+   "nodes": {
+    "head": {
+     "mem_max": 17.6,
+     "load_max": 42.0
+    },
+    "worker A (\u202620.48)": {
+     "mem_max": 33.9,
+     "load_max": 87.0
+    },
+    "worker B (\u202623.192)": {
+     "mem_max": 25.5,
+     "load_max": 70.0
+    }
+   },
+   "top_container": [
+    23.0,
+    "worker A (\u202620.48)",
+    "codex-6e0eb205"
+   ]
+  },
+  "glm": {
+   "start": "2026-11-10T08:09:55Z",
+   "end": "2026-11-10T13:32:39Z",
+   "wall_h": 5.38,
+   "graded": 51,
+   "interrupted": 16,
+   "not_started": 30,
+   "void": 3,
+   "task_hours": {
+    "total": 74.8,
+    "agent": 63.4,
+    "outside_agent": 11.3
+   },
+   "spend": 135.84,
+   "requests": 29350,
+   "calls": 6883,
+   "http_error": 74,
+   "failed_streams": 2,
+   "over_120": 10,
+   "secs": [
+    3.9,
+    9.7,
+    28.8
+   ],
+   "nodes": {
+    "head": {
+     "mem_max": 28.9,
+     "load_max": 16.0
+    },
+    "worker A (\u202621.183)": {
+     "mem_max": 19.5,
+     "load_max": 28.0
+    },
+    "worker B (\u202629.158)": {
+     "mem_max": 10.2,
+     "load_max": 30.0
+    }
+   },
+   "top_container": [
+    22.2,
+    "head",
+    "codex-1c9d08e6"
+   ]
+  }
+ },
+ "fuzzers": {
+  "deepseek": {
+   "tasks": 100,
+   "ran_fuzzer": 85,
+   "ran_parallel_or_afl": 34,
+   "commands": 13928,
+   "fuzzer_commands": 768,
+   "at_limit": 61,
+   "at_limit_ran_fuzzer": 59,
+   "no_poc_tasks": 48,
+   "no_poc_ran_fuzzer": 47,
+   "pass_tasks": 20,
+   "pass_ran_fuzzer": 14,
+   "note": "pattern search over command lines (libFuzzer and AFL options); approximate; the logs have no timestamps, so the share of agent time is not known"
+  },
+  "glm": {
+   "tasks": 51,
+   "ran_fuzzer": 40,
+   "ran_parallel_or_afl": 3,
+   "commands": 25147,
+   "fuzzer_commands": 1281,
+   "at_limit": 35,
+   "at_limit_ran_fuzzer": 28,
+   "no_poc_tasks": 5,
+   "no_poc_ran_fuzzer": 4,
+   "pass_tasks": 5,
+   "pass_ran_fuzzer": 4,
+   "note": "pattern search over command lines (libFuzzer and AFL options); approximate; the logs have no timestamps, so the share of agent time is not known"
+  }
+ },
+ "self_validation": {
+  "deepseek": {
+   "tasks_that_ran_validate_py": 99,
+   "runs": 277,
+   "mean_per_task": 2.8,
+   "max_per_task": 8,
+   "share_of_commands": 2.0
+  },
+  "glm": {
+   "tasks_that_ran_validate_py": 51,
+   "runs": 353,
+   "mean_per_task": 6.9,
+   "max_per_task": 38,
+   "share_of_commands": 1.4
+  }
+ }
+}
