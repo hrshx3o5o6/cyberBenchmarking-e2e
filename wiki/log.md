@@ -585,3 +585,6 @@ New files: `tools/analyze_glm100.py`, `tools/analyze_glm100_extras.py`, `tools/g
 
 ## [2026-11-10] query | Comparison of the DeepSeek and GLM 100-task runs
 New page [[wiki/syntheses/deepseek-vs-glm-flash-comparison]] and `docs/trajectories/compare-deepseek-glm.html` (tools `compare_runs.py`, `compare_report.py`, a panel on the viewer index): on the first 47 tasks of the shared dispatch order DeepSeek passed S1 to S3 on 20 and GLM on 11 (exact sign test p = 0.022); GLM used about 3.5 times the calls per task on 1.8 times longer prompts with 98.5% cached; list of what differs between the runs and caveats.
+
+## [2026-11-10] query | comparison page: 51-task columns added
+Compare page now shows the first 47 tasks and all 51 valid GLM tasks side by side (4 extra tasks listed, 3 void tasks explained). Touched: tools/compare_runs.py, tools/compare_report.py, aws-vm-data/compare-deepseek-glm/*, wiki/syntheses/deepseek-vs-glm-flash-comparison.md, docs/trajectories/compare-deepseek-glm.html. Not pushed.

@@ -1,5 +1,23 @@
 {
  "n_prefix": 47,
+ "extra": [
+  {
+   "position": 49,
+   "task": "libaom/arvo_10574"
+  },
+  {
+   "position": 50,
+   "task": "libheif/arvo_61718"
+  },
+  {
+   "position": 58,
+   "task": "fluent-bit/arvo_26327"
+  },
+  {
+   "position": 65,
+   "task": "libhevc/arvo_23197"
+  }
+ ],
  "prefix_last": "binutils/arvo_60532",
  "prefix": {
   "tasks": 47,

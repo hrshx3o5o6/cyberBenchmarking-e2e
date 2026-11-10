@@ -32,18 +32,22 @@ def build(C, pairs, links_ds, links_glm, ctx):
                    "DeepSeek's result on the same %d tasks is set against GLM's. All headline numbers below are for this set unless a heading says otherwise; the larger sets are in <a href=\"#bigger\">Other sets</a>.</p>"
                    "<p class=\"note\">%d tasks is a small sample and each model had one attempt per task: differences of a few tasks are noise (the 95%% intervals below show how wide). The two runs also differ in more than the model (price lists, grading path, container limits, node setup, day); see <a href=\"#differences\">What differs</a>.</p>" % (C["n_prefix"], esc(C["prefix_last"]), n, n), "read"))
     sg = lambda s, k: "%d of %d (%.0f%%, 95%% interval %.0f to %.0f%%)" % (s[k], s["n"], s[k + "_pct"], s[k + "_ci"][0], s[k + "_ci"][1])
-    facts = [("Passed S1 to S3 (the paper's rule)", sg(d, "s1s3"), sg(g, "s1s3")), ("Passed all four stages", sg(d, "s1s4"), sg(g, "s1s4")),
-             ("Agent time, mean / median", "%.0f / %.0f min" % (d["agent_min"]["mean"], d["agent_min"]["median"]), "%.0f / %.0f min" % (g["agent_min"]["mean"], g["agent_min"]["median"])),
-             ("At the 90-minute limit", "%d of %d (%.0f%%)" % (d["at_limit"], n, 100 * d["at_limit"] / n), "%d of %d (%.0f%%)" % (g["at_limit"], n, 100 * g["at_limit"] / n)),
-             ("Cost per task at each run's own prices", "$%.2f (total $%.2f)" % (d["spend"]["mean"], d["spend"]["total"]), "$%.2f (total $%.2f)" % (g["spend"]["mean"], g["spend"]["total"])),
-             ("Cost per task at one price list (DeepSeek's)", "$%.2f" % d["cost_per_task_at_common_price"], "$%.2f" % g["cost_per_task_at_common_price"]),
-             ("Model calls per task", "%.0f" % d["tokens"]["calls_per_task"], "%.0f" % g["tokens"]["calls_per_task"]),
-             ("Prompt tokens per call / output tokens per call", "%s / %s" % (fmt_d(d["tokens"]["prompt_per_call"]), d["tokens"]["out_per_call"]), "%s / %s" % (fmt_d(g["tokens"]["prompt_per_call"]), g["tokens"]["out_per_call"])),
-             ("Cached share of prompt tokens", "%.1f%%" % d["tokens"]["cached_share"], "%.1f%%" % g["tokens"]["cached_share"])]
-    out.append(sec("At a glance (first %d tasks)" % n, table(["", "DeepSeek V4.1 Flash", "GLM 5.3 Flash"], [[a, b, c] for a, b, c in facts]) +
-                   "<p><b>DeepSeek solved more of the same tasks.</b> On S1 to S3 it passed %d against GLM's %d; the intervals overlap only partly, and the task-by-task counts below give an exact sign test of p = %.3f (%d tasks only DeepSeek solved, %d only GLM). GLM used about <b>%.1f times as many model calls</b> per task with <b>%.1f times longer prompts</b> and cached nearly all of them, so it cost about %.0f%% more at one price list even though its list prices are lower.</p>" % (
-                       d["s1s3"], g["s1s3"], ag["sign_test_p"], ag["deepseek_only"], ag["glm_only"], g["tokens"]["calls_per_task"] / d["tokens"]["calls_per_task"], g["tokens"]["prompt_per_call"] / d["tokens"]["prompt_per_call"],
-                       100 * (g["cost_per_task_at_common_price"] / d["cost_per_task_at_common_price"] - 1)), "glance"))
+    d5, g5 = G["deepseek"], G["glm"]; n5 = G["tasks"]
+    def row(lab, f): return [lab, f(d), f(g), f(d5), f(g5)]
+    facts = [row("Passed S1 to S3 (the paper's rule)", lambda s: sg(s, "s1s3")), row("Passed all four stages", lambda s: sg(s, "s1s4")),
+             row("Agent time, mean / median", lambda s: "%.0f / %.0f min" % (s["agent_min"]["mean"], s["agent_min"]["median"])),
+             row("At the 90-minute limit", lambda s: "%d of %d (%.0f%%)" % (s["at_limit"], s["n"], 100 * s["at_limit"] / s["n"])),
+             row("Cost per task at each run's own prices", lambda s: "$%.2f (total $%.2f)" % (s["spend"]["mean"], s["spend"]["total"])),
+             row("Cost per task at one price list (DeepSeek's)", lambda s: "$%.2f" % s["cost_per_task_at_common_price"]),
+             row("Model calls per task", lambda s: "%.0f" % s["tokens"]["calls_per_task"]),
+             row("Prompt tokens per call / output tokens per call", lambda s: "%s / %s" % (fmt_d(s["tokens"]["prompt_per_call"]), s["tokens"]["out_per_call"])),
+             row("Cached share of prompt tokens", lambda s: "%.1f%%" % s["tokens"]["cached_share"])]
+    ex = "".join("<li>#%d <code>%s</code>: DeepSeek %s, GLM %s</li>" % (e["position"], esc(e["task"]), esc(next(r for r in pairs if r["task"] == e["task"])["deepseek_outcome"]), esc(next(r for r in pairs if r["task"] == e["task"])["glm_outcome"])) for e in C["extra"])
+    out.append(sec("At a glance", table(["", "DeepSeek, first %d tasks" % n, "GLM, first %d tasks" % n, "DeepSeek, all %d valid GLM tasks" % n5, "GLM, all %d" % n5], facts) +
+                   "<p><b>DeepSeek solved more of the same tasks.</b> On the first %d tasks it passed S1 to S3 on %d against GLM's %d (exact sign test p = %.3f; %d tasks only DeepSeek solved, %d only GLM). On all %d valid GLM tasks it is %d against %d (p = %.3f). GLM used about <b>%.1f times as many model calls</b> per task with <b>%.1f times longer prompts</b> and cached nearly all of them, so it cost about %.0f%% more at one price list even though its list prices are lower.</p>" % (
+                       n, d["s1s3"], g["s1s3"], ag["sign_test_p"], ag["deepseek_only"], ag["glm_only"], n5, d5["s1s3"], g5["s1s3"], G["agree_s1s3"]["sign_test_p"], g["tokens"]["calls_per_task"] / d["tokens"]["calls_per_task"], g["tokens"]["prompt_per_call"] / d["tokens"]["prompt_per_call"],
+                       100 * (g["cost_per_task_at_common_price"] / d["cost_per_task_at_common_price"] - 1)) +
+                   "<p class=\"note\">The first %d tasks are an unbroken stretch of the dispatch order (the fair set). The %d-task columns add the %d tasks that GLM also finished validly after the run's break in the order, so they lean towards tasks that end early:</p><ul style=\"margin:0 0 .6rem;padding-left:1.1rem\">%s</ul>" % (n, n5, len(C["extra"]), ex), "glance"))
     order = ["PASS S1-S4", "S4 fail", "S2 fail", "S1 fail", "no PoC", "no patch"]
     cols = {"PASS S1-S4": "var(--pass)", "S4 fail": "var(--accent)", "S2 fail": "var(--skip)", "S1 fail": "var(--skip)", "no PoC": "var(--fail)", "no patch": "#c27a00"}
     funnel_lab = ["S1 PoC crashes the vulnerable build", "S2 patch stops that crash", "S3 other checks", "S4 intended bug fixed"]
@@ -114,8 +118,8 @@ def build(C, pairs, links_ds, links_glm, ctx):
         ds_m = r["deepseek_agent_min"] and "%.0f" % float(r["deepseek_agent_min"]) or "-"
         ds_s = r["deepseek_spend"] and "$%.2f" % float(r["deepseek_spend"]) or "-"
         ptab.append("<tr><td class=\"n\">%s</td><td>%s</td><td>%s</td><td>%s</td><td class=\"n\">%s</td><td class=\"n\">%s</td><td class=\"n\">%s</td><td class=\"n\">%s</td><td>%s</td></tr>" % (
-            r["position"], a, _chip(r["deepseek_outcome"], ctx), _chip(r["glm_outcome"], ctx), ds_m, gm, ds_s, gs, ("fair set · " if r["in_fair_prefix"] == "True" else "") + gl))
-    out.append(sec("Per task (100, in dispatch order)", "<p class=\"note\">Outcome chips: green = passed S1 to S3 (S1 to S4 is labelled <i>PASS</i>, an S4 failure <i>S4 fail</i>); red = failed or nothing produced; grey = no result (GLM tasks void, killed in progress or never started). The fair set is the first %d rows. Links open the task's full run in the viewer.</p>" % n +
+            r["position"], a, _chip(r["deepseek_outcome"], ctx), _chip(r["glm_outcome"], ctx), ds_m, gm, ds_s, gs, ("fair set · " if r["in_fair_prefix"] == "True" else ("valid, after the break · " if r.get("in_valid51") == "True" else "")) + gl))
+    out.append(sec("Per task (100, in dispatch order)", "<p class=\"note\">Outcome chips: green = passed S1 to S3 (S1 to S4 is labelled <i>PASS</i>, an S4 failure <i>S4 fail</i>); red = failed or nothing produced; grey = no result (GLM tasks void, killed in progress or never started). The fair set is the first %d rows; four later rows are marked as valid GLM results after the break. Links open the task's full run in the viewer.</p>" % n +
                    '<div class="tablewrap"><table class="runs"><thead><tr><th>#</th><th>Task (DeepSeek run)</th><th>DeepSeek</th><th>GLM</th><th>DS agent min</th><th>GLM agent min</th><th>DS cost</th><th>GLM cost</th><th>Notes</th></tr></thead><tbody>%s</tbody></table></div>' % "".join(ptab), "tasks"))
     out.append(sec("Caveats", "<ul style=\"margin:0;padding-left:1.1rem\"><li><b>One attempt per task, small n.</b> %d tasks; the intervals are wide and a few tasks can swap the result. Re-running either model could move its numbers.</li>"
                    "<li><b>Not a model ranking.</b> The runs differ in provider, price list, grading path, container limits and day (section above). The GLM run had provider-side problems (credit limits) that were not the model's.</li>"

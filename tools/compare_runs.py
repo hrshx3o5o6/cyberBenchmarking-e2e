@@ -75,7 +75,8 @@ def pair(tasks, price):
 
 
 P_DS, P_GL = (0.30, 0.03, 1.20), (0.15, 0.03, 0.50)
-C = dict(n_prefix=n_prefix, prefix_last=prefix[-1],
+extra = [t for t in glm_valid if t not in prefix]
+C = dict(n_prefix=n_prefix, extra=[dict(position=ORDER.index(t) + 1, task=t) for t in extra], prefix_last=prefix[-1],
          prefix=pair(prefix, P_DS), glm51=pair(glm_valid, P_DS),
          own=dict(deepseek=stats([r for r in DS.values() if valid(r)], P_DS), glm=stats([GL[t] for t in glm_valid], P_DS)),
          price_lists=dict(deepseek_assumed=P_DS, glm_openrouter_list=P_GL),
@@ -90,10 +91,10 @@ C = dict(n_prefix=n_prefix, prefix_last=prefix[-1],
          fuzzers=dict(deepseek=XD["fuzzers"], glm=XG["fuzzers"]), self_validation=dict(deepseek=XD["self_validation"], glm=XG["self_validation"]))
 json.dump(C, open(OUT + "/compare.json", "w"), indent=1)
 with open(OUT + "/per_task_pair.csv", "w", newline="") as f:
-    w = csv.writer(f); w.writerow(["position", "task", "in_fair_prefix", "deepseek_outcome", "glm_outcome", "deepseek_s1s3", "glm_s1s3", "deepseek_agent_min", "glm_agent_min", "deepseek_spend", "glm_spend", "deepseek_calls", "glm_calls"])
+    w = csv.writer(f); w.writerow(["position", "task", "in_fair_prefix", "in_valid51", "deepseek_outcome", "glm_outcome", "deepseek_s1s3", "glm_s1s3", "deepseek_agent_min", "glm_agent_min", "deepseek_spend", "glm_spend", "deepseek_calls", "glm_calls"])
     for i, t in enumerate(ORDER):
         d, g = DS[t], GL[t]
-        w.writerow([i + 1, t, t in prefix, d["outcome"], g["outcome"], S13(d) if valid(d) else "", S13(g) if valid(g) else "", d["agent_min"], g["agent_min"] if valid(g) else "", d["spend"], g["spend"] if valid(g) else "", d["requests"], g["requests"] if valid(g) else ""])
+        w.writerow([i + 1, t, t in prefix, t in glm_valid, d["outcome"], g["outcome"], S13(d) if valid(d) else "", S13(g) if valid(g) else "", d["agent_min"], g["agent_min"] if valid(g) else "", d["spend"], g["spend"] if valid(g) else "", d["requests"], g["requests"] if valid(g) else ""])
 P = C["prefix"]
 print("fair prefix: first", n_prefix, "tasks (last: %s)" % prefix[-1])
 for k in ("deepseek", "glm"):
