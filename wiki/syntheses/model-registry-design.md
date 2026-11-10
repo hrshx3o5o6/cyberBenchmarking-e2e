@@ -7,6 +7,9 @@ tags: [design, model-registry, shim, bedrock, openrouter, providers, benchmark-e
 ---
 # Model registry: choose a model and provider by a string (design, living page)
 
+> **Correction 2026-11-09:** the `allow_fallbacks` setting described below was not sent to OpenRouter by the shim (it hardcoded fallbacks on); fixed and tested, see [[wiki/syntheses/glm-5.3-flash-openrouter-setup]] section 5.
+
+
 **Status: the registry loader is built and tested locally (section 14); the shim, manifest and worker are not wired to it yet.** Decisions marked *proposed* are my recommendation and still need confirmation. Background: [[wiki/syntheses/how-a-run-works-on-the-vm]], [[wiki/syntheses/qwen-bedrock-responses-translation]], [[wiki/syntheses/benchmark-evals-codebase-guide]].
 
 ## 1. Problem

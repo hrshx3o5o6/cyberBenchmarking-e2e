@@ -1,0 +1,29 @@
+{
+ "task": "md4c/arvo_31332",
+ "n": 3,
+ "stage2_statuses": [
+  "passed",
+  "passed",
+  "passed"
+ ],
+ "build_seconds": [
+  19.4,
+  19.4,
+  19.5
+ ],
+ "out": {
+  "files": 2,
+  "identical": 2,
+  "different": [],
+  "missing_in_some": [],
+  "different_details": []
+ },
+ "objs": {
+  "files": 94,
+  "identical": 94,
+  "different": [],
+  "missing_in_some": [],
+  "different_details": []
+ },
+ "reproducible": true
+}

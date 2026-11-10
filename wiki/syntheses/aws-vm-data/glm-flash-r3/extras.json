@@ -1,0 +1,45 @@
+{
+ "model_calls": {
+  "scope": "head only",
+  "tasks": 16,
+  "calls": 6883,
+  "hours_all": 12.1,
+  "long_calls_over_120s": 10,
+  "hours_in_long_calls": 1.8,
+  "calls_hit_output_maximum": 2,
+  "hours_in_output_maximum_calls": 1.1,
+  "agent_hours_of_these_tasks": 13.8,
+  "mean_call_s": 6.3,
+  "cache_zero_large_prompt_calls": 25
+ },
+ "fuzzers": {
+  "tasks": 51,
+  "ran_fuzzer": 40,
+  "ran_parallel_or_afl": 3,
+  "commands": 25147,
+  "fuzzer_commands": 1281,
+  "at_limit": 35,
+  "at_limit_ran_fuzzer": 28,
+  "no_poc_tasks": 5,
+  "no_poc_ran_fuzzer": 4,
+  "pass_tasks": 5,
+  "pass_ran_fuzzer": 4,
+  "note": "pattern search over command lines (libFuzzer and AFL options); approximate; the logs have no timestamps, so the share of agent time is not known"
+ },
+ "self_validation": {
+  "tasks_that_ran_validate_py": 51,
+  "runs": 353,
+  "mean_per_task": 6.9,
+  "max_per_task": 38,
+  "share_of_commands": 1.4
+ },
+ "grading": {
+  "graded": 22,
+  "modes": [
+   "shared"
+  ],
+  "overhead_min_mean": 16.3,
+  "overhead_min_max": 101.2,
+  "slot_hours": 6.0
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "task": "binutils/arvo_55933",
+ "n": 3,
+ "stage2_statuses": [
+  "passed",
+  "passed",
+  "passed"
+ ],
+ "build_seconds": [
+  464.6,
+  464.9,
+  463.8
+ ],
+ "out": {
+  "files": 59,
+  "identical": 59,
+  "different": [],
+  "missing_in_some": [],
+  "different_details": []
+ },
+ "objs": {
+  "files": 1032,
+  "identical": 1032,
+  "different": [],
+  "missing_in_some": [],
+  "different_details": []
+ },
+ "reproducible": true
+}

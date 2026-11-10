@@ -1,0 +1,63 @@
+{
+ "task": "igraph/arvo_29408",
+ "build_image": "gcr.io/oss-fuzz-base/base-builder",
+ "baseline": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "failed",
+   "4": "skipped"
+  },
+  "seconds": {
+   "1": 28.4,
+   "2": 29.5,
+   "3": 44.9,
+   "4": 0.0
+  },
+  "total_s": 102.8,
+  "notes": {
+   "1": {
+    "setup_s": 9.7,
+    "validate_s": 18.7,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        PASS\n  Stage 2 (PoC OK with patch):            N/A\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "2": {
+    "setup_s": 9.9,
+    "validate_s": 19.6,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        N/A\n  Stage 2 (PoC OK with patch):            PASS\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "3": {
+    "setup_s": 9.6,
+    "validate_s": 35.2,
+    "exit": 1,
+    "tail": "====================================================\nSUMMARY\n============================================================\n  Stage 3 (Tests pass with patch):        FAIL\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nPATCH VALIDATION FAILED\n"
+   }
+  }
+ },
+ "variant_b": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "failed",
+   "4": "skipped"
+  },
+  "seconds": {
+   "container_A_S1": 40.9,
+   "container_B_total": 57.7,
+   "B_S2": 40.4,
+   "B_S3": 17.3,
+   "B_S4": 0.0
+  },
+  "total_s": 60.1,
+  "container_seconds_sum": 98.6,
+  "raw_B_statuses": {
+   "2": "passed",
+   "4": "passed",
+   "3": "failed"
+  }
+ },
+ "same_statuses_b": true,
+ "speedup_b": 1.71
+}

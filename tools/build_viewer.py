@@ -22,6 +22,8 @@ RUN_AGENT = os.path.join(ROOT, "cybergym-bench", "cybergym-e2e", "scripts", "run
 ANNOT = os.path.join(ROOT, "tools", "viewer_annotations.json")
 DS_RUNS = os.path.join(RUNS, "deepseek100-pass2")                      # the 100 task run (local copy of its run folders; not in git)
 DS_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "deepseek100")   # the small result tables of that run (in git)
+GLM_RUNS = os.path.join(RUNS, "glm100-r3")                              # the GLM 5.3 Flash run (run folders exported from the database; not in git)
+GLM_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "glm-flash-r3")   # its small result tables (in git)
 REPO_BLOB = "https://github.com/hrshx3o5o6/cyberBenchmarking-e2e/blob/main/wiki/syntheses/"
 OUT_CAP = 20000          # characters of one tool output kept on a page
 THINK_CAP = 20000
@@ -160,7 +162,7 @@ def parse_codex(events):
 def discover():
     seen, runs = {}, []
     for f in sorted(glob.glob(os.path.join(RUNS, "**", "trajectory", "attempt_*.log"), recursive=True)):
-        if f.startswith(DS_RUNS + os.sep):          # shown in its own section (discover_ds100)
+        if f.startswith(DS_RUNS + os.sep) or f.startswith(GLM_RUNS + os.sep):          # shown in their own sections (discover_ds100, discover_glm100)
             continue
         h = hashlib.sha256(open(f, "rb").read()).hexdigest()
         if h in seen:
@@ -207,6 +209,21 @@ def discover_ds100():
             continue
         s_ = json.load(open(rd + "/summary.json")); a = s_["attempts"][0]
         runs.append(dict(path=f, rd=rd, rel=os.path.relpath(f, RUNS), sha=hashlib.sha256(open(f, "rb").read()).hexdigest(), task=s_["task"], agent="codex", model="deepseek-v4.1-flash",
+                         mode="e2e", style=s_.get("prompt_style", "iterative"), stages=[a.get("stage%d" % i) for i in (1, 2, 3, 4)], minutes=s_.get("duration_minutes"),
+                         ts=os.path.basename(rd).split("_e2e")[0], events=load_events(f), summary=s_))
+    runs.sort(key=lambda r: r["task"])
+    return runs
+
+
+def discover_glm100():
+    """Runs of the GLM 5.3 Flash run (valid tasks and the 3 void ones), one per task, in the same shape as discover() returns."""
+    runs = []
+    for f in sorted(glob.glob(os.path.join(GLM_RUNS, "*", "upstream", "*", "*", "trajectory", "attempt_*.log"))):
+        rd = f.split("/trajectory/")[0]
+        if not os.path.exists(rd + "/summary.json"):
+            continue
+        s_ = json.load(open(rd + "/summary.json")); a = s_["attempts"][0]
+        runs.append(dict(path=f, rd=rd, rel=os.path.relpath(f, RUNS), sha=hashlib.sha256(open(f, "rb").read()).hexdigest(), task=s_["task"], agent="codex", model="glm-5.3-flash",
                          mode="e2e", style=s_.get("prompt_style", "iterative"), stages=[a.get("stage%d" % i) for i in (1, 2, 3, 4)], minutes=s_.get("duration_minutes"),
                          ts=os.path.basename(rd).split("_e2e")[0], events=load_events(f), summary=s_))
     runs.sort(key=lambda r: r["task"])
@@ -554,7 +571,7 @@ def build_index(rows, ds_block=""):
           '<a class="btn" href="../infra-leads.html">Infra leads</a></header>' % (len(rows), len(by_task)))
     h += '<div class="banner info"><b>Read the Note column.</b> Some tasks leak the answer and some runs ended for reasons that say nothing about the model. Flagged runs repeat the explanation in a banner on their page.</div>'
     h += ds_block
-    h += '<nav class="jump"><a href="#deepseek100"><b>100 task run</b></a>' + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
+    h += '<nav class="jump"><a href="#deepseek100"><b>100 task run</b></a>' + ('<a href="#glm100"><b>GLM run</b></a>' if 'id="glm100"' in ds_block else "") + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
     for t, rs in by_task.items():
         h += '<section id="t-%s"><h3 class="task">%s</h3><div class="tablewrap"><table class="runs"><colgroup><col style="width:17%%"><col style="width:11%%"><col style="width:9%%"><col style="width:27%%"><col style="width:6%%"><col style="width:12%%"><col style="width:18%%"></colgroup><thead><tr><th>Model</th><th>Harness</th><th>Mode</th><th>S1 S2 S3 S4</th><th>Min</th><th>Cost</th><th>Note</th></tr></thead><tbody>' % (slug(t), esc(t))
         for row in rs:
@@ -646,6 +663,40 @@ def main():
                     '<b>%d of 100 graded, %d passed all four stages</b> (%d more passed S1 to S3); cost $%.2f at an assumed price; 10 h 54 min wall. <a class="btn" href="deepseek-100-report.html">Full report</a></p>'
                     '<p class="note">Report: outcomes, time, money, model calls, memory and CPU per node, autoscaler, the first pass that lost 68 tasks. One row per task below; click a task for its whole run.</p>%s</section>'
                     % (S["run"]["finished"], S["run"]["passed"], S["outcomes"].get("S4 fail", 0), S["spend"]["total"], dsr.task_table(data, links, ctx)))
+    glm = discover_glm100()
+    if glm and os.path.isdir(GLM_DATA):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import glm100_report as glr
+        ctx = dict(head=head, TAIL=TAIL, chip=chip, esc=esc)
+        gdata = glr.load(GLM_DATA)
+        g_by_task = {t["task"]: t for t in gdata["tasks"]}
+        g_links = {}
+        for r in glm:
+            t = g_by_task.get(r["task"], {})
+            if t.get("status") == "void":
+                ann = [dict(level="fail", title="Void result.", text="The run was stopped (a credit guard terminated the driver) while this task's agent was still working (%s minutes of agent time of 90). The harness wrote down whatever existed (no patch or no PoC), which is not a model outcome. The trajectory up to that point is shown; the task is left out of every count." % ("%.0f" % t["agent_min"] if t.get("agent_min") else "?"))]
+            else:
+                ann = [dict(level="info", title="Part of the GLM 5.3 Flash run.", text="One of the 100 tasks of the GLM 5.3 Flash run (Codex through OpenRouter pinned to Z.AI, one attempt, 90-minute agent limit, 10 USD cap, setup A grading, 40 GB and 2,048-process container limits). This run is partial: 51 tasks have a valid result. See the report.")]
+                if r["task"] == "qpdf/oss-fuzz_42535152":
+                    ann.append(dict(level="warn", title="Leak in this task.", text="The task's ground-truth PoC sits inside its source tree (a fuzz-corpus file)."))
+                if t.get("overhead_min") and t["overhead_min"] >= 60:
+                    ann.append(dict(level="info", title="Long setup and grading.", text="Setup plus grading took %d minutes on top of the 90-minute agent run." % t["overhead_min"]))
+            rid, h, info = build_run(r, None, ann)
+            h = h.replace('<a href="../index.html">All runs</a>', '<a href="../index.html#glm100">GLM run</a>')
+            h = h.replace("no matching wiki page", '<a href="../glm-100-report.html">GLM 100 task run report</a>')
+            if t.get("spend") is not None and t.get("status") != "void":
+                h = h.replace("<dd>see the wiki page</dd>", "<dd>$%.2f (shim count, OpenRouter list price)</dd>" % t["spend"])
+                h = re.sub(r"(<dt>Model responses</dt><dd>)n/a(</dd>)", r"\g<1>%d (from the shim)\g<2>" % (t["requests"] or 0), h)
+                h = re.sub(r"(<dt>Tokens \(fresh / cached / output\)</dt><dd>)[^<]*(</dd>)", r"\g<1>%s / %s / %s (from the shim)\g<2>" % (format(int(t["fresh_in"] or 0), ","), format(int(t["cached_in"] or 0), ","), format(int(t["out_tok"] or 0), ",")), h)
+            files["runs/%s.html" % rid] = h
+            g_links[r["task"]] = "runs/%s.html" % rid
+            report["pages"] += 1
+        files["glm-100-report.html"] = glr.build_report(gdata, g_links, ctx)
+        GS = gdata["S"]
+        ds_block += ('<section class="panel" id="glm100"><h2>100 task run: GLM 5.3 Flash (partial)</h2><p>The same 100 CyberGym-E2E tasks, end to end, Codex through OpenRouter (Z.AI), one attempt each, the paper\'s limits (90 minutes, 10 USD), setup A grading. '
+                     '<b>%d of 100 have a valid result, %d passed all four stages</b> (%d more passed S1 to S3); the run was stopped at 5 h 23 min (%d tasks killed in progress, %d never started, %d void); cost of the valid tasks $%.2f. <a class="btn" href="glm-100-report.html">Full report</a></p>'
+                     '<p class="note">Report: what happened over four attempts, outcomes, time, money, model calls, memory and CPU with the new container limits, fuzzers and grading. One row per task below; click a task for its whole run.</p>%s</section>'
+                     % (GS["run"]["finished"], GS["run"]["passed"], GS["outcomes"].get("S4 fail", 0), GS["run"]["interrupted"], GS["run"]["not_started"], GS["run"]["void"], GS["spend"]["total"], glr.task_table(gdata, g_links, ctx)))
     files["index.html"] = build_index(rows, ds_block)
     files["how-to-read.html"] = head("How to read these pages") + HOWTO + TAIL
     files["README.md"] = ("# Run viewer pages\n\nGenerated by `tools/build_viewer.py` from the raw trajectory logs in `cybergym-bench/runs/`. Do not edit by hand.\n\n"

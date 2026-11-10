@@ -7,24 +7,26 @@ tags: [cybergym, validation, grader, docker, experiment, speed, shared-images, l
 ---
 # Validation with shared images instead of four separate setups: design, first results, comparison with the standard grader (2026-11-06)
 
-**Status: second round done. Stage results identical in all nine comparisons (igraph, md4c, four negative controls, binutils, two igraph repeats). Timing: 1.71x faster on binutils (a heavy build), 0.67x to 1.49x on tiny projects where saving the images costs as much as it saves. Not yet tested: ffmpeg, repeats on heavy tasks, equivalence on the 48 saved pairs.** Background: what the stages are in [[wiki/syntheses/cybergym-agent-and-validation-walkthrough]]; why validation matters for wall time in [[wiki/syntheses/deepseek-100-task-run-report]] sections 13 and 18; the scheduling side of the discussion (ordering, a separate validation pool) is in the same report and in the conversation notes of 2026-11-05. "Grader" and "validation" mean the same thing here. Raw numbers: `aws-vm-data/grader-bench/`; script: `tools/grader_bench.py`.
+**Status: fourth round done. Variant B (build once, no saved images, S1 in a second container at the same time) gave identical stage statuses in all seven inputs (igraph, four negative controls, binutils, ffmpeg) and was **3.87x faster on binutils and 3.71x on ffmpeg** (5,974 s to 1,612 s) while using 46% less container time than the standard grader. It beats the shared-images variant (A: 1.71x and 1.34x). Not yet done: the equivalence check on the 48 saved pairs, repeats, a harness patch.**
 
 ## Verdict so far: is it helping? (2026-11-06)
 **Yes, where it matters, and modestly for the whole run.**
 - **Correct:** the stage statuses were identical to the standard grader in nine comparisons, including a failing stage 4, a failing patch, a build error, a patch that only disables the code (S3 failed it in both) and a PoC that does not crash. No case where the variant turned a failure into a pass.
-- **Faster on heavy builds:** binutils (a build of about 7 minutes per stage) went from 1,725 s to 1,006 s, **1.71x**, matching the cost model's 1.5x to 1.7x. On tiny projects (igraph, md4c) it was 0.67x to 1.49x: the two image saves cost as much as the work they avoid.
-- **Effect on the 100-task run, replayed** (the report's replay model, which reproduces the 11.3 h; the ffmpeg ratio is an **assumption** carried over from binutils, ffmpeg has not been measured):
+- **Faster on heavy builds, but less than hoped on the heaviest:** binutils (about 7 minutes per stage) went from 1,725 s to 1,006 s, **1.71x**; ffmpeg (about 25 minutes per stage) from 5,974 s to 4,458 s, **1.34x**, because saving the two images cost 1,462 s (33% of the variant); without the saves it would have been 1.99x. On tiny projects (igraph, md4c) it was 0.67x to 1.49x: the saves cost as much as the work they avoid. **The image save is the weak point of this design.**
+- **Effect on the 100-task run, replayed** (the report's replay model, which reproduces the 11.3 h; the rows marked hypothetical are not measured):
 | Change to grading | As run | ffmpeg first |
 |---|---|---|
 | none (standard) | 11.3 h | 9.7 h |
-| shared images on ffmpeg tasks, 1.71x (measured on binutils) | 10.0 h | 9.2 h |
+| shared images on ffmpeg tasks, 1.34x (**measured on ffmpeg**) | 10.5 h | 9.5 h |
+| the same without the image-save cost, 1.99x (hypothetical) | 9.8 h | 9.2 h |
+| **variant B, 3.71x on ffmpeg (measured)** | **9.1 h** | **8.9 h** |
 | shared images and parallel stages, 2.9x (not tested) | 9.3 h | 9.0 h |
 | the four standard stages in parallel, 3.9x (not tested) | 9.1 h | 8.9 h |
 | grading 2x faster (the report's scenario) | 9.7 h | 8.8 h |
-  So shared images alone would have saved about 1.3 h of 11.3 h (about 12%), 6.5 hours of slot time on the 12 ffmpeg tasks, and about 0.5 h on top of ordering ffmpeg first. **The scheduling change (ffmpeg first, 1.6 h) is a bigger lever than the images, and running the stages in parallel is probably a bigger lever too.**
+  So shared images as built would have saved about 0.8 h of 11.3 h on the whole run (about 7%) and only 0.2 h on top of ordering ffmpeg first. **Variant B, as measured, would have saved 2.2 h (11.3 h to 9.1 h) and, together with ffmpeg first, 2.4 h (to 8.9 h), close to the floor set by agent time (about 7.4 h) plus packing.** Ordering alone (1.6 h) remains the cheapest lever.
 - **Resource view:** shared images save compute (1,725 s of container time to 1,006 s on binutils) at the price of disk (the saved images were several GB) and 11 to 92 s of save time; parallelism saves wall time but not compute. The VM sat at load 1.0 on 16 vCPUs during grading, so the CPU for parallel stages is there.
-- **Recommended use:** only for projects with long builds (ffmpeg and a few others), combined with ffmpeg-first ordering; not for small projects. Do not adopt until ffmpeg is measured and the equivalence check on the 48 saved pairs passes.
-- **Limits of the evidence:** one heavy project, one run each, a few small ones; run-to-run noise of the image saves is large (11 to 92 s); the ffmpeg gain is extrapolated.
+- **Recommended use:** variant B, not the shared images. It matched the standard grader's statuses on all seven inputs, took 3.7x to 3.9x less wall time on the two heavy projects and 46% less compute on ffmpeg, with no images to write. Adopt only after the equivalence check on the 48 saved pairs passes and the harness change (run S1 and the patched build side by side; S2, S4, then S3 in one container) is written as a patch through `patch_cybergym.py`. Keep ffmpeg-first ordering as well.
+- **Limits of the evidence:** one run each of two heavy projects and a few small ones; the image saves are noisy (11 s to 1,175 s depending on image size); the hypothetical rows are projections.
 
 ## 1. The standard grader (the baseline)
 `run_final_validation` (`scripts/run_agent.py:332`) in end-to-end mode runs four stages, **each in its own fresh container from the plain build image**, and each container repeats the same work before its check:
@@ -106,6 +108,71 @@ Statuses identical: passed, passed, passed, passed in both. **Baseline 1,725 s (
 | **Total** | **1,725.3** | **Total** | **1,006.3** |
 Each standard stage is dominated by the build (about 400 s of the 410 to 430 s of `validate.py`); `test.sh` is short here (6.6 s). The two patched builds that disappear (about 2 x 410 s) and three setups (about 45 s) explain the saving, minus the two image saves (42 + 92 = 134 s, about 13% of the variant's time). The VM's load average stayed at about 1.0 on 16 vCPUs during the run: the build is effectively single-threaded and the machine was mostly idle.
 
+### 4d. The heaviest project: ffmpeg `oss-fuzz_42537665` (task-specific 51.4 GB build image; about 25 minutes per stage)
+Statuses identical: passed x4 in both. **Baseline 5,974 s (99.6 min), variant 4,458 s (74.3 min): 1.34x, 1,516 s saved.**
+| Standard grader | Seconds | Variant | Seconds |
+|---|---|---|---|
+| S1 (setup 103.3 + `validate.py` 1,412.0) | 1,515.3 | setup 34.4, `prepare.sh` 0.1, **save prepared image 286.5** (once, total) | 366.0 |
+| S2 (setup 39.5 + 1,439.4) | 1,478.9 | S1: build vulnerable tree + run PoC | 1,428.3 |
+| S3 (setup 34.1 + 1,474.5) | 1,508.7 | patched build once (about 1,430) + **save image 1,175.2** (total) | 2,627.9 |
+| S4 (setup 35.1 + 1,436.4) | 1,471.5 | S2 PoC only / S3 `test.sh` only / S4 PoC only | 0.3 / 30.4 / 0.2 |
+| **Total** | **5,974.4** | **Total** | **4,457.7** |
+- The work that disappears is about 2 x 1,420 s of builds plus three setups (about 210 s): about 3,050 s. The two image saves cost **1,462 s (33% of the variant)**, so the net saving is 1,516 s. **Without the saves the same plan would take about 2,996 s: 1.99x.**
+- Saving the patched-build image (33 GB of build tree, 19.6 minutes) is the single largest cost of the variant: `docker commit` has to write and hash a layer of many small files, about 28 MB/s here. The prepared image (19 GB, 4.8 minutes) cost less.
+- Once saved, the three checks took under 31 s in total (S3's tests 30.4 s). The VM's load stayed at about 1.0.
+- A caveat on the comparison with the 100-task run: this baseline took 99.6 minutes, against 131 minutes of setup and grading for the same task in that run, which shared its node with other work.
+
+### 4e. Variant B: build once, no saved images, two containers at once (2026-11-07)
+**The design.** Container A builds the vulnerable tree and runs S1 exactly as the standard grader. Container B, at the same time, runs the standard S2 through `validate.py` (prepare, snapshot, restore, apply the patch, build the patched tree **once**, run the agent's PoC), then in the same container S4 (the ground-truth PoC, which only executes the binary) and last S3 (the tests, which can modify the tree). If S2 does not pass, B stops there. The skip rules are applied to the results afterwards, so the statuses are the ones the standard grader would report. No image is saved. Script: `tools/grader_bench.py --mode b` (or `bothb`, which also runs the standard grader on the same input).
+**Results.** "Container time" is the sum of the two containers, the compute-side cost. Standard times for igraph and the controls are from a standard run on the same input in the same session; for binutils and ffmpeg they are the recorded standard results of 4c and 4d.
+| Input | Statuses same as standard | Standard | Variant B wall | Ratio | B container time |
+|---|---|---|---|---|---|
+| igraph, real PoC and patch (all four pass) | yes | 133 s | 58 s | 2.27x | 97 s |
+| control: PoC that does not crash (S1 fails) | yes (failed, skipped x3) | 28 s | 60 s | **0.47x** | 99 s |
+| control: no-op patch (S2 fails) | yes | 57 s | 47 s | 1.20x | 82 s |
+| control: patch that breaks the build (S2 error) | yes | 56 s | 43 s | 1.31x | 74 s |
+| control: patch that disables the code (S2 passes, S3 fails) | yes (passed, passed, failed, skipped) | 103 s | 60 s | 1.71x | 99 s |
+| binutils `arvo_55933` | yes (passed x4) | 1,725 s | 446 s | **3.87x** | 864 s |
+| ffmpeg `oss-fuzz_42537665` | yes (passed x4) | 5,974 s | 1,612 s | **3.71x** | 3,199 s |
+**The three designs on the two heavy projects**
+| | Standard | A: shared images | B: build once, two containers |
+|---|---|---|---|
+| binutils, wall time | 1,725 s | 1,006 s (1.71x) | **446 s (3.87x)** |
+| ffmpeg, wall time | 5,974 s | 4,458 s (1.34x) | **1,612 s (3.71x)** |
+| ffmpeg, container time (compute) | 5,974 s | about 4,458 s | **3,199 s (46% less)** |
+| image saves | none | two, 1,462 s on ffmpeg | none |
+**Observations**
+- **Correct in every case, including the ones designed to go wrong.** The code-disabling control is the sharpest: S2 passes, S3 fails, and S4 must be skipped. In B the raw S4 check had already run and passed (it runs before the tests), but the skip rule masks it, giving the standard grader's statuses. Same for the non-crashing PoC, where B's raw S2, S4 and S3 all passed and were masked to skipped because S1 failed.
+- **Why it is fast on heavy builds:** both containers do one build each (about 1,577 s of it on ffmpeg) and run at the same time, so the wall time is the longer build plus the checks (S3's tests took 31 s on ffmpeg and 7 s on binutils; S2 and S4 take under a second beyond the build). The standard grader runs four builds in a row.
+- **Why it also uses less compute:** two builds and two setups instead of four of each (3,199 s against 5,974 s on ffmpeg), and no 33 GB images to write.
+- **Where it loses:** when S1 fails, B has already started the patched build, so it spends 99 s where the standard grader needs 28 s (0.47x). S1 failed in 2 of 47 graded tasks in the 100-task run. When S2 fails or errors B stops early and still wins (1.2x and 1.3x).
+- **Resources:** two builds at once is twice the simultaneous CPU of the standard grader (the VM stayed near load 1 to 2 on 16 vCPUs) and two build trees on disk at once (about 30 GB each for ffmpeg); 187 GB were free afterwards.
+- **What it does not prove:** seven inputs, one run each; the contamination question (the harness's own comment names stage-to-stage state) is answered only for these cases. S3 runs last for exactly that reason, and the tests ran on a tree where two PoC runs had already executed without any difference in result.
+- A note on how this round was run: the watcher I set for the first test series missed its completion marker, so the notification came two hours late; the ffmpeg run itself had started automatically on time and finished with the VM idle afterwards.
+
+### 4f. Is the patched build reproducible? (2026-11-09)
+**The question.** The standard grader compiles the patched tree three times (S2, S3 and S4, each in its own container); variants A and B compile it once and reuse the result. That is the same thing only if every compile gives the same bytes. Until now this was assumed, not checked.
+**The test** (`tools/repro_check.py`): build the patched tree in 3 independent fresh containers, each with its own setup, `prepare.sh` and compile exactly as the standard S2 does (all three ran at once on the head VM), then compare the SHA-256 of every file under `/out` (the binaries the PoC runs) and of every `*.o`, `*.a` and `*.so*` under `/src` (what the tests may link). Data: `aws-vm-data/grader-bench/repro_{igraph,md4c,binutils}.json`.
+| Project | Builds | S2 status | `/out` files identical | Object, archive and library files identical | Build time each |
+|---|---|---|---|---|---|
+| igraph `arvo_29408` | 3 | passed x3 | 4 of 4 | 794 of 794 | 58 s |
+| md4c `arvo_31332` | 3 | passed x3 | 2 of 2 | 94 of 94 | 19 s |
+| binutils `arvo_55933` | 3 | passed x3 | 59 of 59 | 1,032 of 1,032 | 464 s |
+**Reading.** For these three projects the three patched builds the standard grader makes are byte-identical, so building once (A or B) hands every stage exactly the files it would have built itself; this also means the S2 and S4 binaries of the standard grader are the same bytes. It supports the nine identical status comparisons with a direct check. **Not shown:** other projects (ffmpeg, the heaviest and the one where A and B matter most, is not tested; about 26 minutes for 3 parallel builds and about 90 GB of disk), files outside `/out` and the object files, and builds that differ by timestamp in a file that is not an object, archive or library.
+
+### 4g. Setup A as a patch in the harness, checked through the harness's own functions (2026-11-09)
+`tools/patch_setup_a.py` adds an optional shared-image validation path to `scripts/run_agent.py` (off unless `CYBERGYM_VALIDATION_MODE=shared`; the original function is kept, renamed `run_final_validation_standard`; a failure of the sharing machinery or too little free disk runs the standard grader instead; `summary.json` records `validation_mode`; saved images are named `cgval-<id>-prep` and `-built` and always removed; optional per-node cap `CYBERGYM_SHARED_MAX_CONCURRENT`). `tools/setup_a_check.py` and `tools/setup_a_fallback_test.py` call the real functions. Data: `aws-vm-data/grader-bench/` (seta_*.json are on the VM; the table below is the record).
+| Input | Shared (A) | Standard | Same | A against standard |
+|---|---|---|---|---|
+| igraph, real pair | passed x4 | passed x4 | yes | 122 s against 147 s (1.21x) |
+| control: PoC that does not crash | failed, skipped x3 | same | yes | 46 s against 33 s (0.70x) |
+| control: no-op patch | passed, failed, skipped x2 | same | yes | 70 s against 65 s (0.93x) |
+| control: patch that breaks the build | passed, error, skipped x2 | same | yes | 60 s against 63 s (1.05x) |
+| control: patch that disables the code | passed, passed, failed, skipped | same | yes | 88 s against 115 s (1.30x) |
+| md4c (S4 fails) | passed x3, failed | same | yes | 78 s against 76 s (0.97x) |
+| binutils `arvo_55933` (recorded passed x4) | passed x4 | recorded | yes | 1,060 s against 1,725 s (1.63x) |
+Fallbacks (igraph real pair): switch unset, disk below the threshold, `prepare.sh` failing (simulated) and image save failing (simulated) each returned passed x4 with the mode `standard`, `standard_low_disk`, `standard_after_shared_failure` and `standard_after_shared_failure`; no image was left in any case. Concurrency cap: three simultaneous calls with the cap at 1 ran one at a time (90 s, 194 s, 284 s), all passed, the wait was logged. 13 checks in all, no difference in any stage status. The replay on the recorded DeepSeek pairs was not run before the GLM 5.3 Flash run started.
+
 ## 5. Reading
 - **Correctness first:** the variant gave the same pass, fail and skip status as the standard grader on all stages, including the case where S4 fails. That is the necessary condition; it is only a few cases.
 - **Cost model that fits the numbers:** saving about 3 x (setup + `prepare.sh`) + 2 x (patched build) - (the two image saves). Saving an image of about 0.9 GB was the surprise: the first save took 11.4 s (igraph run 3), about 43 s (md4c) and visibly more in igraph run 2 (the prepared step took 58.8 s there, against 27.9 s in run 3), so it is **noisy**. For igraph (setup 9 to 10 s, `prepare.sh` 4 s, patched build about 15 s) the model gives about 50 s saved against 42 observed; for md4c (setup 11 s, `prepare.sh` 0 s, build about 3 s) it gives about -6 s against -3.5 observed.
@@ -122,15 +189,15 @@ The experiment needs no change to CyberGym's code (the script imports the harnes
 1. `scripts/run_agent.py`: an image-based path beside `run_final_validation`, or a flag, and a way to clean up the saved images.
 2. `scripts/validate.py`: a skip-build option (no `prepare.sh`, restore, patch or compile) so S2 to S4 can run from the saved patched build with the harness's own pass rules; today my script re-implements those rules (exit code 0 or not), which could drift from upstream.
 3. The patch would go through `scripts/patch_cybergym.py` in the owner's repo, like the two existing upstream patches, and could also be proposed upstream.
-4. Gate: an equivalence check on saved pairs (the 48 tasks of the 100-task run that have a PoC and patch) before anyone relies on it.
+4. Gate: an equivalence check on saved pairs (the 48 tasks of the 100-task run that have a PoC and patch) before anyone relies on it. The reproducibility check (4f) is done for igraph, md4c and binutils (identical bytes); ffmpeg is still open.
 
 ## 8. Next steps
-Done: negative controls (4.b), a heavy project (4.c), repeats on igraph.
-1. **ffmpeg** (up to 131 minutes of setup and grading in the 100-task run): where the saving should be largest and the image saves (several GB) matter most.
-2. **A second heavy task and repeats** (binutils `arvo_51010`, `arvo_18615`) to put a spread on the 1.71x.
-3. **Parallelism inside the variant:** S1 and the patched build at once; S2 to S4 side by side; compare with parallelising the standard stages.
-4. **Equivalence on the 48 saved pairs** of the 100-task run (and a failing-pair mix), as the gate before any real use.
-5. **Cheaper saves:** the first image save cost 11 to 91 s; options include committing less (a smaller tree), or running S2 to S4 in one container from the built state with a clean copy per stage.
+Done: negative controls (4b), binutils (4c), ffmpeg (4d), variant B on igraph, the controls, binutils and ffmpeg (4e).
+1. **Equivalence on the 48 saved pairs** (and a mix of failing pairs) for variant B against the standard grader: the gate before any real use. These can run several at a time on the VM (about 25 minutes each for ffmpeg-sized pairs).
+2. **Repeats** on a second heavy task (binutils `arvo_51010`, ffmpeg `oss-fuzz_438780119`) to put a spread on 3.7x to 3.9x.
+3. **The harness change:** run S1 and the patched build side by side in `run_final_validation`; `validate.py` gets an option to run S2, S4 and S3 in one container after one build without restoring and rebuilding between them; shipped as a patch through `scripts/patch_cybergym.py`, and proposed upstream.
+4. **Resource budgeting for validation:** two builds at once per graded task means the Ray scheduler should reserve about 2 CPUs and 60 GB of disk for each validation (the split-validation idea of the 100-task report).
+5. **Optional refinements:** skip the patched build when the agent's own stage-1 check never saw a crash; stop container B when S1 fails early.
 
 ## 9. Reproduce
 On the head VM, from a folder holding `grader_bench.py`, a PoC and a patch: `~/cybergym-e2e/.venv/bin/python grader_bench.py --harness ~/cybergym-e2e --task igraph/arvo_29408 --poc poc.bin --patch fix.patch --mode both --json out.json` (`--mode baseline` or `variant` for one side; `--keep` keeps the saved images). It prints both results and whether the statuses agree.

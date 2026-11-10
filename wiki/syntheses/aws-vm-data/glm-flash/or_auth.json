@@ -1,0 +1,24 @@
+{
+ "cmd": "auth",
+ "model": "z-ai/glm-5.3-flash",
+ "provider_pin": "z-ai",
+ "key": {
+  "http": 200,
+  "limit": 500,
+  "limit_remaining": 500,
+  "usage": 0,
+  "is_free_tier": false
+ },
+ "completion": {
+  "http": 200,
+  "seconds": 4.61,
+  "text": "ok",
+  "provider": "Z.AI",
+  "model": "z-ai/glm-5.3-flash",
+  "prompt": 19,
+  "completion": 36,
+  "cached": 0,
+  "reasoning": 33,
+  "cost": 2.085e-05
+ }
+}

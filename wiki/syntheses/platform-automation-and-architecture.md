@@ -41,6 +41,8 @@ Summary: the model plug-in is about 70% there; the run around it is about 20% au
 - **Benchmark adapter:** what the engine would ask of any benchmark: list tasks and metadata; prepare a task (data, images); run one task under limits and return a result; classify it (pass, model failure, infrastructure failure); give a resource profile (memory, disk, time per task); run validity screens; state protocol defaults (limits, attempts). Today these answers are spread over the runner, helper scripts and wiki pages.
 - **Engine:** plans nodes and slots from the adapter's resource profile, provisions, runs a reconcile loop, watches, reports, tears down.
 
+The adapter idea above is worked out in [[wiki/syntheses/benchmark-plugin-architecture]] (contract, run file, node profiles, migration steps).
+
 ## 4. The most important gap: scheduling
 Both big failures of the first pass came from the driver rather than the model plumbing: one node's memory exhaustion failed every task queued behind it (62 tasks at once), and nothing retried them. Target: a declarative run spec; a loop that continues until every task has a final state (a model result, or an infrastructure failure it retries on its own); infrastructure failures requeued, model failures never rerun (the protocol rule); new starts held back when a node's memory is low (the repo's adaptive gate `tools/controller.py` exists but is switched off).
 
@@ -59,7 +61,7 @@ Both big failures of the first pass came from the driver rather than the model p
 ## 7. Open questions
 - Is the agent part of the model choice or of the benchmark protocol?
 - Should a protocol (limits, prompt style, validity rules) be a versioned object referenced by the run spec? The protocol pages already play that role.
-- Does ExploitGym use the same container-per-task pattern?
+- Does ExploitGym use the same container-per-task pattern? Answered 2026-11-09 from its code: an agent container per task plus a controller-launched target container on the same host, per-host controller, firewall and proxy; details in [[wiki/syntheses/exploitgym-architecture-and-integration]].
 - How hands-off: approve the cost before each run, or fully automatic within a budget?
 
 ## 8. Model and provider side, assessed (added 2026-11-05)

@@ -1,0 +1,40 @@
+{
+ "steps": [
+  {
+   "turn": 1,
+   "seconds": 4.05,
+   "events": 11,
+   "tool_calls": 2,
+   "args_valid": [
+    true,
+    true
+   ],
+   "text": "",
+   "completed": true,
+   "input_tokens": 187,
+   "cached": 128,
+   "output_tokens": 53
+  },
+  {
+   "turn": 2,
+   "seconds": 3.34,
+   "events": 28,
+   "tool_calls": 0,
+   "args_valid": [],
+   "text": "The `echo hello` command output `hello`, and the `uname -s` command output `Linux`.",
+   "completed": true,
+   "input_tokens": 222,
+   "cached": 192,
+   "output_tokens": 50
+  }
+ ],
+ "final_mentions_both": true,
+ "shim_count": {
+  "requests": 2,
+  "input_tokens": 89,
+  "cache_read_tokens": 320,
+  "output_tokens": 103,
+  "errors": 0,
+  "spend": 7.445e-05
+ }
+}

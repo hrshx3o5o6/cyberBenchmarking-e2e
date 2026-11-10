@@ -7,7 +7,7 @@ tags: [pull-request, benchmark-evals, shim, translation-layer, registry, upstrea
 ---
 # Pull requests we can raise against the owner's repository (plan, 2026-11-05)
 
-**No pull request is open.** A combined branch for PR 1, 3 and 4 (and the hooks) is pushed to the owner's remote as `pr/model-shim-and-chat-translation` (section 5); the PR itself is for the study owner to open. The repository is the owner's (`prescera/benchmark-evals`, private); by the study owner's standing instruction nothing is pushed there without their go-ahead, and the owner has to accept the content. Code map and status of each copy: [[wiki/syntheses/benchmark-evals-codebase-guide]] (sections 7 and 8).
+**PR #3 is open** (opened 2026-11-06 07:23 UTC by the study owner, title "Pr/model shim and chat translation"): the combined branch `pr/model-shim-and-chat-translation` with the gcp serving arguments, the translation layer, the shim and the runner hooks (section 5). Everything else below is not raised yet. The repository is the owner's (`prescera/benchmark-evals`, private); by the study owner's standing instruction nothing is pushed there without their go-ahead, and the owner has to accept the content. Code map and status of each copy: [[wiki/syntheses/benchmark-evals-codebase-guide]] (sections 7 and 8).
 
 ## 1. Where things stand (checked 2026-11-05)
 - Owner's `main` is `c845c38` ("added gcp file": `src/gcp/manage_endpoint.py`). **PR #1** (Ray isolation, stagger, scheduling strategy; branch `ray-isolation-stagger-spread`) merged 2026-10-27 and **PR #2** (optional shared Postgres store and the SQLite lock race fix; branch `pr/postgres-store-and-race-fix`, with a description drafted in `spark/amit-repo/PR_DESCRIPTION_postgres-store-and-race-fix.md`) merged 2026-11-02. No PR is open.
@@ -36,7 +36,7 @@ tags: [pull-request, benchmark-evals, shim, translation-layer, registry, upstrea
 ## 4. What I would do first
 Raise (or offer) PR 1 as a small, measured first step, then PR 2, then 3 to 5 as a series (shim, translation, registry), because 4 and 5 are only reviewable once 3 is merged. All of it needs the study owner's go-ahead before anything is pushed.
 
-## 5. The combined, trimmed PR (built locally 2026-11-06; branch pushed to the owner's remote the same day, no pull request opened yet)
+## 5. The combined, trimmed PR (built locally 2026-11-06; branch pushed to the owner's remote the same day and opened as PR #3)
 Decision of the study owner: club the gcp change, the shim and the translation layer into one PR, and cut the size by moving optional features to the next PR.
 - **Branch:** `pr/model-shim-and-chat-translation` in `spark/amit-repo/benchmark-evals` (on top of the owner's `main` `c845c38`), four commits in review order: (1) gcp serving arguments, (2) `tools/responses_chat.py` with 16 tests, (3) `tools/llm_shim.py` with 6 tests, (4) runner hooks (`worker.py`, `config.py`), 3 tests and a README section. Description drafted in `spark/amit-repo/PR_DESCRIPTION_shim-and-chat-translation.md`.
 - **Size:** 1,245 added lines: 740 code, 480 tests, 25 docs (the merged Postgres PR was 1,361). The first estimate for the same content was about 1,800.
@@ -45,3 +45,17 @@ Decision of the study owner: club the gcp change, the shim and the translation l
 - **Tests:** whole suite 59 passed, 17 skipped (Postgres tests need a database), including the 25 new ones.
 - **Caveat:** the files are a trimmed copy of the shim that ran on the VM, covered by tests but not yet used for a real task; a smoke run on the VM before raising is advisable.
 - **Commit style:** author only the study owner, no assistant co-author lines, as in the earlier PR commits (dfa33e4, 215ae51).
+
+## 6. What is still left to raise (2026-11-06)
+| Candidate | Depends on | Readiness |
+|---|---|---|
+| `mem_sampler.py` and `fetch_task_data.py` with tests (about 200 lines) | nothing: the owner's `pgstore.py` already has the `node_metrics` table and `add_metrics` | code and tests exist in the local copy; needs a branch and sanitising |
+| Provider-specific shim features (Google ADC auth and key reload, per-call time cap and chunk statistics, `UPSTREAM_API=auto`, `TOKEN_CAPS_ONLY`, 429 retry, provider order) | PR #3 merged | code exists (the trimmed parts); about 400 lines |
+| Model registry and `start_shim.sh` (about 670 lines) | PR #3 merged, ideally the features above | code and tests exist |
+| Token tools (`push_vertex_token.py`, `token_relay.py`) | the registry | optional stopgap |
+| Ray autoscaler scripts | none | needs ids turned into parameters |
+| Heavy-first task ordering (a manifest option) | none | not built; biggest measured scheduling lever (1.6 h of 11.3 h) |
+| Fix for silent reasoning stalls (stream activity, reasoning cap) | PR #3 merged | not built |
+| Docker CPU and memory limits (harness patch via `patch_cybergym.py`) | none | not built; also needed for ExploitGym |
+| Shared-images and parallel validation (a skip-build flag in `validate.py`, image-based path) | equivalence check on the 48 saved pairs | experiment only ([[wiki/syntheses/grader-shared-images-experiment]]) |
+| 8-bit KV and a sequence cap as options in `manage_endpoint.py` | an accuracy check of 8-bit | measured only |

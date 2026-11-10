@@ -1,0 +1,44 @@
+{
+ "cmd": "tools",
+ "model": "z-ai/glm-5.3-flash",
+ "provider_pin": "z-ai",
+ "steps": [
+  {
+   "turn": 1,
+   "seconds": 1.7,
+   "tool_calls": 2,
+   "args_valid": [
+    true,
+    true
+   ],
+   "finish": "tool_calls",
+   "text": "",
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 196,
+   "completion": 58,
+   "cached": 0,
+   "reasoning": 33,
+   "cost": 5.84e-05
+  },
+  {
+   "turn": 2,
+   "seconds": 1.71,
+   "tool_calls": 0,
+   "args_valid": [],
+   "finish": "stop",
+   "text": "The first command output `hello` and the second output `Linux`.",
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 229,
+   "completion": 28,
+   "cached": 192,
+   "reasoning": 12,
+   "cost": 2.531e-05
+  }
+ ],
+ "verdict": {
+  "final_mentions_both": true,
+  "all_args_valid": true
+ }
+}

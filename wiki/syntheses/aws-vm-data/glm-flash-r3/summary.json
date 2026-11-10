@@ -1,0 +1,682 @@
+{
+ "run": {
+  "start_utc": "2026-11-10T08:09:55Z",
+  "end_utc": "2026-11-10T13:32:39Z",
+  "tasks": 100,
+  "finished": 51,
+  "void": 3,
+  "interrupted": 16,
+  "not_started": 30,
+  "passed": 5
+ },
+ "outcomes": {
+  "S1 fail": 6,
+  "no patch": 24,
+  "PASS S1-S4": 5,
+  "S4 fail": 10,
+  "no PoC": 5,
+  "S2 fail": 1
+ },
+ "stage_patterns": [
+  [
+   [
+    "skipped",
+    "skipped",
+    "no_patch",
+    "skipped"
+   ],
+   24
+  ],
+  [
+   [
+    "passed",
+    "passed",
+    "passed",
+    "failed"
+   ],
+   10
+  ],
+  [
+   [
+    "failed",
+    "skipped",
+    "skipped",
+    "skipped"
+   ],
+   6
+  ],
+  [
+   [
+    "passed",
+    "passed",
+    "passed",
+    "passed"
+   ],
+   5
+  ],
+  [
+   [
+    "no_poc",
+    "skipped",
+    "skipped",
+    "skipped"
+   ],
+   5
+  ],
+  [
+   [
+    "passed",
+    "failed",
+    "skipped",
+    "skipped"
+   ],
+   1
+  ]
+ ],
+ "agent_minutes": {
+  "n": 51,
+  "mean": 74.6,
+  "median": 90.0,
+  "p90": 90.0,
+  "max": 90.0
+ },
+ "hit_limit": 35,
+ "agent_max_seconds": 5400.0,
+ "total_minutes": {
+  "n": 51,
+  "mean": 88.0,
+  "median": 91.7,
+  "p90": 106.9,
+  "max": 191.2
+ },
+ "overhead_minutes_all": {
+  "n": 51,
+  "mean": 13.3,
+  "median": 5.9,
+  "p90": 20.8,
+  "max": 101.2
+ },
+ "graded": 22,
+ "not_graded": 29,
+ "task_hours": {
+  "total": 74.8,
+  "agent": 63.4,
+  "outside_agent": 11.3
+ },
+ "spend": {
+  "total": 135.84,
+  "mean": 2.66,
+  "median": 2.69,
+  "p90": 4.42,
+  "max": 5.95,
+  "over_5": 2,
+  "over_8": 0,
+  "over_10": 0,
+  "by_outcome": {
+   "PASS S1-S4": 0.82,
+   "S1 fail": 2.95,
+   "S2 fail": 2.96,
+   "S4 fail": 1.86,
+   "no PoC": 2.86,
+   "no patch": 3.26
+  },
+  "total_by_outcome": {
+   "PASS S1-S4": 4.12,
+   "S1 fail": 17.7,
+   "S2 fail": 2.96,
+   "S4 fail": 18.55,
+   "no PoC": 14.32,
+   "no patch": 78.19
+  },
+  "cost_per_pass": 27.17,
+  "void_tasks": 3.94
+ },
+ "tokens": {
+  "fresh": 64173494,
+  "cached": 4132313152,
+  "out": 4485984,
+  "requests": 29350,
+  "cached_share": 98.5
+ },
+ "calls_per_task": {
+  "n": 51,
+  "mean": 575.5,
+  "median": 595,
+  "p90": 956,
+  "max": 1150
+ },
+ "prompt_tokens_per_call_mean": 142981,
+ "out_tokens_per_call_mean": 153,
+ "shim": {
+  "scope": "the head's shim only (the workers' logs were lost with the workers)",
+  "calls": 6883,
+  "http_200": 6805,
+  "http_402": 74,
+  "failed_streams": 2,
+  "over_120s": 10,
+  "calls_length": 2,
+  "secs_p50": 3.9,
+  "secs_p90": 9.7,
+  "secs_p99": 28.8,
+  "secs_max": 2066.8,
+  "finish": {
+   "tool_calls": 6774,
+   "stop": 27,
+   "length": 2,
+   "None": 79,
+   "error": 1
+  },
+  "providers": {
+   "Z.AI": 6805,
+   "None": 78
+  },
+  "long_calls": [
+   [
+    2067.0,
+    "32f7cefd",
+    "length",
+    131072
+   ],
+   [
+    1844.0,
+    "32f7cefd",
+    "length",
+    131072
+   ],
+   [
+    1083.0,
+    "0e4c5249",
+    "stop",
+    55205
+   ],
+   [
+    334.0,
+    "63cdba6a",
+    "stop",
+    18496
+   ],
+   [
+    300.0,
+    "63cdba6a",
+    null,
+    0
+   ],
+   [
+    188.0,
+    "b262da86",
+    "stop",
+    9519
+   ],
+   [
+    160.0,
+    "0e4c5249",
+    "stop",
+    6849
+   ],
+   [
+    133.0,
+    "8d482311",
+    "error",
+    371
+   ],
+   [
+    121.0,
+    "f3131c62",
+    "stop",
+    4984
+   ],
+   [
+    121.0,
+    "2f1790bd",
+    "tool_calls",
+    4425
+   ]
+  ]
+ },
+ "nodes": {
+  "head": {
+   "samples": 629,
+   "mem_used_avg": 7.8,
+   "mem_used_p99": 26.9,
+   "mem_used_max": 28.9,
+   "mem_avail_min": 32.9,
+   "load_avg": 3.5,
+   "load_p50": 3.0,
+   "load_p90": 6.0,
+   "load_max": 16.0,
+   "pct_load_over_16": 0.2,
+   "pct_load_over_32": 0.0,
+   "containers_avg": 4.9
+  },
+  "worker A (\u202621.183)": {
+   "samples": 593,
+   "mem_used_avg": 5.7,
+   "mem_used_p99": 18.8,
+   "mem_used_max": 19.5,
+   "mem_avail_min": 42.3,
+   "load_avg": 6.5,
+   "load_p50": 5.0,
+   "load_p90": 13.0,
+   "load_max": 28.0,
+   "pct_load_over_16": 6.6,
+   "pct_load_over_32": 0.0,
+   "containers_avg": 6.7
+  },
+  "worker B (\u202629.158)": {
+   "samples": 588,
+   "mem_used_avg": 3.8,
+   "mem_used_p99": 7.3,
+   "mem_used_max": 10.2,
+   "mem_avail_min": 51.6,
+   "load_avg": 4.2,
+   "load_p50": 3.0,
+   "load_p90": 8.0,
+   "load_max": 30.0,
+   "pct_load_over_16": 2.7,
+   "pct_load_over_32": 0.0,
+   "containers_avg": 6.7
+  }
+ },
+ "top_containers_gb": [
+  [
+   22.2,
+   "head",
+   "codex-1c9d08e6"
+  ],
+  [
+   16.7,
+   "head",
+   "codex-32420641"
+  ],
+  [
+   15.9,
+   "worker A (\u202621.183)",
+   "codex-17fce942"
+  ],
+  [
+   11.4,
+   "worker A (\u202621.183)",
+   "codex-e1d1bc73"
+  ],
+  [
+   10.7,
+   "worker A (\u202621.183)",
+   "codex-4dd10dd6"
+  ],
+  [
+   7.5,
+   "worker A (\u202621.183)",
+   "codex-08254ed2"
+  ],
+  [
+   7.3,
+   "worker B (\u202629.158)",
+   "codex-d3028734"
+  ],
+  [
+   7.3,
+   "worker A (\u202621.183)",
+   "codex-82f8e851"
+  ]
+ ],
+ "autoscaler_event_counts": {
+  "Adding N node(s) of type worker.": 1,
+  "Resized to N CPUs.": 1
+ },
+ "autoscaler_events": [
+  [
+   "+8s",
+   "Adding 2 node(s) of type worker."
+  ],
+  [
+   "+5m44s",
+   "Resized to 48 CPUs."
+  ]
+ ],
+ "by_project": [
+  {
+   "project": "ghostscript",
+   "n": 6,
+   "passed": 0,
+   "s4_fail": 3,
+   "no_poc": 1,
+   "agent_min": 66.0,
+   "spend": 17.28
+  },
+  {
+   "project": "ffmpeg",
+   "n": 4,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 14.51
+  },
+  {
+   "project": "mruby",
+   "n": 4,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 1,
+   "agent_min": 86.0,
+   "spend": 11.53
+  },
+  {
+   "project": "libavc",
+   "n": 3,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 2,
+   "agent_min": 90.0,
+   "spend": 9.06
+  },
+  {
+   "project": "binutils",
+   "n": 3,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 78.0,
+   "spend": 10.41
+  },
+  {
+   "project": "opensc",
+   "n": 3,
+   "passed": 0,
+   "s4_fail": 2,
+   "no_poc": 0,
+   "agent_min": 73.0,
+   "spend": 7.6
+  },
+  {
+   "project": "upx",
+   "n": 2,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 1,
+   "agent_min": 90.0,
+   "spend": 8.01
+  },
+  {
+   "project": "libxml2",
+   "n": 2,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 61.0,
+   "spend": 3.07
+  },
+  {
+   "project": "yara",
+   "n": 2,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 7.56
+  },
+  {
+   "project": "fluent-bit",
+   "n": 2,
+   "passed": 0,
+   "s4_fail": 2,
+   "no_poc": 0,
+   "agent_min": 30.0,
+   "spend": 1.03
+  },
+  {
+   "project": "libraw",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.96
+  },
+  {
+   "project": "libdwarf",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 3.68
+  },
+  {
+   "project": "harfbuzz",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.96
+  },
+  {
+   "project": "boringssl",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 24.0,
+   "spend": 0.83
+  },
+  {
+   "project": "libvips",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 3.16
+  },
+  {
+   "project": "util-linux",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 3.43
+  },
+  {
+   "project": "zeek",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 3.53
+  },
+  {
+   "project": "qpdf",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 0,
+   "agent_min": 60.0,
+   "spend": 1.52
+  },
+  {
+   "project": "h2o",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.95
+  },
+  {
+   "project": "quickjs",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.47
+  },
+  {
+   "project": "libwebp",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.19
+  },
+  {
+   "project": "libheif",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 1,
+   "no_poc": 0,
+   "agent_min": 48.0,
+   "spend": 2.28
+  },
+  {
+   "project": "wireshark",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.09
+  },
+  {
+   "project": "libhevc",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 12.0,
+   "spend": 0.2
+  },
+  {
+   "project": "radare2",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 2.68
+  },
+  {
+   "project": "leptonica",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 0.48
+  },
+  {
+   "project": "zstd",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 1.54
+  },
+  {
+   "project": "libaom",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 25.0,
+   "spend": 1.64
+  },
+  {
+   "project": "c-blosc2",
+   "n": 1,
+   "passed": 0,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 90.0,
+   "spend": 5.07
+  },
+  {
+   "project": "libplist",
+   "n": 1,
+   "passed": 1,
+   "s4_fail": 0,
+   "no_poc": 0,
+   "agent_min": 9.0,
+   "spend": 0.1
+  }
+ ],
+ "by_kind": [
+  {
+   "kind": "arvo",
+   "n": 38,
+   "passed": 5,
+   "no_poc": 4,
+   "s4_fail": 9,
+   "spend": 94.64
+  },
+  {
+   "kind": "oss-fuzz",
+   "n": 13,
+   "passed": 0,
+   "no_poc": 1,
+   "s4_fail": 1,
+   "spend": 41.2
+  }
+ ],
+ "by_host": [
+  {
+   "host": "head",
+   "n": 11,
+   "passed": 0,
+   "agent_min": 70.0,
+   "overhead_min": 34.9
+  },
+  {
+   "host": "worker A (\u202621.183)",
+   "n": 19,
+   "passed": 2,
+   "agent_min": 78.0,
+   "overhead_min": 5.9
+  },
+  {
+   "host": "worker B (\u202629.158)",
+   "n": 21,
+   "passed": 3,
+   "agent_min": 74.0,
+   "overhead_min": 8.8
+  }
+ ],
+ "grading": {
+  "graded_overhead": {
+   "n": 22,
+   "mean": 16.3,
+   "median": 7.2,
+   "p90": 46.9,
+   "max": 101.2
+  },
+  "validation_modes": {
+   "shared": 22,
+   "None": 29
+  },
+  "ffmpeg_graded": [
+   [
+    "ffmpeg/oss-fuzz_42537564",
+    46.9
+   ]
+  ]
+ },
+ "pass_by_limit": {
+  "passed_at_limit": 0,
+  "passed_agent_min": {
+   "n": 5,
+   "mean": 20.1,
+   "median": 23.5,
+   "p90": 31.8,
+   "max": 31.8
+  }
+ },
+ "lost": {
+  "tasks": 16,
+  "hours_elapsed": 8.1
+ }
+}

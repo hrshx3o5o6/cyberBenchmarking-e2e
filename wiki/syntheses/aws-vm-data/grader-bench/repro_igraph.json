@@ -1,0 +1,29 @@
+{
+ "task": "igraph/arvo_29408",
+ "n": 3,
+ "stage2_statuses": [
+  "passed",
+  "passed",
+  "passed"
+ ],
+ "build_seconds": [
+  57.9,
+  57.9,
+  58.2
+ ],
+ "out": {
+  "files": 4,
+  "identical": 4,
+  "different": [],
+  "missing_in_some": [],
+  "different_details": []
+ },
+ "objs": {
+  "files": 794,
+  "identical": 794,
+  "different": [],
+  "missing_in_some": [],
+  "different_details": []
+ },
+ "reproducible": true
+}

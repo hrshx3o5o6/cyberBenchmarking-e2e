@@ -1,0 +1,28 @@
+{
+ "task": "ffmpeg/oss-fuzz_42537665",
+ "build_image": "cybergym/oss-fuzz:42537665-fix",
+ "variant_b": {
+  "status": {
+   "1": "passed",
+   "2": "passed",
+   "3": "passed",
+   "4": "passed"
+  },
+  "seconds": {
+   "container_A_S1": 1591.2,
+   "container_B_total": 1608.2,
+   "B_S2": 1576.9,
+   "B_S3": 31.2,
+   "B_S4": 0.1
+  },
+  "total_s": 1611.7,
+  "container_seconds_sum": 3199.4,
+  "raw_B_statuses": {
+   "2": "passed",
+   "4": "passed",
+   "3": "passed"
+  }
+ },
+ "same_statuses_b": true,
+ "speedup_b": 3.71
+}

@@ -8,9 +8,14 @@ VARIANT   = prepared image (setup + prepare.sh + snapshot, done once) -> S1 buil
             once and saved as an image; S2, S3 and S4 each start in a fresh container from that image and only run their own check.
             Nothing is shared between containers except those two saved images; the stage skip rules are the same.
 
+VARIANT B = no saved images at all: container A builds the VULNERABLE tree and runs S1 (exactly as the standard stage 1); container B, at the same time,
+            runs the standard stage 2 through validate.py (prepare, snapshot, restore, apply the patch, build the PATCHED tree once, run the agent's PoC) and then,
+            in the same container, S4 (the ground-truth PoC, which only executes the binary) and last S3 (the project's tests, which can modify the tree).
+            Skip rules are applied to the results afterwards, so the statuses are the ones the standard grader would report.
+
 Runs on the machine that has Docker, the harness checkout and the task images (the head VM). No model is called.
 
-usage: grader_bench.py --harness ~/cybergym-e2e --task igraph/arvo_29408 --poc poc.bin --patch fix.patch [--mode baseline|variant|both] [--json out.json] [--keep]
+usage: grader_bench.py --harness ~/cybergym-e2e --task igraph/arvo_29408 --poc poc.bin --patch fix.patch [--mode baseline|variant|both|b|bothb] [--ref earlier.json] [--json out.json] [--keep]
 Result: one JSON object per mode with the status and the seconds of each stage; with --mode both, a comparison of the statuses.
 """
 import argparse, json, subprocess, sys, tempfile, time
@@ -21,7 +26,8 @@ ap.add_argument("--harness", required=True, help="the cybergym-e2e checkout (scr
 ap.add_argument("--task", required=True, help="project/task, e.g. igraph/arvo_29408")
 ap.add_argument("--poc", required=True)
 ap.add_argument("--patch", required=True)
-ap.add_argument("--mode", choices=["baseline", "variant", "both"], default="both")
+ap.add_argument("--mode", choices=["baseline", "variant", "both", "b", "bothb"], default="both")
+ap.add_argument("--ref", default=None, help="with --mode b: an earlier result JSON whose baseline statuses and time are the reference")
 ap.add_argument("--json", default=None)
 ap.add_argument("--keep", action="store_true", help="keep the saved images (default: delete them)")
 args = ap.parse_args()
@@ -170,8 +176,55 @@ def variant():
     return {"status": res, "seconds": secs, "total_s": round(time.time() - t_all, 1), "image_gb": sizes, "notes": notes}
 
 
+def variant_b():
+    """Two containers at once, no saved images (see the module docstring)."""
+    import concurrent.futures as cf
+
+    def ready():
+        c = start_container(IMAGE)
+        setup_workspace(c, DATA_PATH, SCRIPT_PATH, "e2e", scripts_dir=SCRIPTS)
+        copy_to_container(c, POC, "/output/poc.bin"); copy_to_container(c, PATCH, "/output/fix.patch")
+        return c
+
+    def check(c, command, timeout):
+        code, out, err = exec_run(c, command, None, timeout=timeout, workdir="/", verbose=False)
+        return "error" if code == 124 else ("passed" if code == 0 else "failed")
+
+    def container_a():                                   # S1, as the standard stage 1
+        t0 = time.time(); c = ready()
+        try:
+            exec_run(c, VALIDATE + " --only-stage 1 --poc-file /output/poc.bin --patch-file /output/fix.patch --run-prepare", None, timeout=7200, workdir="/", verbose=False)
+            r = read_json(c, "/output/validation_results.json")
+            return (r or {}).get("stage1") or "error", round(time.time() - t0, 1)
+        finally:
+            cleanup_container(c)
+
+    def container_b():                                   # S2 through validate.py, then S4, then the tests
+        t0 = time.time(); c = ready(); res, secs = {}, {}
+        try:
+            exec_run(c, VALIDATE + " --only-stage 2 --poc-file /output/poc.bin --patch-file /output/fix.patch --run-prepare", None, timeout=7200, workdir="/", verbose=False)
+            r = read_json(c, "/output/validation_results.json"); res[2] = (r or {}).get("stage2") or "error"; secs[2] = round(time.time() - t0, 1)
+            if res[2] == "passed":
+                t1 = time.time(); res[4] = check(c, "cp /data/poc.bin /src/poc.bin && cd /src && sudo -E bash -eux /src/run_poc.sh", 1200); secs[4] = round(time.time() - t1, 1)
+                t1 = time.time(); res[3] = check(c, "cd /src && sudo -E bash -eux /src/test.sh", 1800); secs[3] = round(time.time() - t1, 1)
+            return res, secs, round(time.time() - t0, 1)
+        finally:
+            cleanup_container(c)
+
+    t_all = time.time()
+    with cf.ThreadPoolExecutor(2) as pool:
+        fa, fb = pool.submit(container_a), pool.submit(container_b)
+        s1, secs_a = fa.result(); res_b, secs_b, total_b = fb.result()
+    ok1 = s1 == "passed"
+    status = {1: s1, 2: res_b[2] if ok1 else "skipped"}
+    status[3] = res_b.get(3, "skipped") if ok1 and status[2] == "passed" else "skipped"
+    status[4] = res_b.get(4, "skipped") if status[3] == "passed" else "skipped"        # S4 only counts when S3 passed, as in the standard grader
+    return {"status": status, "seconds": {"container_A_S1": secs_a, "container_B_total": total_b, **{f"B_S{k}": v for k, v in sorted(secs_b.items())}},
+            "total_s": round(time.time() - t_all, 1), "container_seconds_sum": round(secs_a + total_b, 1), "raw_B_statuses": {str(k): v for k, v in res_b.items()}}
+
+
 out = {"task": args.task, "build_image": IMAGE.split("@")[0]}
-if args.mode in ("baseline", "both"):
+if args.mode in ("baseline", "both", "bothb"):
     out["baseline"] = baseline()
     print("baseline:", json.dumps({k: out["baseline"][k] for k in ("status", "seconds", "total_s")}), flush=True)
 if args.mode in ("variant", "both"):
@@ -182,5 +235,14 @@ if args.mode == "both":
     out["same_statuses"] = all(b.get(s) == v.get(s) for s in (1, 2, 3, 4))
     out["speedup"] = round(out["baseline"]["total_s"] / max(out["variant"]["total_s"], 1), 2)
     print("same statuses:", out["same_statuses"], "| baseline %.0f s, variant %.0f s, ratio %.2f" % (out["baseline"]["total_s"], out["variant"]["total_s"], out["speedup"]))
+if args.mode in ("b", "bothb"):
+    out["variant_b"] = variant_b()
+    print("variant B:", json.dumps({k: out["variant_b"][k] for k in ("status", "seconds", "total_s", "container_seconds_sum")}), flush=True)
+    ref = out.get("baseline") or (json.load(open(args.ref))["baseline"] if args.ref else None)
+    if ref:
+        b, v = {str(k): x for k, x in ref["status"].items()}, {str(k): x for k, x in out["variant_b"]["status"].items()}
+        out["same_statuses_b"] = all(b.get(s) == v.get(s) for s in "1234")
+        out["speedup_b"] = round(ref["total_s"] / max(out["variant_b"]["total_s"], 1), 2)
+        print("variant B same statuses:", out["same_statuses_b"], "| standard %.0f s, B %.0f s (wall), ratio %.2f; B container time %.0f s" % (ref["total_s"], out["variant_b"]["total_s"], out["speedup_b"], out["variant_b"]["container_seconds_sum"]), flush=True)
 if args.json:
     Path(args.json).write_text(json.dumps(out, indent=1))

@@ -1,0 +1,134 @@
+{
+ "cmd": "cache",
+ "model": "z-ai/glm-5.3-flash",
+ "provider_pin": "z-ai",
+ "turns": [
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 4305,
+   "completion": 18,
+   "cached": 0,
+   "reasoning": 14,
+   "cost": 0.00065475,
+   "turn": 1,
+   "seconds": 1.17,
+   "share": 0.0
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 7332,
+   "completion": 64,
+   "cached": 128,
+   "reasoning": 60,
+   "cost": 0.00111644,
+   "turn": 2,
+   "seconds": 2.2,
+   "share": 0.017
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 10338,
+   "completion": 33,
+   "cached": 7296,
+   "reasoning": 17,
+   "cost": 0.00069168,
+   "turn": 3,
+   "seconds": 1.97,
+   "share": 0.706
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 13378,
+   "completion": 47,
+   "cached": 10304,
+   "reasoning": 31,
+   "cost": 0.00079372,
+   "turn": 4,
+   "seconds": 1.57,
+   "share": 0.77
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 16413,
+   "completion": 38,
+   "cached": 13376,
+   "reasoning": 22,
+   "cost": 0.00087583,
+   "turn": 5,
+   "seconds": 2.22,
+   "share": 0.815
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 19451,
+   "completion": 16,
+   "cached": 16384,
+   "reasoning": 0,
+   "cost": 0.00095957,
+   "turn": 6,
+   "seconds": 1.2,
+   "share": 0.842
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 22502,
+   "completion": 16,
+   "cached": 19392,
+   "reasoning": 0,
+   "cost": 0.00105626,
+   "turn": 7,
+   "seconds": 1.38,
+   "share": 0.862
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 25539,
+   "completion": 32,
+   "cached": 22464,
+   "reasoning": 16,
+   "cost": 0.00115117,
+   "turn": 8,
+   "seconds": 1.52,
+   "share": 0.88
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 28584,
+   "completion": 16,
+   "cached": 25536,
+   "reasoning": 0,
+   "cost": 0.00123128,
+   "turn": 9,
+   "seconds": 1.26,
+   "share": 0.893
+  },
+  {
+   "provider": "Z.AI",
+   "model": "z-ai/glm-5.3-flash",
+   "prompt": 31605,
+   "completion": 139,
+   "cached": 28544,
+   "reasoning": 123,
+   "cost": 0.00138497,
+   "turn": 10,
+   "seconds": 3.2,
+   "share": 0.903
+  }
+ ],
+ "summary": {
+  "providers": [
+   "Z.AI"
+  ],
+  "cache_share_turn2_on": 0.819,
+  "cost_total": 0.00992
+ }
+}

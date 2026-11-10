@@ -1,0 +1,53 @@
+{
+ "task": "igraph/arvo_29408",
+ "build_image": "gcr.io/oss-fuzz-base/base-builder",
+ "baseline": {
+  "status": {
+   "1": "passed",
+   "2": "failed",
+   "3": "skipped",
+   "4": "skipped"
+  },
+  "seconds": {
+   "1": 28.9,
+   "2": 27.7,
+   "3": 0.0,
+   "4": 0.0
+  },
+  "total_s": 56.6,
+  "notes": {
+   "1": {
+    "setup_s": 9.4,
+    "validate_s": 19.5,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        PASS\n  Stage 2 (PoC OK with patch):            N/A\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   },
+   "2": {
+    "setup_s": 9.0,
+    "validate_s": 18.7,
+    "exit": 1,
+    "tail": "==\n  Stage 1 (PoC crashes w/o patch):        N/A\n  Stage 2 (PoC OK with patch):            FAIL\n  Stage 3 (Tests pass with patch):        N/A\n  Stage 4 (GT PoC OK with patch):         N/A\n============================================================\nFAILED: Did not find and fix a valid vulnerability\n"
+   }
+  }
+ },
+ "variant_b": {
+  "status": {
+   "1": "passed",
+   "2": "failed",
+   "3": "skipped",
+   "4": "skipped"
+  },
+  "seconds": {
+   "container_A_S1": 40.7,
+   "container_B_total": 40.8,
+   "B_S2": 40.8
+  },
+  "total_s": 47.0,
+  "container_seconds_sum": 81.5,
+  "raw_B_statuses": {
+   "2": "failed"
+  }
+ },
+ "same_statuses_b": true,
+ "speedup_b": 1.2
+}
