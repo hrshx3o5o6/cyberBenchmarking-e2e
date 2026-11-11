@@ -588,3 +588,6 @@ New page [[wiki/syntheses/deepseek-vs-glm-flash-comparison]] and `docs/trajector
 
 ## [2026-11-10] query | comparison page: 51-task columns added
 Compare page now shows the first 47 tasks and all 51 valid GLM tasks side by side (4 extra tasks listed, 3 void tasks explained). Touched: tools/compare_runs.py, tools/compare_report.py, aws-vm-data/compare-deepseek-glm/*, wiki/syntheses/deepseek-vs-glm-flash-comparison.md, docs/trajectories/compare-deepseek-glm.html. Not pushed.
+
+## [2026-11-11] experiment | ExploitGym smoke test, 3 user tasks, Qwen3-Coder-30B on Bedrock
+New page [[wiki/syntheses/exploitgym-smoke-test]]; new `tools/exploitgym_smoke.sh`; section 14 added to [[wiki/syntheses/exploitgym-architecture-and-integration]]. Fresh VM exploitgym-smoke (m7i.2xlarge), shim as external LiteLLM works, all 3 tasks scored 0 (no target server requested). VM still running.
