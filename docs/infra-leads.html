@@ -56,7 +56,7 @@ code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);paddi
 <header>
   <div class="crumbs"><a href="trajectories/index.html">Run viewer</a> / Infra leads</div>
   <h1>Infra leads update: from first pilot to an autoscaling cluster</h1>
-  <p class="sub">CyberGym-E2E benchmarking of open models. Status as of 1 November 2026.</p>
+  <p class="sub">CyberGym-E2E benchmarking of open models. Status as of 1 November 2026; the ExploitGym section and the last timeline entry were added on 14 November 2026.</p>
 </header>
 
 <section class="panel" aria-label="At a glance">
@@ -84,6 +84,8 @@ code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);paddi
       A worker machine image, a Ray autoscaler on the existing head VM, a hosted Postgres that every task writes results and artifacts into, and a 30-task test of the whole path. Details below.</li>
     <li><span class="when">31 Oct – 1 Nov</span><b>Next study and the Qwen question</b>
       The planned 100-task Qwen run hit a model-availability gap on Bedrock; a translation layer in the shim closes it. Details below.</li>
+      <li><span class="when">11 – 14 Nov</span><b>ExploitGym added to the same setup</b>
+      A second benchmark, ExploitGym (write an exploit that reads a hidden flag from a target server), now runs through the same runner, head, metering and database as CyberGym, with its own kind of worker machine. Two test runs on it (2 and 50 tasks) are described in the "One setup, two benchmarks" section below.</li>
   </ol>
 </section>
 
@@ -139,6 +141,66 @@ code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);paddi
     <path d="M440 98 C380 120 340 150 310 170" marker-end="url(#ar)"/><text class="m" x="380" y="150">results</text>
   </svg>
   <p class="note">Each task runs in its own containers behind a firewall; the shim meters every model call and enforces dollar caps. Workers do not keep results: a task is only finished once its results are read back from Postgres.</p>
+</section>
+
+<section class="panel" id="two-benchmarks">
+  <h2>One setup, two benchmarks</h2>
+  <p>The runner used to be built around CyberGym alone. It now treats the benchmark as a plug-in. A run is still one small file that says <b>which benchmark, which model, which tasks and what the limits are</b>. The runner reads the benchmark name and hands the work to the matching <b>adapter</b>: the part that knows how that benchmark starts a task, grades it and records the result. Everything else is shared.</p>
+  <svg viewBox="0 0 760 270" role="img" aria-label="One run file goes to the runner on the head; the runner uses the CyberGym adapter or the ExploitGym adapter; the autoscaler starts CyberGym workers or ExploitGym workers; both write to one Postgres server with a database each">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z"/></marker></defs>
+    <rect class="b" x="20" y="20" width="270" height="230" rx="8"/>
+    <text x="34" y="42" font-weight="600">Shared (the head)</text>
+    <rect class="w" x="34" y="54" width="242" height="34" rx="5"/><text x="44" y="75">Run file: benchmark, model, tasks, caps</text>
+    <rect class="w" x="34" y="98" width="116" height="34" rx="5"/><text x="44" y="119">CyberGym adapter</text>
+    <rect class="w" x="160" y="98" width="116" height="34" rx="5"/><text x="170" y="119">ExploitGym adapter</text>
+    <rect class="w" x="34" y="142" width="242" height="34" rx="5"/><text x="44" y="163">Autoscaler, metering shim, caps</text>
+    <rect class="w" x="34" y="186" width="242" height="52" rx="5"/><text x="44" y="206" font-weight="600">One Postgres server</text><text class="m" x="44" y="224">a database for each benchmark</text>
+    <rect class="b" x="440" y="20" width="300" height="104" rx="8"/>
+    <text x="454" y="42" font-weight="600">CyberGym workers</text>
+    <text class="m" x="454" y="62">as before, 6 tasks each</text>
+    <text x="454" y="84">own firewall allow-list, Docker</text>
+    <text class="m" x="454" y="104">launched on demand, stopped when idle</text>
+    <rect class="b" x="440" y="146" width="300" height="104" rx="8"/>
+    <text x="454" y="168" font-weight="600">ExploitGym workers</text>
+    <text class="m" x="454" y="188">bigger machine, 10 tasks each</text>
+    <text x="454" y="210">kernel-task virtual machines, own firewall</text>
+    <text class="m" x="454" y="230">launched on demand, stopped when idle</text>
+    <path d="M290 78 C350 78 380 72 430 72" marker-end="url(#ar2)"/>
+    <path d="M290 160 C350 160 380 198 430 198" marker-end="url(#ar2)"/>
+  </svg>
+  <p class="note">The autoscaler starts whichever worker kind has tasks waiting, so a CyberGym run and an ExploitGym run use the same commands, the same head and the same results store.</p>
+  <h3>What stayed the same, and what is new</h3>
+  <ul>
+    <li><b>CyberGym is unchanged.</b> Its code moved behind its adapter without changes, and we checked that its run identifiers and settings fingerprints come out exactly the same as before.</li>
+    <li><b>Same safety limits for both:</b> every task gets its own metered key with a hard dollar cap (20 USD and 2 hours for ExploitGym) and every model call is counted by the shim.</li>
+    <li><b>Each benchmark gets the machine it needs:</b> ExploitGym's kernel tasks need virtual machines inside the worker, so its workers are a different size and are built from their own machine image.</li>
+    <li><b>The runner no longer trusts what the agent writes down.</b> Whether a task failed, ran out of money or needs a retry is decided from our own logs, not from files the agent can edit. A task is retried at most once, and a run ended by the model provider refusing payment is marked as an infrastructure result, not as a model failure.</li>
+  </ul>
+</section>
+
+<section class="two">
+  <div class="panel">
+    <h2>ExploitGym through this setup</h2>
+    <p>Model GLM 5.3 Flash through Codex, 2 hours and 20 USD per task, on two autoscaled ExploitGym workers.</p>
+    <table><tbody>
+      <tr><td>2-task test (one user, one kernel task)</td><td class="n"><span class="tag na">no flag, 8.92 USD</span></td></tr>
+      <tr><td>50-task run: finished</td><td class="n"><span class="tag na">39, no flag</span></td></tr>
+      <tr><td>Stopped by the provider refusing payment</td><td class="n"><span class="tag na">9</span></td></tr>
+      <tr><td>Interrupted before starting</td><td class="n"><span class="tag na">2</span></td></tr>
+      <tr><td>Cost of the 39 finished tasks</td><td class="n">153.68 USD</td></tr>
+      <tr><td>Tasks at once</td><td class="n">20 (two workers, 10 each)</td></tr>
+    </tbody></table>
+    <p class="note">Details, every task and its log: <a href="trajectories/exploitgym-50-report.html">the ExploitGym 50-task report</a>. The 11 tasks that did not finish still need a rerun.</p>
+  </div>
+  <div class="panel">
+    <h2>What it showed</h2>
+    <ul>
+      <li>The same autoscaler, shim and database ran a second benchmark without changes to how CyberGym works; the first ExploitGym worker was ready in under two minutes.</li>
+      <li>Starting ten tasks at once on a fresh worker made 48 of the first 50 tasks fail, because unpacking each task's image was slower than ExploitGym's fixed one-minute Docker timeout. Spacing the launches one minute apart on each worker fixed it, and it cost nothing because no model call had been made.</li>
+      <li>Kernel and v8 tasks load a worker's CPU much more than the other tasks: a worker with several of them sat at 90 to 95 percent CPU pressure for hours. Ten at a time per worker is fine for the lighter tasks; the number may need to be lower for a kernel-heavy mix.</li>
+      <li>Only two ExploitGym workers fit in the current vCPU quota next to the head.</li>
+    </ul>
+  </div>
 </section>
 
 <section class="two">

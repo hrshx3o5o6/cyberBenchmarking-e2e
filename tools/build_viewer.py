@@ -25,6 +25,7 @@ DS_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "deepseek100") 
 GLM_RUNS = os.path.join(RUNS, "glm100-r3")                              # the GLM 5.3 Flash run (run folders exported from the database; not in git)
 GLM_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "glm-flash-r3")   # its small result tables (in git)
 CMP_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "compare-deepseek-glm")   # tables of the DeepSeek / GLM comparison (in git)
+EG_DATA = os.path.join(ROOT, "wiki", "syntheses", "aws-vm-data", "exploitgym-50")   # tables of the ExploitGym 50 task run (in git)
 REPO_BLOB = "https://github.com/hrshx3o5o6/cyberBenchmarking-e2e/blob/main/wiki/syntheses/"
 OUT_CAP = 20000          # characters of one tool output kept on a page
 THINK_CAP = 20000
@@ -569,10 +570,10 @@ def build_index(rows, ds_block=""):
     h = head("CyberGym-E2E run viewer")
     h += ('<header class="top"><div><h1>CyberGym-E2E run viewer</h1><p class="sub">One page per agent run: the prompt, every model step and tool call, and the grading outcome. '
           '%d runs across %d tasks. <a href="how-to-read.html">How to read these pages</a>.</p></div>'
-          '<div style="display:flex;gap:8px;flex-wrap:wrap">%s<a class="btn" href="../infra-leads.html">Infra leads</a></div></header>' % (len(rows), len(by_task), ('<a class="btn" href="compare-deepseek-glm.html">Comparisons</a>' if 'id="compare"' in ds_block else "")))
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">%s%s<a class="btn" href="../infra-leads.html">Infra leads</a></div></header>' % (len(rows), len(by_task), ('<a class="btn" href="compare-deepseek-glm.html">Comparisons</a>' if 'id="compare"' in ds_block else ""), ('<a class="btn" href="exploitgym-50-report.html">ExploitGym run</a>' if 'id="exploitgym50"' in ds_block else "")))
     h += '<div class="banner info"><b>Read the Note column.</b> Some tasks leak the answer and some runs ended for reasons that say nothing about the model. Flagged runs repeat the explanation in a banner on their page.</div>'
     h += ds_block
-    h += '<nav class="jump"><a href="#deepseek100"><b>100 task run</b></a>' + ('<a href="#glm100"><b>GLM run</b></a>' if 'id="glm100"' in ds_block else "") + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
+    h += '<nav class="jump"><a href="#deepseek100"><b>100 task run</b></a>' + ('<a href="#glm100"><b>GLM run</b></a>' if 'id="glm100"' in ds_block else "") + ('<a href="#exploitgym50"><b>ExploitGym run</b></a>' if 'id="exploitgym50"' in ds_block else "") + "".join('<a href="#t-%s">%s</a>' % (slug(t), esc(t.split("/")[0])) for t in by_task) + "</nav>"
     for t, rs in by_task.items():
         h += '<section id="t-%s"><h3 class="task">%s</h3><div class="tablewrap"><table class="runs"><colgroup><col style="width:17%%"><col style="width:11%%"><col style="width:9%%"><col style="width:27%%"><col style="width:6%%"><col style="width:12%%"><col style="width:18%%"></colgroup><thead><tr><th>Model</th><th>Harness</th><th>Mode</th><th>S1 S2 S3 S4</th><th>Min</th><th>Cost</th><th>Note</th></tr></thead><tbody>' % (slug(t), esc(t))
         for row in rs:
@@ -705,6 +706,21 @@ def main():
         ds_block += ('<section class="panel" id="compare"><h2>DeepSeek V4.1 Flash against GLM 5.3 Flash</h2><p>The two 100 task runs side by side, on the first %d tasks of the shared dispatch order (the set in which every task has a valid GLM result): '
                      'S1 to S3 passed by DeepSeek %d, by GLM %d; cost, time, model behaviour, what differs between the runs, and every task with both outcomes. <a class="btn" href="compare-deepseek-glm.html">Comparison</a></p></section>'
                      % (C_["n_prefix"], C_["prefix"]["deepseek"]["s1s3"], C_["prefix"]["glm"]["s1s3"]))
+    if os.path.isdir(EG_DATA):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import exploitgym50_report as egr
+        edata = egr.load(EG_DATA)
+        ectx = dict(head=head, TAIL=TAIL, esc=esc, clean=clean)
+        elogs = egr.collect(edata)
+        epages, elinks = egr.build_pages(edata, ectx, elogs)
+        files.update(epages)
+        files["exploitgym-50-report.html"] = egr.build_report(edata, ectx, elinks, elogs)
+        ES = edata["S"]
+        ds_block += ('<section class="panel" id="exploitgym50"><h2>50 task run: ExploitGym with GLM 5.3 Flash (partial)</h2><p>50 random ExploitGym v1 tasks (32 user, 11 v8, 7 kernel), Codex through OpenRouter (Z.AI), '
+                     '2 hours and 20 USD per task, on two autoscaled m8i.4xlarge workers, 10 slots each. <b>%d finished, 0 flags</b>; %d stopped by HTTP 402 and %d interrupted, both groups to be rerun; '
+                     'cost of the finished tasks $%.2f. <a class="btn" href="exploitgym-50-report.html">Full report</a></p>'
+                     '<p class="note">Report: what happened in order (including the Docker start-up failures of the first burst), outcomes by family, time, money, memory and CPU snapshots, observations, one row per task.</p></section>'
+                     % (ES["by_status"]["benchmark_failed"], ES["by_status"].get("infra_error", 0), ES["by_status"].get("interrupted", 0), ES["spend_finished"]))
     files["index.html"] = build_index(rows, ds_block)
     files["how-to-read.html"] = head("How to read these pages") + HOWTO + TAIL
     files["README.md"] = ("# Run viewer pages\n\nGenerated by `tools/build_viewer.py` from the raw trajectory logs in `cybergym-bench/runs/`. Do not edit by hand.\n\n"
@@ -741,6 +757,7 @@ def main():
         wanted.add(os.path.normpath(p))
         if os.path.exists(p) and open(p).read() == content:
             continue
+        os.makedirs(os.path.dirname(p), exist_ok=True)
         open(p, "w").write(content)
     for p in glob.glob(os.path.join(OUT, "runs", "*.html")):      # drop pages of runs that no longer exist
         if os.path.normpath(p) not in wanted:
