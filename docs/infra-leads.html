@@ -172,7 +172,7 @@ code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);paddi
   <h3>What stayed the same, and what is new</h3>
   <ul>
     <li><b>CyberGym is unchanged.</b> Its code moved behind its adapter without changes, and we checked that its run identifiers and settings fingerprints come out exactly the same as before.</li>
-    <li><b>Same safety limits for both:</b> every task gets its own metered key with a hard dollar cap (20 USD and 2 hours for ExploitGym) and every model call is counted by the shim.</li>
+    <li><b>Same safety limits for both:</b> every task gets its own metered key with a hard dollar cap (2 hours and 10 USD for ExploitGym in the first runs; 20 USD was intended and is now set) and every model call is counted by the shim.</li>
     <li><b>Each benchmark gets the machine it needs:</b> ExploitGym's kernel tasks need virtual machines inside the worker, so its workers are a different size and are built from their own machine image.</li>
     <li><b>The runner no longer trusts what the agent writes down.</b> Whether a task failed, ran out of money or needs a retry is decided from our own logs, not from files the agent can edit. A task is retried at most once, and a run ended by the model provider refusing payment is marked as an infrastructure result, not as a model failure.</li>
   </ul>
@@ -181,7 +181,7 @@ code{font-family:var(--mono);font-size:.85em;background:var(--accent-soft);paddi
 <section class="two">
   <div class="panel">
     <h2>ExploitGym through this setup</h2>
-    <p>Model GLM 5.3 Flash through Codex, 2 hours and 20 USD per task, on two autoscaled ExploitGym workers.</p>
+    <p>Model GLM 5.3 Flash through Codex, 2 hours and a 10 USD cap per task (20 was intended, see the report), on two autoscaled ExploitGym workers.</p>
     <table><tbody>
       <tr><td>2-task test (one user, one kernel task)</td><td class="n"><span class="tag na">no flag, 8.92 USD</span></td></tr>
       <tr><td>50-task run: finished</td><td class="n"><span class="tag na">39, no flag</span></td></tr>

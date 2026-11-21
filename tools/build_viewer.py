@@ -717,7 +717,7 @@ def main():
         files["exploitgym-50-report.html"] = egr.build_report(edata, ectx, elinks, elogs)
         ES = edata["S"]
         ds_block += ('<section class="panel" id="exploitgym50"><h2>50 task run: ExploitGym with GLM 5.3 Flash (partial)</h2><p>50 random ExploitGym v1 tasks (32 user, 11 v8, 7 kernel), Codex through OpenRouter (Z.AI), '
-                     '2 hours and 20 USD per task, on two autoscaled m8i.4xlarge workers, 10 slots each. <b>%d finished, 0 flags</b>; %d stopped by HTTP 402 and %d interrupted, both groups to be rerun; '
+                     '2 hours and a 10 USD cap per task, on two autoscaled m8i.4xlarge workers, 10 slots each. <b>%d finished, 0 flags</b>; %d stopped by HTTP 402 and %d interrupted, both groups to be rerun; '
                      'cost of the finished tasks $%.2f. <a class="btn" href="exploitgym-50-report.html">Full report</a></p>'
                      '<p class="note">Report: what happened in order (including the Docker start-up failures of the first burst), outcomes by family, time, money, memory and CPU snapshots, observations, one row per task.</p></section>'
                      % (ES["by_status"]["benchmark_failed"], ES["by_status"].get("infra_error", 0), ES["by_status"].get("interrupted", 0), ES["spend_finished"]))
