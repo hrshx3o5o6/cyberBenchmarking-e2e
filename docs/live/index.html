@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Benchmark runs</title>
+<meta name="description" content="Live view of benchmark runs: outcomes, observations and agent trajectories.">
+<script>
+try { var t = localStorage.getItem("live-theme"); if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#">Benchmark runs</a>
+    <div class="tabs" id="tabs"></div>
+    <div class="nav-right">
+      <div id="nav-cells"></div>
+      <span class="pill" id="pill"><span class="dot"></span><span id="pill-text">loading</span></span>
+      <button class="icon-btn" id="theme" title="Switch light or dark" aria-label="Switch light or dark">◐</button>
+    </div>
+  </div>
+</nav>
+<main class="wrap" id="app"><p class="muted">Loading…</p></main>
+<footer class="wrap foot"><span id="foot-text"></span></footer>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
