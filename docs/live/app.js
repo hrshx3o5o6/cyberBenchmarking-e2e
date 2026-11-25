@@ -89,7 +89,13 @@
   }
 
   function loadStudies() {
-    return getJSON("index.json").then(function (d) { S.studies = d.studies || []; });
+    // newest first: the date is the last part of a study's name (yyyymmdd); studies without one keep their order at the end
+    function stamp(x) { var m = /(\d{8})(?:-\w+)?$/.exec(x.name); return m ? m[1] : ""; }
+    return getJSON("index.json").then(function (d) {
+      var list = (d.studies || []).map(function (x, i) { return { x: x, i: i }; });
+      list.sort(function (p, q) { var a = stamp(p.x), b = stamp(q.x); return a === b ? (p.x.name < q.x.name ? -1 : p.x.name > q.x.name ? 1 : p.i - q.i) : a < b ? 1 : -1; });
+      S.studies = list.map(function (e) { return e.x; });
+    });
   }
   function loadStudy() {
     var dir = studyDir();
