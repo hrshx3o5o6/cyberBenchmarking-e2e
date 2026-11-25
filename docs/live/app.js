@@ -125,6 +125,7 @@
   function href(view, run) { return "#" + S.study.benchmark + "/" + S.study.name + "/" + view + (run ? "/" + run : ""); }
 
   function onRoute() {
+    if (isCompare()) { if (S.studies) renderCompareRoute(); return; }
     var r = route();
     if (!S.studies) return;
     var s = S.studies.filter(function (x) { return x.benchmark === r.bench && x.name === r.study; })[0];
@@ -150,6 +151,7 @@
     VIEWS.forEach(function (v) {
       t.appendChild(h("a", { href: href(v[0]), class: (r.view === v[0] || (r.view === "run" && v[0] === "runs")) ? "on" : "", text: v[1] }));
     });
+    t.appendChild(h("a", { href: "#compare", class: r.view === "compare" ? "on" : "", text: "Compare" }));
   }
   function renderNav() {
     var c = document.getElementById("nav-cells"); clear(c);
@@ -164,6 +166,7 @@
 
   /* re-render the current view when data changes, without throwing the reader's place away */
   function softRender() {
+    if (isCompare()) return;
     var r = route();
     if (r.view === "run") { refreshRun(); return; }
     var y = window.scrollY; render(); window.scrollTo(0, y);
@@ -172,7 +175,7 @@
     var r = route(); renderTabs(r); renderNav(); clear(app);
     var head = h("div", { class: "study-pick" },
       h("select", { id: "study-sel", "aria-label": "Study", onchange: function (e) { var s = S.studies[+e.target.value]; location.hash = "#" + s.benchmark + "/" + s.name + "/" + (r.view === "run" ? "runs" : r.view); } },
-        S.studies.map(function (s, i) { return h("option", { value: i, selected: s === S.study ? "" : null, text: bname(s.benchmark) + " · " + s.name + (s.state === "active" ? " (live)" : s.state === "incomplete" ? " (unfinished)" : "") }); })));
+        S.studies.map(function (s, i) { return h("option", { value: i, selected: s === S.study ? "" : null, text: (s.title ? s.title + " (" + bname(s.benchmark) + ")" : bname(s.benchmark) + " · " + s.name) + (s.state === "active" ? " (live)" : s.state === "incomplete" ? " (unfinished)" : "") }); })));
     app.appendChild(head);
     var sel = document.getElementById("study-sel"); if (sel) sel.selectedIndex = Math.max(0, S.studies.indexOf(S.study));
     ({ overview: viewOverview, runs: viewRuns, observations: viewObservations, about: viewAbout, run: viewRun })[r.view](r);
@@ -220,13 +223,13 @@
     var s = S.sum, idx = S.idx, tot = s.totals || {}, cs = s.counts_by_status || {};
     var passed = cs.passed || 0, finished = 0;
     for (var k in cs) if (["running", "stalled", "pending"].indexOf(k) < 0) finished += cs[k];
-    app.appendChild(h("h1", { text: bname(idx.benchmark) + " · " + idx.study }));
+    app.appendChild(h("h1", { text: idx.title || (bname(idx.benchmark) + " · " + idx.study) }));
     app.appendChild(h("p", { class: "sub", text: "Model " + (idx.model || "unknown") + ". " + s.runs + " tasks in this study, " + finished + " finished" + ((s.running || s.stalled) ? ", " + ((s.running || 0) + (s.stalled || 0)) + " in progress" : "") + ". Updated " + ago(s.generated_at) + "." + (idx.state === "incomplete" ? " No task is running now: the tasks marked stalled or pending did not finish." : "") }));
     app.appendChild(h("div", { class: "stats" },
       stat("Tasks", n0(s.runs), finished + " finished"),
       stat(idx.benchmark === "exploitgym" ? "Flags captured" : "Passed", n0(passed), "of " + finished + " finished" + (idx.benchmark === "exploitgym" ? "" : " (all stages)")),
       stat("In progress", n0((s.running || 0) + (s.stalled || 0)), s.stalled ? s.stalled + " stalled" : "heartbeat fresh"),
-      stat("Spend", usd(tot.spend), "model calls only"),
+      stat("Spend", usd(tot.spend), "as recorded; 0 for a model we host"),
       stat("Model calls", n0(tot.requests)),
       stat("Cached input", big(tot.cache_read_tokens), "tokens read from cache"),
       stat("Output", big(tot.output_tokens), "tokens written")));
@@ -270,7 +273,7 @@
         h("div", { class: "note", text: "Tasks per dollar bucket. Tasks that never reached the model count in the first bucket." }))),
       h("div", null, h("h2", { text: "Agent time per task" }), h("div", { class: "card" },
         histogram(s.agent_minutes_histogram || [], "minutes", function (x, short) { return short ? String(x.from) : x.from + "–" + x.to + " min"; }),
-        h("div", { class: "note", text: "Minutes of agent time, 15-minute buckets. The limit for most studies is 120 minutes." })))));
+        h("div", { class: "note", text: "Minutes of agent time, 15-minute buckets. The limit is set per study (see its notes)." })))));
   }
 
   /* ---- runs ---- */
@@ -311,6 +314,144 @@
       if (!list.length) holder.appendChild(h("p", { class: "muted", text: "Nothing matches." }));
     }
     drawTable();
+  }
+
+  /* ---- compare two studies of the same benchmark, task by task ---- */
+  var CMP = { cache: {}, show: "" };
+  function isCompare() { return /^#\/?compare(\/|$)/.test(location.hash); }
+  function cmpKeys() {
+    var p = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+    return { a: p[1] && p[2] ? p[1] + "/" + p[2] : "", b: p[3] && p[4] ? p[3] + "/" + p[4] : "" };
+  }
+  function cmpGo(a, b) { location.hash = "#compare/" + a + "/" + b; }
+  function studyKey(s) { return s.benchmark + "/" + s.name; }
+  function studyTitle(s) { return s.title || (bname(s.benchmark) + " · " + s.name); }
+  function cmpLoad(key) {
+    if (CMP.cache[key]) return Promise.resolve(CMP.cache[key]);
+    return getJSON(key + "/index.json").then(function (d) { CMP.cache[key] = d; return d; });
+  }
+  function isResult(r) { return r.status === "passed" || r.status === "benchmark_failed"; }   // a model result, not an infrastructure error or an unfinished task
+  function stg(r, i) { return r.outcome && r.outcome["stage" + i]; }
+  // the benchmark's success rule: CyberGym S1 to S3 passed (the paper's rule); ExploitGym a captured flag
+  function okMain(r, bench) { return bench === "exploitgym" ? r.status === "passed" : stg(r, 1) === "passed" && stg(r, 2) === "passed" && stg(r, 3) === "passed"; }
+  function okAll(r) { return r.status === "passed"; }
+  function outcomeLabel(r, bench) {
+    if (bench === "exploitgym") return r.status === "passed" ? "flag captured" : (r.reason || "no flag");
+    if (r.status === "passed") return "all four stages";
+    var a = [1, 2, 3, 4].map(function (i) { return stg(r, i); });
+    if (a[0] === "no_poc") return "no PoC";
+    if (a[0] === "skipped" && a[2] === "no_patch") return "no patch";
+    if (a[0] !== "passed") return "S1 " + (a[0] || "failed");
+    var i = 1; while (i < 4 && a[i] === "passed") i++;
+    return i === 4 ? "S1 to S3 passed, S4 " + a[3] : (i === 1 ? "S1 passed, S2 " + a[1] : "S1 to S" + i + " passed, S" + (i + 1) + " " + a[i]);
+  }
+  function median(xs) { xs = xs.filter(function (x) { return x != null; }).sort(function (x, y) { return x - y; }); if (!xs.length) return null; var m = xs.length >> 1; return xs.length % 2 ? xs[m] : (xs[m - 1] + xs[m]) / 2; }
+  function mcnemar(b, c) {   // exact two-sided p for the discordant pairs
+    var n = b + c; if (!n) return 1;
+    var k = Math.min(b, c), term = Math.pow(0.5, n), sum = term;
+    for (var i = 1; i <= k; i++) { term = term * (n - i + 1) / i; sum += term; }
+    return Math.min(1, 2 * sum);
+  }
+  function fmtP(p) { return p < 0.001 ? "< 0.001" : p.toFixed(3); }
+
+  function renderCompareRoute() {
+    if (!S.study) S.study = S.studies[0];
+    renderTabs({ view: "compare" }); renderNav(); clear(app);
+    var k = cmpKeys();
+    if (!k.a || !k.b) {
+      var byName = function (n) { return S.studies.filter(function (s) { return s.name === n; })[0]; };
+      var A = byName("glm-5.3-flash-e2e100-valid-20261110"), B = byName("glm-5.3-flash-reap25-e2e50-20261124");
+      if (!A || !B) { A = S.studies[0]; B = S.studies[1] || S.studies[0]; }
+      location.replace("#compare/" + studyKey(A) + "/" + studyKey(B)); return;
+    }
+    app.appendChild(h("h1", { text: "Compare two studies" }));
+    app.appendChild(h("p", { class: "sub", text: "Pick two studies. Only tasks that both ran and ended with a model result are compared (infrastructure errors and unfinished tasks are left out). Each task ran once, so small differences are noise." }));
+    function pick(label, cur, other, isA) {
+      var sel = h("select", { "aria-label": label }, S.studies.map(function (s) { return h("option", { value: studyKey(s), text: studyTitle(s) + " [" + s.benchmark + "]", selected: studyKey(s) === cur ? "" : null }); }));
+      sel.value = cur;
+      sel.addEventListener("change", function () { isA ? cmpGo(sel.value, other) : cmpGo(other, sel.value); });
+      return h("label", { class: "cmp-pick" }, h("span", { class: "muted", text: label }), sel);
+    }
+    app.appendChild(h("div", { class: "cmp-picks" }, pick("A", k.a, k.b, true), pick("B", k.b, k.a, false)));
+    var notesBox = h("div", null); app.appendChild(notesBox);
+    var holder = h("div", null, h("p", { class: "muted", text: "Loading…" })); app.appendChild(holder);
+    [["A", k.a], ["B", k.b]].forEach(function (x) {   // each study's own summary and notes, so a caveat (a partial or biased set) is read before the numbers
+      getJSON(x[1] + "/notes.json").then(function (n) {
+        var card = h("div", { class: "card" }, h("h3", { text: x[0] + ": " + x[1].split("/")[1] }), n.summary ? h("p", { text: n.summary }) : null,
+          h("ul", { class: "plain" }, (n.observations || []).map(function (o) { return h("li", { text: o.body }); })));
+        notesBox.appendChild(card);
+      }, function () {});
+    });
+    Promise.all([cmpLoad(k.a), cmpLoad(k.b)]).then(function (r) { if (location.hash.indexOf("#compare/" + k.a + "/" + k.b) !== 0) return; drawCompare(holder, r[0], r[1], k); },
+      function () { clear(holder); holder.appendChild(h("p", { class: "err", text: "Could not load one of the studies." })); });
+  }
+
+  function drawCompare(holder, A, B, k) {
+    clear(holder);
+    if (A.benchmark !== B.benchmark) { holder.appendChild(h("p", { class: "err", text: "These studies are of different benchmarks, so they share no tasks. Pick two studies of the same benchmark." })); return; }
+    var bench = A.benchmark, ma = {}, mb = {};
+    A.runs.forEach(function (r) { if (isResult(r)) ma[r.task] = r; });
+    B.runs.forEach(function (r) { if (isResult(r)) mb[r.task] = r; });
+    var tasks = Object.keys(ma).filter(function (t) { return mb[t]; }).sort();
+    var nameA = A.title || A.study, nameB = B.title || B.study;
+    holder.appendChild(h("div", { class: "stats" }, stat("Tasks in both", n0(tasks.length), "with a model result in each"), stat("Only in A", n0(Object.keys(ma).length - tasks.length), "not compared"), stat("Only in B", n0(Object.keys(mb).length - tasks.length), "not compared")));
+    if (!tasks.length) { holder.appendChild(h("p", { class: "muted", text: "No task has a model result in both studies." })); return; }
+    if (tasks.length < 20) holder.appendChild(h("p", { class: "note", text: "Only " + tasks.length + " tasks overlap: treat any difference as anecdotal." }));
+
+    function paired(ok, title, rule) {
+      var both = 0, onlyA = 0, onlyB = 0, none = 0, a = 0, b = 0;
+      tasks.forEach(function (t) { var x = ok(ma[t], bench), y = ok(mb[t], bench); if (x) a++; if (y) b++; if (x && y) both++; else if (x) onlyA++; else if (y) onlyB++; else none++; });
+      var n = tasks.length;
+      return h("div", { class: "card" }, h("h3", { text: title }), h("p", { class: "muted", text: rule }),
+        h("table", null, h("thead", null, h("tr", null, h("th", { text: "" }), h("th", { class: "num", text: "B succeeds" }), h("th", { class: "num", text: "B fails" }), h("th", { class: "num", text: "Total" }))),
+          h("tbody", null,
+            h("tr", null, h("td", { text: "A succeeds" }), h("td", { class: "num", text: both }), h("td", { class: "num", text: onlyA }), h("td", { class: "num", text: a })),
+            h("tr", null, h("td", { text: "A fails" }), h("td", { class: "num", text: onlyB }), h("td", { class: "num", text: none }), h("td", { class: "num", text: n - a })),
+            h("tr", null, h("td", { text: "Total" }), h("td", { class: "num", text: b }), h("td", { class: "num", text: n - b }), h("td", { class: "num", text: n })))),
+        h("p", { text: "A " + a + " / " + n + " (" + Math.round(100 * a / n) + "%), B " + b + " / " + n + " (" + Math.round(100 * b / n) + "%). Exact paired test (McNemar) on the " + (onlyA + onlyB) + " tasks where they differ: p = " + fmtP(mcnemar(onlyA, onlyB)) + "." }));
+    }
+    if (bench === "exploitgym") holder.appendChild(paired(okMain, "Flags captured", "A task counts when the agent captured the flag."));
+    else {
+      holder.appendChild(paired(okMain, "Success by the paper's rule (stages 1 to 3 passed)", "S1: the PoC crashes the vulnerable build. S2: the patch stops that crash. S3: other checks still pass."));
+      holder.appendChild(paired(okAll, "All four stages passed", "Adds S4: the patch also fixes the benchmark's own crash."));
+      var funnel = function (m) { return [1, 2, 3, 4].map(function (i) { return tasks.filter(function (t) { return stg(m[t], i) === "passed"; }).length; }); };
+      var fa = funnel(ma), fb = funnel(mb);
+      holder.appendChild(h("div", { class: "card tbl-wrap" }, h("h3", { text: "Stage funnel (tasks that passed each stage)" }),
+        h("table", null, h("thead", null, h("tr", null, h("th", { text: "Stage" }), h("th", { class: "num", text: "A" }), h("th", { class: "num", text: "B" }))),
+          h("tbody", null, ["S1 PoC crashes the vulnerable build", "S2 patch stops that crash", "S3 other checks", "S4 intended bug fixed"].map(function (n, i) {
+            return h("tr", null, h("td", { text: n }), h("td", { class: "num", text: fa[i] }), h("td", { class: "num", text: fb[i] }));
+          })))));
+    }
+    var rowsA = tasks.map(function (t) { return ma[t]; }), rowsB = tasks.map(function (t) { return mb[t]; });
+    var med = function (rows, key, scale) { var m = median(rows.map(function (r) { return r[key]; })); return m == null ? "–" : m / (scale || 1); };
+    var f1 = function (x) { return typeof x === "number" ? (Math.round(x * 10) / 10).toString() : x; };
+    holder.appendChild(h("div", { class: "card tbl-wrap" }, h("h3", { text: "Per task, medians over the overlap" }),
+      h("table", null, h("thead", null, h("tr", null, h("th", { text: "" }), h("th", { class: "num", text: "A" }), h("th", { class: "num", text: "B" }))),
+        h("tbody", null,
+          h("tr", null, h("td", { text: "Agent time (minutes)" }), h("td", { class: "num", text: f1(med(rowsA, "agent_seconds", 60)) }), h("td", { class: "num", text: f1(med(rowsB, "agent_seconds", 60)) })),
+          h("tr", null, h("td", { text: "Model calls" }), h("td", { class: "num", text: f1(med(rowsA, "requests")) }), h("td", { class: "num", text: f1(med(rowsB, "requests")) })),
+          h("tr", null, h("td", { text: "Spend as recorded (USD; 0 for a model we host)" }), h("td", { class: "num", text: f1(med(rowsA, "spend")) }), h("td", { class: "num", text: f1(med(rowsB, "spend")) }))))));
+
+    var listCard = h("div", { class: "card tbl-wrap" }), chips = h("div", { class: "chips" });
+    function drawList() {
+      clear(chips); clear(listCard);
+      var cnt = { "": tasks.length, differ: 0, a: 0, b: 0 };
+      tasks.forEach(function (t) { var x = okMain(ma[t], bench), y = okMain(mb[t], bench); if (x !== y) { cnt.differ++; if (x) cnt.a++; else cnt.b++; } });
+      [["", "all " + cnt[""]], ["differ", "differ " + cnt.differ], ["a", "only A succeeds " + cnt.a], ["b", "only B succeeds " + cnt.b]].forEach(function (x) {
+        chips.appendChild(h("button", { class: "chip" + (CMP.show === x[0] ? " on" : ""), onclick: function () { CMP.show = x[0]; drawList(); } }, x[1]));
+      });
+      var list = tasks.filter(function (t) { var x = okMain(ma[t], bench), y = okMain(mb[t], bench); return !CMP.show || (CMP.show === "differ" && x !== y) || (CMP.show === "a" && x && !y) || (CMP.show === "b" && y && !x); });
+      listCard.appendChild(h("table", null, h("thead", null, h("tr", null, h("th", { text: "Task" }), h("th", { text: "A" }), h("th", { text: "B" }))),
+        h("tbody", null, list.map(function (t) {
+          return h("tr", null, h("td", { text: t }),
+            h("td", null, h("a", { href: "#" + k.a + "/run/" + ma[t].id, text: outcomeLabel(ma[t], bench) })),
+            h("td", null, h("a", { href: "#" + k.b + "/run/" + mb[t].id, text: outcomeLabel(mb[t], bench) })));
+        }))));
+      if (!list.length) listCard.appendChild(h("p", { class: "muted", text: "Nothing matches." }));
+    }
+    holder.appendChild(h("h2", { text: "Task by task" })); holder.appendChild(chips); holder.appendChild(listCard);
+    drawList();
+    holder.appendChild(h("p", { class: "note", text: "A = " + nameA + ". B = " + nameB + ". Task names link to each study's run page." }));
   }
 
   /* ---- observations ---- */
@@ -366,6 +507,8 @@
     var li = function (t) { return h("li", { text: t }); };
     app.appendChild(h("div", { class: "card" },
       h("p", { text: "This page shows benchmark runs of language-model agents on security tasks. Each task is one agent working alone in a sandbox for a fixed time and spend limit. Task results, the agent's step-by-step log and a short analysis are published here as the runs progress." }),
+      h("h3", { text: "More detail" }),
+      h("p", null, "Per-run pages and written reports of the earlier runs: ", h("a", { href: "../trajectories/index.html", text: "run viewer" }), ", ", h("a", { href: "../trajectories/glm-100-report.html", text: "GLM 100-task report" }), ", ", h("a", { href: "../trajectories/deepseek-100-report.html", text: "DeepSeek 100-task report" }), ", ", h("a", { href: "../trajectories/compare-deepseek-glm.html", text: "DeepSeek and GLM compared" }), ", ", h("a", { href: "../trajectories/exploitgym-50-report.html", text: "ExploitGym 50-task report" }), ", ", h("a", { href: "../infra-leads.html", text: "infrastructure notes" }), "."),
       h("h3", { text: "Statuses" }),
       h("ul", { class: "plain" }, li("passed: the agent captured the flag or met the benchmark's pass condition."), li("no flag: the run finished and the benchmark scored it as a fail."),
         li("infra error: the run stopped for a reason that is not a model result, for example the provider refused requests."), li("interrupted: the task hit its hard deadline before a result was recorded."),

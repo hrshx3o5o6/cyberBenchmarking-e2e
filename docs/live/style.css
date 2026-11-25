@@ -127,3 +127,6 @@ button.btn[disabled] { opacity: .45; cursor: default; }
 .tbl-wrap { max-width: 100%; }
 body { overflow-x: hidden; }
 .sub { overflow-wrap: anywhere; }
+.cmp-picks { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 14px; }
+.cmp-pick { display: flex; flex-direction: column; gap: 3px; flex: 1 1 320px; min-width: 0; }
+.cmp-pick select { max-width: 100%; }
